@@ -19,7 +19,7 @@ class MembershipBottomSheet {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.85,
+          height: MediaQuery.of(context).size.height * 0.90,
           decoration: BoxDecoration(
             color: AppColors.primaryBlack.withOpacity(0.95),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
@@ -219,23 +219,24 @@ class MembershipBottomSheet {
                               child: Text(
                                 plan.name ?? 'Plan',
                                 style: const TextStyle(
-                                  fontSize: 20, 
+                                  fontSize: 15, 
                                   fontWeight: FontWeight.w900,
                                   color: Colors.white,
                                 ),
-                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                                overflow: TextOverflow.visible,
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: planColor.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                plan.duration ?? 'N/A',
+                                plan.adminFee != null ? 'Admin Fee: ${plan.adminFee}' : 'Admin Fee: N/A',
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 8.5,
                                   fontWeight: FontWeight.w800,
                                   color: planColor,
                                 ),
@@ -247,7 +248,7 @@ class MembershipBottomSheet {
                         Text(
                           '${plan.price}', // Removed ₹
                           style: TextStyle(
-                            fontSize: 28,
+                            fontSize: 22,
                             fontWeight: FontWeight.w900,
                             color: planColor,
                             letterSpacing: -1,
@@ -294,15 +295,16 @@ class MembershipBottomSheet {
                 
                 // Buy Button
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20), // Increased
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   child: SizedBox(
                     width: double.infinity,
-                    height: 56, // Increased from 48
+                    height: 44,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: planColor,
                         foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         elevation: 10,
                         shadowColor: planColor.withOpacity(0.4),
                       ),
@@ -311,8 +313,8 @@ class MembershipBottomSheet {
                         Get.toNamed(Routes.MEMBERSHIP_FORM, arguments: plan);
                       },
                       child: const Text(
-                        'ACTIVATE PLAN',
-                        style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
+                        'BUY NOW',
+                        style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5, fontSize: 13),
                       ),
                     ),
                   ),

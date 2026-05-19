@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = "https://ownholidayclub.onrender.com/api";
+  static const String baseUrl = "https://api.ownholidayclub.com/api";
   static const String heroSlides = "$baseUrl/hero-slides";
   
   // Auth Endpoints

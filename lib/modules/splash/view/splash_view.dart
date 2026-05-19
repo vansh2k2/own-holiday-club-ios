@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:own_holiday_app/utils/app_colors.dart';
+import 'package:own_holiday_app/routes/app_pages.dart';
 import '../controller/splash_controller.dart';
 
 class SplashView extends GetView<SplashController> {
@@ -240,8 +241,12 @@ class _LottieWithSpeedState extends State<_LottieWithSpeed> with TickerProviderS
       width: widget.width,
       fit: BoxFit.contain,
       onLoaded: (composition) {
-        _controller.duration = composition.duration;
-        _controller.repeat(period: composition.duration * (1 / widget.speed));
+        _controller.duration = composition.duration * (1 / widget.speed);
+        _controller.forward().then((_) {
+          if (mounted) {
+            Get.offAllNamed(Routes.ONBOARDING);
+          }
+        });
       },
     );
   }

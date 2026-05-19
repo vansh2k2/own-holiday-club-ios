@@ -306,7 +306,7 @@ class _DestinationDetailsViewState extends State<DestinationDetailsView> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'BOOK YOUR EXPERIENCE NOW',
+                  'ENQUIRE NOW',
                   style: GoogleFonts.montserrat(fontWeight: FontWeight.w600, fontSize: 14, letterSpacing: 1),
                 ),
                 const SizedBox(width: 10),

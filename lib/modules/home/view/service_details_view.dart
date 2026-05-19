@@ -269,7 +269,7 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'BOOK THIS SERVICE NOW',
+                  'ENQUIRE NOW',
                   style: GoogleFonts.montserrat(fontWeight: FontWeight.w600, fontSize: 14, letterSpacing: 1),
                 ),
                 const SizedBox(width: 10),

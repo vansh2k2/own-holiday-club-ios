@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:animate_do/animate_do.dart';
@@ -37,7 +38,7 @@ class HomeView extends GetView<HomeController> {
                   // Own Holiday Logo
                   Image.asset(
                     'assets/images/own-holiday-club-logo.png',
-                    height: 40,
+                    height: 48,
                     fit: BoxFit.contain,
                   ),
                   const Spacer(),
@@ -111,7 +112,7 @@ class HomeView extends GetView<HomeController> {
                     // 2. Foreground Content (Starts with overlap)
                     Column(
                       children: [
-                        const SizedBox(height: 360), // Space to show hero, allows 80px overlap (440-360)
+                        const SizedBox(height: 360),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: FadeInUp(
@@ -148,75 +149,53 @@ class HomeView extends GetView<HomeController> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const Text(
-                                        'Our Services',
+                                        'Club Spotlight',
                                         style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.w600,
                                           color: AppColors.primaryBlack,
                                         ),
                                       ),
-                                      const SizedBox(height: 18),
-                                      // 2x2 service grid
-                                      Obx(() {
-                                        if (controller.isLoading.value) {
-                                          return GridView.count(
-                                            crossAxisCount: 2,
-                                            shrinkWrap: true,
-                                            physics: const NeverScrollableScrollPhysics(),
-                                            crossAxisSpacing: 14,
-                                            mainAxisSpacing: 14,
-                                            childAspectRatio: 1.0,
-                                            children: List.generate(
-                                                4, (index) => const Skeleton()),
-                                          );
-                                        }
-                                        return GridView.count(
-                                          crossAxisCount: 2,
-                                          shrinkWrap: true,
-                                          physics: const NeverScrollableScrollPhysics(),
-                                          crossAxisSpacing: 14,
-                                          mainAxisSpacing: 14,
-                                          childAspectRatio: 1.0,
-                                          children: controller.services.take(4).toList().map((svc) {
-                                            return GestureDetector(
-                                              behavior: HitTestBehavior.opaque,
-                                              onTap: () => Get.toNamed(
-                                                Routes.SERVICE_DETAILS,
-                                                arguments: svc,
-                                              ),
-                                              child: _ServiceCard(service: svc),
-                                            );
-                                          }).toList(),
-                                        );
-                                      }),
-                                      const SizedBox(height: 18),
-                                      GestureDetector(
-                                        behavior: HitTestBehavior.opaque,
-                                        onTap: () => Get.toNamed(Routes.SERVICES_REEL),
-                                        child: Container(
-                                          width: double.infinity,
-                                          padding: const EdgeInsets.symmetric(vertical: 12),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primaryBlack,
-                                            borderRadius: BorderRadius.circular(10),
+                                      const SizedBox(height: 16),
+                                      // 4 Static Quick-Access Cards in Blinkit spotlight style (Compact size, Richer colors)
+                                      GridView.count(
+                                        crossAxisCount: 2,
+                                        shrinkWrap: true,
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                                        crossAxisSpacing: 16,
+                                        mainAxisSpacing: 16,
+                                        childAspectRatio: 1.22, // decreased height for smaller, sleek cards
+                                        children: [
+                                          _QuickAccessCard(
+                                            title: 'OHC\nPrivilege',
+                                            imagePath: 'assets/images/ohc_privilege.png',
+                                            bgColor: const Color(0xFFFFF3CD), // Soft light pastel gold
+                                            textColor: const Color(0xFF5C4300), // Dark gold/bronze
+                                            onTap: () {},
                                           ),
-                                          child: const Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Explore All Services',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 13,
-                                                  letterSpacing: 0.5,
-                                                ),
-                                              ),
-                                              SizedBox(width: 8),
-                                              Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 13),
-                                            ],
+                                          _QuickAccessCard(
+                                            title: 'Plan\nEvent',
+                                            imagePath: 'assets/images/plan_event.png',
+                                            bgColor: const Color(0xFFD1ECF1), // Soft light pastel blue
+                                            textColor: const Color(0xFF072A52), // Dark royal blue
+                                            onTap: () {},
                                           ),
-                                        ),
+                                          _QuickAccessCard(
+                                            title: 'Book\nHoliday',
+                                            imagePath: 'assets/images/book_holiday_3d.png',
+                                            bgColor: const Color(0xFFD4EDDA), // Soft light pastel green
+                                            textColor: const Color(0xFF0F472A), // Dark emerald green
+                                            onTap: () {},
+                                          ),
+                                          _QuickAccessCard(
+                                            title: 'OHC\nMembership',
+                                            imagePath: 'assets/images/membership_3d.png',
+                                            bgColor: const Color(0xFFF3E5F5), // Soft light pastel lavender
+                                            textColor: const Color(0xFF4A148C), // Dark indigo purple
+                                            onTap: () => MembershipBottomSheet.show(context),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -225,23 +204,12 @@ class HomeView extends GetView<HomeController> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 25),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: _BannerCarousel(
-                            images: [
-                              'assets/images/slide1.png',
-                              'assets/images/slide2.png',
-                              'assets/images/slide3.png',
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                   ],
                 ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
               // ─── Top Destinations Horizontal Scroll ───────────
               Padding(
@@ -255,6 +223,17 @@ class HomeView extends GetView<HomeController> {
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primaryBlack,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Get.toNamed(Routes.DESTINATIONS_REEL),
+                      child: const Text(
+                        'View All',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryYellow,
+                        ),
                       ),
                     ),
                   ],
@@ -420,6 +399,122 @@ class HomeView extends GetView<HomeController> {
                 }),
               ),
 
+              const SizedBox(height: 24),
+
+              // ─── Banner Carousel ──────────────────────────────
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: _BannerCarousel(
+                  images: [
+                    'assets/images/slide1.png',
+                    'assets/images/slide2.png',
+                    'assets/images/slide3.png',
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              // ─── Our Services Horizontal Scroll (Blinkit-style) ─
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Our Services',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryBlack,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Get.toNamed(Routes.SERVICES_REEL),
+                      child: const Text(
+                        'View All',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryYellow,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 188,
+                child: Obx(() {
+                  final svcs = controller.services;
+                  if (controller.isLoading.value && svcs.isEmpty) {
+                    return ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: 5,
+                      itemBuilder: (_, i) => Container(
+                        width: 120,
+                        margin: const EdgeInsets.only(right: 12),
+                        child: const Skeleton(borderRadius: 12.0),
+                      ),
+                    );
+                  }
+                  final totalCount = svcs.length + 1; // +1 for Explore All card
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: totalCount,
+                    itemBuilder: (context, i) {
+                      if (i == svcs.length) {
+                        // Explore All Services card wrapped to match height/padding perfectly
+                        return GestureDetector(
+                          onTap: () => Get.toNamed(Routes.SERVICES_REEL),
+                          child: Container(
+                            width: 136,
+                            margin: const EdgeInsets.only(right: 12),
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppColors.borderGrey, width: 2),
+                            ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.lightGrey,
+                                borderRadius: BorderRadius.circular(11),
+                                border: Border.all(color: AppColors.borderGrey, width: 1),
+                              ),
+                              child: const Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.grid_view_rounded, color: AppColors.primaryYellow, size: 30),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    'Explore All\nServices',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primaryBlack,
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      final svc = svcs[i];
+                      return GestureDetector(
+                        onTap: () => Get.toNamed(Routes.SERVICE_DETAILS, arguments: svc),
+                        child: _BlinklitServiceCard(service: svc, index: i),
+                      );
+                    },
+                  );
+                }),
+              ),
+
               const SizedBox(height: 28),
 
               // ─── Featured Experiences ─────────────────────────
@@ -435,7 +530,7 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
               SizedBox(
-                height: 340, // Decreased height
+                height: 340,
                 child: Obx(() {
                   if (controller.isLoading.value && controller.featuredExperiences.isEmpty) {
                     return ListView.builder(
@@ -659,83 +754,6 @@ class HomeView extends GetView<HomeController> {
   }
 }
 
-// ── Service Card Widget ────────────────────────────────────────────────────────
-class _ServiceCard extends StatelessWidget {
-  final Map<String, dynamic> service;
-  const _ServiceCard({required this.service});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: Stack(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.lightGrey,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color.fromRGBO(50, 50, 93, 0.25),
-                      offset: const Offset(0, 2),
-                      blurRadius: 5,
-                      spreadRadius: -1,
-                    ),
-                    BoxShadow(
-                      color: Color.fromRGBO(0, 0, 0, 0.3),
-                      offset: const Offset(0, 1),
-                      blurRadius: 3,
-                      spreadRadius: -1,
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: _buildDynamicImage(
-                    service['image'] ?? '',
-                    width: double.infinity,
-                    height: double.infinity,
-                  ),
-                ),
-              ),
-              // Arrow icon overlay
-              Positioned(
-                bottom: 6,
-                right: 6,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryYellow,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 10,
-                    color: AppColors.primaryBlack,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          service['title'] ?? '',
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: AppColors.primaryBlack,
-            height: 1.2,
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 // ── Experience Card Widget ────────────────────────────────────────────────────
 class _ExperienceCard extends StatelessWidget {
@@ -884,8 +902,6 @@ Widget _buildDynamicImage(String path, {double? height, double? width}) {
   );
 }
 
-
-// â”€â”€ Hero Carousel Widget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _HeroCarousel extends StatefulWidget {
   final List<Map<String, dynamic>> slides;
   const _HeroCarousel({required this.slides});
@@ -897,16 +913,30 @@ class _HeroCarousel extends StatefulWidget {
 class _HeroCarouselState extends State<_HeroCarousel> {
   final PageController _pageCtrl = PageController();
   int _currentPage = 0;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _scheduleNext();
+    _startTimer();
   }
 
-  void _scheduleNext() {
-    Future.delayed(const Duration(seconds: 5), () {
-      if (!mounted || widget.slides.length <= 1) return;
+  @override
+  void didUpdateWidget(covariant _HeroCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.slides.length != widget.slides.length) {
+      _startTimer();
+    }
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    if (widget.slides.length <= 1) return;
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       final next = (_currentPage + 1) % widget.slides.length;
       if (_pageCtrl.hasClients) {
         _pageCtrl.animateToPage(
@@ -915,18 +945,19 @@ class _HeroCarouselState extends State<_HeroCarousel> {
           curve: Curves.easeInOutCubic,
         );
       }
-      _scheduleNext();
     });
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _pageCtrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final firstSlide = widget.slides.isNotEmpty ? widget.slides.first : <String, dynamic>{};
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -940,110 +971,105 @@ class _HeroCarouselState extends State<_HeroCarousel> {
             itemBuilder: (context, index) {
               final slide = widget.slides[index];
               final imageUrl = slide['image'] ?? '';
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Background image
-                  imageUrl.startsWith('http')
-                    ? CachedNetworkImage(
-                        imageUrl: imageUrl,
-                        fit: BoxFit.cover,
-                        placeholder: (ctx, url) => Container(color: Colors.black87),
-                        errorWidget: (ctx, url, e) => Image.asset('assets/images/maldives_private_shore.png', fit: BoxFit.cover),
-                      )
-                    : Image.asset(imageUrl.isEmpty ? 'assets/images/maldives_private_shore.png' : imageUrl, fit: BoxFit.cover),
-                  // Gradient overlay â€” identical to original
-                  Positioned.fill(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          stops: const [0.0, 0.45, 1.0],
-                          colors: [
-                            Colors.black.withOpacity(0.15),
-                            Colors.black.withOpacity(0.35),
-                            Colors.black.withOpacity(0.75),
-                          ],
-                        ),
+              return imageUrl.startsWith('http')
+                ? CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (ctx, url) => Container(color: Colors.black87),
+                    errorWidget: (ctx, url, e) => Image.asset('assets/images/maldives_private_shore.png', fit: BoxFit.cover),
+                  )
+                : Image.asset(imageUrl.isEmpty ? 'assets/images/maldives_private_shore.png' : imageUrl, fit: BoxFit.cover);
+            },
+          ),
+        ),
+        // Gradient overlay — identical to original, placed static over images
+        Positioned.fill(
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.45, 1.0],
+                  colors: [
+                    Colors.black.withOpacity(0.15),
+                    Colors.black.withOpacity(0.35),
+                    Colors.black.withOpacity(0.75),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        // Hero text — identical layout to original, but static
+        Positioned(
+          top: 30,
+          left: 20,
+          right: 20,
+          child: IgnorePointer(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FadeInDown(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryYellow,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      _stripHtml(firstSlide['subtitle'] ?? 'ELITE EXPERIENCE').toUpperCase(),
+                      style: const TextStyle(
+                        color: AppColors.primaryBlack,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1,
                       ),
                     ),
                   ),
-                  // Hero text â€” identical layout to original
-                  Positioned(
-                    top: 30,
-                    left: 20,
-                    right: 20,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        FadeInDown(
-                          key: ValueKey('subtitle_$index'),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryYellow,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              _stripHtml(slide['subtitle'] ?? 'ELITE EXPERIENCE').toUpperCase(),
-                              style: const TextStyle(
-                                color: AppColors.primaryBlack,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        FadeInLeft(
-                          key: ValueKey('title_$index'),
-                          delay: const Duration(milliseconds: 150),
-                          child: Text(
-                            '${_stripHtml(slide['title1'] ?? '')}\n${_stripHtml(slide['title2'] ?? '')}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 44,
-                              fontWeight: FontWeight.w600,
-                              height: 1.1,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black54,
-                                  blurRadius: 12,
-                                  offset: Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        FadeInLeft(
-                          key: ValueKey('desc_$index'),
-                          delay: const Duration(milliseconds: 250),
-                          child: Text(
-                            _stripHtml(slide['description'] ?? ''),
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.88),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              height: 1.5,
-                              shadows: const [
-                                Shadow(
-                                  color: Colors.black54,
-                                  blurRadius: 8,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                          ),
+                ),
+                const SizedBox(height: 14),
+                FadeInLeft(
+                  delay: const Duration(milliseconds: 150),
+                  child: Text(
+                    '${_stripHtml(firstSlide['title1'] ?? '')}\n${_stripHtml(firstSlide['title2'] ?? '')}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 44,
+                      fontWeight: FontWeight.w600,
+                      height: 1.1,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black54,
+                          blurRadius: 12,
+                          offset: Offset(0, 4),
                         ),
                       ],
                     ),
                   ),
-                ],
-              );
-            },
+                ),
+                const SizedBox(height: 10),
+                FadeInLeft(
+                  delay: const Duration(milliseconds: 250),
+                  child: Text(
+                    _stripHtml(firstSlide['description'] ?? ''),
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.88),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      height: 1.5,
+                      shadows: const [
+                        Shadow(
+                          color: Colors.black54,
+                          blurRadius: 8,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         // Slide indicator dots
@@ -1192,6 +1218,172 @@ class _BannerCarouselState extends State<_BannerCarousel> {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ── Quick Access Card ─────────────────────────────────────────────────────────
+class _QuickAccessCard extends StatelessWidget {
+  final String title;
+  final String imagePath;
+  final Color bgColor;
+  final Color textColor;
+  final VoidCallback onTap;
+  const _QuickAccessCard({
+    required this.title,
+    required this.imagePath,
+    required this.bgColor,
+    required this.textColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromRGBO(50, 50, 93, 0.25),
+              offset: Offset(0, 2),
+              blurRadius: 5,
+              spreadRadius: -1,
+            ),
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.3),
+              offset: Offset(0, 1),
+              blurRadius: 3,
+              spreadRadius: -1,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            children: [
+              // Title text at Top-Left (shorter size)
+              Positioned(
+                top: 12,
+                left: 12,
+                right: 12,
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                  ),
+                ),
+              ),
+              // High-quality 3D render illustration positioned at the Bottom-Right Corner without any spacing/padding
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: Image.asset(
+                    imagePath,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Blinkit-style Service Card (horizontal scroll) ────────────────────────────
+class _BlinklitServiceCard extends StatelessWidget {
+  final Map<String, dynamic> service;
+  final int index;
+  const _BlinklitServiceCard({required this.service, required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    // Curated Harmonious Bold/Dark Accent Colors matching Blinkit's Featured this week borders
+    final borderColors = [
+      const Color(0xFFD4AF37), // Luxury Gold
+      const Color(0xFF1976D2), // Royal Blue
+      const Color(0xFF2E7D32), // Emerald Green
+      const Color(0xFFD81B60), // Dark Pink
+      const Color(0xFF8E24AA), // Deep Purple
+      const Color(0xFFE65100), // Rich Dark Orange
+    ];
+    final borderColor = borderColors[index % borderColors.length];
+
+    return Container(
+      width: 136,
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(4), // thoda sa card se space/padding
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor, width: 2), // outer bold dynamic border
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(11),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromRGBO(50, 50, 93, 0.25),
+              offset: Offset(0, 2),
+              blurRadius: 5,
+              spreadRadius: -1,
+            ),
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.3),
+              offset: Offset(0, 1),
+              blurRadius: 3,
+              spreadRadius: -1,
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Full-width image fills top of card
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
+                child: _buildDynamicImage(
+                  service['image'] ?? '',
+                  height: double.infinity,
+                  width: double.infinity,
+                ),
+              ),
+            ),
+            // Title label below image
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(11)),
+              ),
+              child: Text(
+                service['title'] ?? '',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryBlack,
+                  height: 1.3,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

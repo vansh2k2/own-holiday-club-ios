@@ -82,7 +82,12 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
             ),
             child: const Icon(Icons.edit_outlined, color: AppColors.primaryYellow, size: 16),
           ),
-          onPressed: () {},
+          onPressed: () {
+            Get.snackbar('Notice', 'Profile editing will be available soon.',
+                snackPosition: SnackPosition.TOP,
+                backgroundColor: AppColors.primaryYellow,
+                colorText: AppColors.primaryBlack);
+          },
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
@@ -731,22 +736,6 @@ class PaymentsPage extends StatelessWidget {
                         if (p.bank != null && p.bank!.isNotEmpty) _PayRow('Bank', p.bank!),
                         if (p.wallet != null && p.wallet!.isNotEmpty) _PayRow('Wallet', p.wallet!),
                         _PayRow('Period', p.period ?? 'N/A'),
-                        const SizedBox(height: 14),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () => _downloadInvoice(p.invoice?.url),
-                            icon: const Icon(Icons.download_rounded, size: 15),
-                            label: Text('Download Invoice', style: GoogleFonts.montserrat(fontSize: 11, fontWeight: FontWeight.w800)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryBlack,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 13),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              elevation: 0,
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),

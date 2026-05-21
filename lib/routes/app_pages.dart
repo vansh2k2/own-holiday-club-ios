@@ -116,6 +116,9 @@ class AppPages {
     GetPage(
       name: _Paths.FAQ,
       page: () => const FaqView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => HomeController());
+      }),
     ),
     GetPage(
       name: _Paths.DESTINATION_DETAILS,

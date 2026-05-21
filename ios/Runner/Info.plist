@@ -90,5 +90,7 @@
 	<string>This app requires access to the microphone for video features.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app requires access to your location to show relevant destinations.</string>
+	<key>GMSApiKey</key>
+	<string>AIzaSyDarNwOH5Gfi1KseDZ82fkh2b0wn66uudg</string>
 </dict>
 </plist>

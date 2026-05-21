@@ -229,7 +229,7 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
               
               _buildTextField(
                 controller: _messageController,
-                label: "Special Requests or Preferences...",
+                label: "Special Requests or Preferences... (Optional)",
                 maxLines: 3,
               ),
               const SizedBox(height: 24),

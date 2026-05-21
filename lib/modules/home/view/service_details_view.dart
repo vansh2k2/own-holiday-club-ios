@@ -402,7 +402,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                 ],
               ),
               const SizedBox(height: 16),
-              _buildField(_msgCtrl, 'Special Requests or Preferences...', Icons.message_outlined, maxLines: 3),
+              _buildField(_msgCtrl, 'Special Requests or Preferences...', Icons.message_outlined, maxLines: 3, isOptional: true),
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
@@ -440,14 +440,14 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
     );
   }
 
-  Widget _buildField(TextEditingController ctrl, String hint, IconData icon, {TextInputType? keyboard, int maxLines = 1}) {
+  Widget _buildField(TextEditingController ctrl, String hint, IconData icon, {TextInputType? keyboard, int maxLines = 1, bool isOptional = false}) {
     return TextFormField(
       controller: ctrl,
       keyboardType: keyboard,
       maxLines: maxLines,
       style: GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.w600),
       decoration: InputDecoration(
-        hintText: hint,
+        hintText: isOptional ? '$hint (Optional)' : hint,
         hintStyle: GoogleFonts.montserrat(fontSize: 12, color: Colors.grey),
         prefixIcon: Icon(icon, size: 16, color: Colors.grey),
         filled: true,
@@ -459,7 +459,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
-      validator: (v) => v!.isEmpty ? 'Required' : null,
+      validator: isOptional ? null : (v) => v!.isEmpty ? 'Required' : null,
     );
   }
 

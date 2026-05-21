@@ -7,6 +7,7 @@ class MembershipTier {
   final List<String> features;
   final String? color;
   final String? duration;
+  final String? actuallyPrice;
 
   MembershipTier({
     required this.id,
@@ -17,6 +18,7 @@ class MembershipTier {
     required this.features,
     this.color,
     this.duration,
+    this.actuallyPrice,
   });
 
   factory MembershipTier.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class MembershipTier {
       features: List<String>.from(json['features'] ?? []),
       color: json['color'],
       duration: json['duration'],
+      actuallyPrice: json['actuallyPrice']?.toString(),
     );
   }
 }

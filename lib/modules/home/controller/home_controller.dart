@@ -33,25 +33,10 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     fetchHomeData();
-    _startFeaturedAutoPlay();
     _startHeroAutoPlay();
   }
 
-  void _startFeaturedAutoPlay() {
-    Future.delayed(const Duration(seconds: 4), () {
-      if (featuredExperiences.isNotEmpty) {
-        int next = (currentFeaturedPage.value + 1) % featuredExperiences.length;
-        if (featuredPageController.hasClients) {
-          featuredPageController.animateToPage(
-            next,
-            duration: const Duration(milliseconds: 800),
-            curve: Curves.easeInOutCubic,
-          );
-        }
-      }
-      _startFeaturedAutoPlay();
-    });
-  }
+
 
   void _startHeroAutoPlay() {
     Future.delayed(const Duration(seconds: 5), () {
@@ -113,8 +98,8 @@ class HomeController extends GetxController {
           mixedImages.shuffle();
           allPortfolioImages.value = mixedImages;
           
-          // Take first 10 for slider
-          featuredExperiences.value = mixedImages.take(10).toList();
+          // Map categories with their galleries for featured experiences
+          featuredExperiences.value = fetchedServices.where((svc) => svc['gallery'] != null && (svc['gallery'] as List).isNotEmpty).toList();
         }
       }
 

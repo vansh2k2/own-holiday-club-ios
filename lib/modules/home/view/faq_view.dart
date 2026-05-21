@@ -55,12 +55,20 @@ class FaqView extends GetView<HomeController> {
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade200, width: 1),
+                  boxShadow: const [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      color: Color.fromRGBO(50, 50, 93, 0.1),
+                      offset: Offset(0, 2),
+                      blurRadius: 5,
+                      spreadRadius: -1,
+                    ),
+                    BoxShadow(
+                      color: Color.fromRGBO(0, 0, 0, 0.1),
+                      offset: Offset(0, 1),
+                      blurRadius: 3,
+                      spreadRadius: -1,
                     ),
                   ],
                 ),

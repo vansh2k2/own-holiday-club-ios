@@ -8,6 +8,7 @@ import 'package:own_holiday_app/routes/app_pages.dart';
 import 'package:own_holiday_app/widgets/skeleton.dart';
 import 'package:own_holiday_app/modules/dashboard/controller/dashboard_controller.dart';
 import 'package:own_holiday_app/modules/membership/model/membership_tier.dart';
+import 'package:own_holiday_app/modules/account/controller/account_controller.dart';
 
 class MembershipBottomSheet {
   static void show(BuildContext context) {
@@ -230,29 +231,50 @@ class MembershipBottomSheet {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: planColor.withOpacity(0.15),
+                                color: Colors.red.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: Colors.red.withOpacity(0.3)),
                               ),
                               child: Text(
-                                plan.adminFee != null ? 'Admin Fee: ${plan.adminFee}' : 'Admin Fee: N/A',
-                                style: TextStyle(
+                                plan.adminFee != null ? 'Admin Fee: ₹ ${plan.adminFee!.replaceAll('₹', '').replaceAll('Rs.', '').replaceAll('Rs', '').trim()}' : 'Admin Fee: N/A',
+                                style: const TextStyle(
                                   fontSize: 8.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: planColor,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.redAccent,
                                 ),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          '${plan.price}', // Removed ₹
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: planColor,
-                            letterSpacing: -1,
-                          ),
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.end,
+                          children: [
+                            if (plan.id == 'ohc-privilege' && plan.actuallyPrice != null && plan.actuallyPrice!.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0, bottom: 2.0),
+                                child: Text(
+                                  '₹ ${plan.actuallyPrice!.replaceAll('₹', '').replaceAll('Rs.', '').replaceAll('Rs', '').trim()}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white54,
+                                    decoration: TextDecoration.lineThrough,
+                                    decorationColor: Colors.redAccent,
+                                    decorationThickness: 2.0,
+                                  ),
+                                ),
+                              ),
+                            Text(
+                              '₹ ${plan.price.replaceAll('₹', '').replaceAll('Rs.', '').replaceAll('Rs', '').trim()}',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                color: planColor,
+                                letterSpacing: -1,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 20),
                         const Text(
@@ -312,9 +334,11 @@ class MembershipBottomSheet {
                         Navigator.pop(Get.context!);
                         Get.toNamed(Routes.MEMBERSHIP_FORM, arguments: plan);
                       },
-                      child: const Text(
-                        'BUY NOW',
-                        style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5, fontSize: 13),
+                      child: Text(
+                        (Get.isRegistered<AccountController>() && Get.find<AccountController>().userData.value?.membership != null)
+                            ? 'UPDATE NOW'
+                            : 'BUY NOW',
+                        style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5, fontSize: 13),
                       ),
                     ),
                   ),

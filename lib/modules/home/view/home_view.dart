@@ -172,21 +172,27 @@ class HomeView extends GetView<HomeController> {
                                             imagePath: 'assets/images/ohc_privilege.png',
                                             bgColor: const Color(0xFFFFF3CD), // Soft light pastel gold
                                             textColor: const Color(0xFF5C4300), // Dark gold/bronze
-                                            onTap: () {},
+                                            onTap: () => MembershipBottomSheet.show(context),
                                           ),
                                           _QuickAccessCard(
                                             title: 'Plan\nEvent',
                                             imagePath: 'assets/images/plan_event.png',
                                             bgColor: const Color(0xFFD1ECF1), // Soft light pastel blue
                                             textColor: const Color(0xFF072A52), // Dark royal blue
-                                            onTap: () {},
+                                            onTap: () => Get.toNamed(Routes.SERVICES_REEL),
                                           ),
                                           _QuickAccessCard(
                                             title: 'Book\nHoliday',
                                             imagePath: 'assets/images/book_holiday_3d.png',
                                             bgColor: const Color(0xFFD4EDDA), // Soft light pastel green
                                             textColor: const Color(0xFF0F472A), // Dark emerald green
-                                            onTap: () {},
+                                            onTap: () {
+                                              Get.bottomSheet(
+                                                const GeneralEnquiryForm(),
+                                                isScrollControlled: true,
+                                                backgroundColor: Colors.transparent,
+                                              );
+                                            },
                                           ),
                                           _QuickAccessCard(
                                             title: 'OHC\nMembership',
@@ -544,9 +550,9 @@ class HomeView extends GetView<HomeController> {
                       ),
                     );
                   }
-                  return PageView.builder(
-                    controller: controller.featuredPageController,
-                    onPageChanged: (idx) => controller.currentFeaturedPage.value = idx,
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 10), // Adjust padding for list
                     itemCount: controller.featuredExperiences.length,
                     itemBuilder: (_, i) =>
                         _ExperienceCard(exp: controller.featuredExperiences[i], width: screenWidth * 0.88),
@@ -654,8 +660,10 @@ class HomeView extends GetView<HomeController> {
                   Get.toNamed(Routes.FAQ);
                 }),
                 const Divider(indent: 20, endIndent: 20),
-                _DrawerItem(Icons.privacy_tip_outlined, 'Privacy Policy', () {}),
-                _DrawerItem(Icons.info_outline_rounded, 'About Us', () {}),
+                _DrawerItem(Icons.privacy_tip_outlined, 'Privacy Policy', () {
+                  Get.back();
+                  Get.toNamed(Routes.PRIVACY_POLICY);
+                }),
               ],
             ),
           ),
@@ -756,126 +764,177 @@ class HomeView extends GetView<HomeController> {
 
 
 // ── Experience Card Widget ────────────────────────────────────────────────────
-class _ExperienceCard extends StatelessWidget {
+class _ExperienceCard extends StatefulWidget {
   final Map<String, dynamic> exp;
   final double width;
   const _ExperienceCard({required this.exp, required this.width});
 
   @override
+  State<_ExperienceCard> createState() => _ExperienceCardState();
+}
+
+class _ExperienceCardState extends State<_ExperienceCard> {
+  final PageController _pageController = PageController();
+  Timer? _timer;
+  int _currentPage = 0;
+  List<String> _images = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _images = List<String>.from(widget.exp['gallery'] ?? []);
+    if (_images.isEmpty) {
+      _images = [widget.exp['image'] ?? '']; // Fallback
+    }
+    _startAutoPlay();
+  }
+
+  void _startAutoPlay() {
+    if (_images.length <= 1) return;
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      _currentPage = (_currentPage + 1) % _images.length;
+      if (_pageController.hasClients) {
+        _pageController.animateToPage(
+          _currentPage,
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return FadeInUp(
-      child: Container(
-        width: width,
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08), // Lighter shadow
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Stack(
-            children: [
-              _buildDynamicImage(
-                exp['image'] ?? '',
-                height: 340, // Decreased height
-                width: double.infinity,
+    return Container(
+      width: widget.width,
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          children: [
+            SizedBox(
+              height: 340,
+              width: double.infinity,
+              child: PageView.builder(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(), // Only auto scroll
+                itemCount: _images.length,
+                itemBuilder: (context, index) {
+                  return _buildDynamicImage(
+                    _images[index],
+                    height: 340,
+                    width: double.infinity,
+                  );
+                },
               ),
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: const [0.0, 0.5, 1.0],
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.15), // Lighter mid gradient
-                        Colors.black.withOpacity(0.65), // Lighter bottom gradient
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.5, 1.0],
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.15),
+                      Colors.black.withOpacity(0.65),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 20,
+              left: 20,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryYellow,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Text(
+                  'PORTFOLIO',
+                  style: const TextStyle(
+                    color: AppColors.primaryBlack,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 24,
+              left: 20,
+              right: 20,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.exp['serviceTitle'] ?? widget.exp['title'] ?? '',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.exp['shortDescription'] ?? widget.exp['description'] ?? '',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 12,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryYellow,
+                      foregroundColor: AppColors.primaryBlack,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                      elevation: 2,
+                    ),
+                    onPressed: () => Get.toNamed(Routes.GALLERY),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Explore More',
+                             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                        SizedBox(width: 6),
+                        Icon(Icons.arrow_forward_rounded, size: 14),
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
-              Positioned(
-                top: 20,
-                left: 20,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryYellow,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Text(
-                    exp['badge'] ?? 'PREMIUM',
-                    style: const TextStyle(
-                      color: AppColors.primaryBlack,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 10,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 24,
-                left: 20,
-                right: 20,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      exp['title'] ?? '',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22, // Slightly smaller font
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      exp['description'] ?? '',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
-                        fontSize: 12,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryYellow,
-                        foregroundColor: AppColors.primaryBlack,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 10),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25)),
-                        elevation: 2,
-                      ),
-                      onPressed: () => Get.toNamed(Routes.GALLERY),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('Explore More',
-                               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                          SizedBox(width: 6),
-                          Icon(Icons.arrow_forward_rounded, size: 14),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1123,7 +1182,7 @@ class _DrawerItem extends StatelessWidget {
       title: Text(label,
           style: const TextStyle(
               fontWeight: FontWeight.w600,
-              fontSize: 14,
+              fontSize: 12,
               color: AppColors.primaryBlack)),
       trailing: const Icon(Icons.arrow_forward_ios_rounded,
           size: 13, color: AppColors.greyText),
@@ -1309,15 +1368,7 @@ class _BlinklitServiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Curated Harmonious Bold/Dark Accent Colors matching Blinkit's Featured this week borders
-    final borderColors = [
-      const Color(0xFFD4AF37), // Luxury Gold
-      const Color(0xFF1976D2), // Royal Blue
-      const Color(0xFF2E7D32), // Emerald Green
-      const Color(0xFFD81B60), // Dark Pink
-      const Color(0xFF8E24AA), // Deep Purple
-      const Color(0xFFE65100), // Rich Dark Orange
-    ];
-    final borderColor = borderColors[index % borderColors.length];
+    const borderColor = Color(0xFFD4AF37); // Luxury Gold
 
     return Container(
       width: 136,

@@ -53,4 +53,8 @@ class AuthRepo {
   Future<http.Response> bookHoliday(Map<String, dynamic> data) async {
     return await apiClient.postData(ApiConstants.holidayLeads, data);
   }
+
+  Future<http.Response> submitSlotBooking(String userId, Map<String, dynamic> data) async {
+    return await apiClient.postData("${ApiConstants.baseUrl}/profile/$userId/holiday-bookings", data);
+  }
 }

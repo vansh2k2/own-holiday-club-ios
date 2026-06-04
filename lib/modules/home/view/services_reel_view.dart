@@ -92,10 +92,21 @@ class _ServicePage extends StatelessWidget {
           child: _buildImage(imageUrl),
         ),
 
-        // Gradient Overlay (Removed color overlay from images)
+        // Gradient overlay — covers only the bottom text area
         Positioned.fill(
-          child: Container(
-            color: Colors.transparent,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.35, 0.65, 1.0],
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.45),
+                  Colors.black.withValues(alpha: 0.78),
+                ],
+              ),
+            ),
           ),
         ),
 

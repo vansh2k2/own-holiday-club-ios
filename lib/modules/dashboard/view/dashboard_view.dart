@@ -16,54 +16,43 @@ class DashboardView extends GetView<DashboardController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: Obx(() => AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: controller.pages[controller.currentIndex.value],
           )),
       bottomNavigationBar: Container(
-        height: 75,
+        height: 95,
         color: Colors.transparent,
         child: Stack(
           alignment: Alignment.bottomCenter,
           children: [
-            // Background Navbar (Full width, square corners, light background)
-            Container(
-              height: 60,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Color.fromRGBO(50, 50, 93, 0.12),
-                    offset: Offset(0, -2),
-                    blurRadius: 5,
-                    spreadRadius: -1,
-                  ),
-                  BoxShadow(
-                    color: Color.fromRGBO(0, 0, 0, 0.1),
-                    offset: Offset(0, -1),
-                    blurRadius: 3,
-                    spreadRadius: -1,
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildNavItem(0, Icons.home_rounded, 'Home'),
-                  const SizedBox(width: 60), 
-                  _buildNavItem(2, Icons.person_rounded, 'Account'),
-                ],
+            // Background Navbar (Full width, CustomPaint Notch, light background)
+            CustomPaint(
+              size: const Size(double.infinity, 60),
+              painter: NotchPainter(),
+              child: Container(
+                height: 60,
+                color: Colors.transparent,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(0, Icons.home_rounded, 'Home'),
+                    const SizedBox(width: 60), 
+                    _buildNavItem(2, Icons.person_rounded, 'Account'),
+                  ],
+                ),
               ),
             ),
 
-            // Overlapping Middle Icon (Membership)
+            // Overlapping Middle Icon (Membership) - Shifted upward (bottom: 29) & Size increased to 62
             Positioned(
-              bottom: 12,
+              bottom: 29,
               child: GestureDetector(
                 onTap: () => MembershipBottomSheet.show(context),
                 child: Container(
-                  height: 52,
-                  width: 52,
+                  height: 62,
+                  width: 62,
                   decoration: BoxDecoration(
                     color: AppColors.primaryYellow,
                     shape: BoxShape.circle,
@@ -82,7 +71,7 @@ class DashboardView extends GetView<DashboardController> {
                   ),
                   child: const Icon(
                     Icons.card_membership_rounded,
-                    size: 24,
+                    size: 28,
                     color: AppColors.primaryBlack,
                   ),
                 ),
@@ -91,7 +80,7 @@ class DashboardView extends GetView<DashboardController> {
             
             // Middle Label
             Positioned(
-              bottom: 2,
+              bottom: 6,
               child: const Text(
                 'Membership',
                 style: TextStyle(
@@ -112,19 +101,21 @@ class DashboardView extends GetView<DashboardController> {
       onTap: () => controller.changeIndex(index),
       child: Obx(() {
         bool isSelected = controller.currentIndex.value == index;
+        // Brand logo's signature Burgundy/Red-Purple color
+        const activeColor = Color(0xFF9D0B51);
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primaryYellow : AppColors.greyText,
+              color: isSelected ? activeColor : AppColors.greyText,
               size: 26,
             ),
             const SizedBox(height: 2),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppColors.primaryYellow : AppColors.greyText,
+                color: isSelected ? activeColor : AppColors.greyText,
                 fontSize: 12.0,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
@@ -135,4 +126,47 @@ class DashboardView extends GetView<DashboardController> {
     );
   }
 
+}
+
+class NotchPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    // Beautiful soft bottom nav shadows matching the shape perfectly
+    final shadowPaint = Paint()
+      ..color = Colors.black.withOpacity(0.08)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+
+    final path = Path();
+    final notchRadius = 36.0; // Button size is 62 (radius 31) + 5px margin = 36px
+    final middle = size.width / 2;
+
+    path.moveTo(0, 0);
+    // Left shoulder line
+    path.lineTo(middle - notchRadius, 0);
+
+    // Perfect semicircular arc cut-out
+    path.arcToPoint(
+      Offset(middle + notchRadius, 0),
+      radius: Radius.circular(notchRadius),
+      clockwise: false,
+    );
+
+    // Right shoulder line to end
+    path.lineTo(size.width, 0);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+
+    // Draw bottom shadow shifted up slightly
+    canvas.drawPath(path.shift(const Offset(0, -2)), shadowPaint);
+    // Draw the white filled notched shape
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

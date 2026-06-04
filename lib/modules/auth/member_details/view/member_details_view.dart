@@ -12,6 +12,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:own_holiday_app/widgets/skeleton.dart';
 import 'package:own_holiday_app/modules/home/controller/home_controller.dart';
+import 'package:own_holiday_app/modules/account/controller/account_controller.dart';
+import 'book_holiday_view.dart';
 
 // ─────────────────────────────────────────────
 //  MAIN MEMBER DETAILS VIEW
@@ -36,24 +38,28 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
               child: CircularProgressIndicator(color: AppColors.primaryYellow),
             );
           }
-          return CustomScrollView(
-            slivers: [
-              _buildSliverHeader(context, u),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                  child: Column(
-                    children: [
-                      FadeInUp(delay: const Duration(milliseconds: 100), child: _buildMembershipBanner(u)),
-                      const SizedBox(height: 20),
-                      FadeInUp(delay: const Duration(milliseconds: 150), child: _buildAccordionMenuSection(u)),
-                      const SizedBox(height: 24),
-                      FadeInUp(delay: const Duration(milliseconds: 200), child: _buildSignOutButton()),
-                    ],
+          return RefreshIndicator(
+            color: AppColors.primaryYellow,
+            onRefresh: () => Get.find<AccountController>().fetchProfile(),
+            child: CustomScrollView(
+              slivers: [
+                _buildSliverHeader(context, u),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                    child: Column(
+                      children: [
+                        FadeInUp(delay: const Duration(milliseconds: 100), child: _buildMembershipBanner(u)),
+                        const SizedBox(height: 20),
+                        FadeInUp(delay: const Duration(milliseconds: 150), child: _buildAccordionMenuSection(u)),
+                        const SizedBox(height: 24),
+                        FadeInUp(delay: const Duration(milliseconds: 200), child: _buildSignOutButton()),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         }),
       ),
@@ -72,24 +78,6 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
         icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primaryBlack, size: 18),
         onPressed: () => Get.offAllNamed(Routes.DASHBOARD),
       ),
-      actions: [
-        IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.primaryBlack.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.edit_outlined, color: AppColors.primaryYellow, size: 16),
-          ),
-          onPressed: () {
-            Get.snackbar('Notice', 'Profile editing will be available soon.',
-                snackPosition: SnackPosition.TOP,
-                backgroundColor: AppColors.primaryYellow,
-                colorText: AppColors.primaryBlack);
-          },
-        ),
-      ],
       flexibleSpace: FlexibleSpaceBar(
         background: _buildHeaderContent(u),
       ),
@@ -239,16 +227,16 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
         border: Border.all(color: AppColors.primaryYellow.withOpacity(0.5), width: 1.2),
         boxShadow: const [
           BoxShadow(
-            color: Color.fromRGBO(50, 50, 93, 0.25),
-            offset: Offset(0, 2),
-            blurRadius: 5,
-            spreadRadius: -1,
-          ),
-          BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.3),
+            color: Color.fromRGBO(0, 0, 0, 0.02),
             offset: Offset(0, 1),
             blurRadius: 3,
-            spreadRadius: -1,
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: Color.fromRGBO(27, 31, 35, 0.15),
+            offset: Offset(0, 0),
+            blurRadius: 0,
+            spreadRadius: 1,
           ),
         ],
       ),
@@ -344,7 +332,8 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
           label: 'Book Holiday',
           subtitle: '${u.holidayBookings?.length ?? 0} trips used',
           color: const Color(0xFF10B981),
-          child: _buildHolidayBookingsContent(u),
+          child: const SizedBox.shrink(),
+          onTap: () => Get.to(() => BookHolidayView(user: u)),
         ),
         _buildAccordionItem(
           index: 3,
@@ -373,6 +362,7 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
     required String subtitle,
     required Color color,
     required Widget child,
+    VoidCallback? onTap,
   }) {
     return Obx(() {
       final isExpanded = controller.expandedSection.value == index;
@@ -384,23 +374,23 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
           border: Border.all(color: AppColors.borderGrey.withOpacity(0.4), width: 0.8),
           boxShadow: const [
             BoxShadow(
-              color: Color.fromRGBO(50, 50, 93, 0.25),
-              offset: Offset(0, 2),
-              blurRadius: 5,
-              spreadRadius: -1,
-            ),
-            BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.3),
+              color: Color.fromRGBO(0, 0, 0, 0.02),
               offset: Offset(0, 1),
               blurRadius: 3,
-              spreadRadius: -1,
+              spreadRadius: 0,
+            ),
+            BoxShadow(
+              color: Color.fromRGBO(27, 31, 35, 0.15),
+              offset: Offset(0, 0),
+              blurRadius: 0,
+              spreadRadius: 1,
             ),
           ],
         ),
         child: Column(
           children: [
             InkWell(
-              onTap: () => controller.toggleSection(index),
+              onTap: onTap ?? () => controller.toggleSection(index),
               borderRadius: BorderRadius.circular(16),
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -557,16 +547,16 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
             border: Border.all(color: AppColors.primaryYellow.withOpacity(0.6), width: 1.2),
             boxShadow: const [
               BoxShadow(
-                color: Color.fromRGBO(50, 50, 93, 0.25),
-                offset: Offset(0, 2),
-                blurRadius: 5,
-                spreadRadius: -1,
-              ),
-              BoxShadow(
-                color: Color.fromRGBO(0, 0, 0, 0.3),
+                color: Color.fromRGBO(0, 0, 0, 0.02),
                 offset: Offset(0, 1),
                 blurRadius: 3,
-                spreadRadius: -1,
+                spreadRadius: 0,
+              ),
+              BoxShadow(
+                color: Color.fromRGBO(27, 31, 35, 0.15),
+                offset: Offset(0, 0),
+                blurRadius: 0,
+                spreadRadius: 1,
               ),
             ],
           ),
@@ -732,7 +722,7 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
               const SizedBox(height: 14),
               _PayRow('Status', p.status?.toUpperCase() ?? 'N/A', isStatus: true, statusOk: p.status?.toLowerCase() == 'captured'),
               _PayRow('Method', p.method?.toUpperCase() ?? 'N/A'),
-              _PayRow('Date', p.paidAt ?? 'N/A'),
+              _PayRow('Date', p.paidAt != null ? _fmtDate(p.paidAt) : 'N/A'),
               if (p.bank != null && p.bank!.isNotEmpty) _PayRow('Bank', p.bank!),
               if (p.wallet != null && p.wallet!.isNotEmpty) _PayRow('Wallet', p.wallet!),
               _PayRow('Period', p.period ?? 'N/A'),
@@ -749,6 +739,18 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
         ? Get.find<HomeController>()
         : Get.put(HomeController());
 
+    // Default FAQs matching the website fallback
+    const defaultFaqs = [
+      {'question': 'How does the vacation membership work?', 'answer': 'Our vacation membership gives you access to a curated network of luxury resorts and properties worldwide. Once enrolled, you receive an annual credit allocation that can be used to book stays, experiences, and exclusive member benefits at participating destinations.'},
+      {'question': 'Can I transfer my membership to my children?', 'answer': 'Yes — our memberships are fully inheritable. You can transfer ownership to your children or designated beneficiaries at any time through a simple documentation process, ensuring your family continues to enjoy the benefits for generations.'},
+      {'question': "What happens if I don't use my credits this year?", 'answer': "Unused credits roll over to the following year — we never want you to lose what you've earned. Credits are valid for up to 24 months, giving you complete flexibility to plan your ideal vacation on your own schedule."},
+      {'question': 'Are there any hidden maintenance fees?', 'answer': 'Absolutely none. We believe in complete transparency. Your annual membership fee covers everything — property maintenance, concierge access, and platform services. The price you see is exactly what you pay, with no surprises.'},
+      {'question': 'How do I book a property as a member?', 'answer': 'Booking is seamless through our member portal or dedicated concierge line. Simply select your preferred destination, dates, and room type. Members receive priority booking windows — often 12 months in advance — ensuring you always get the best availability.'},
+    ];
+
+    // Trigger FAQ fetch when this section is rendered
+    homeCtrl.fetchFaqs();
+
     return Obx(() {
       if (homeCtrl.isLoading.value && homeCtrl.faqs.isEmpty) {
         return Column(
@@ -762,32 +764,29 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
         );
       }
 
-      if (homeCtrl.faqs.isEmpty) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Center(
-            child: Text(
-              'No FAQs available at the moment.',
-              style: GoogleFonts.montserrat(fontSize: 12.0, color: AppColors.greyText),
-            ),
-          ),
-        );
-      }
+      final List<Map<String, String>> faqList = homeCtrl.faqs.isNotEmpty
+          ? homeCtrl.faqs.map((f) => {'question': f['question']?.toString() ?? '', 'answer': f['answer']?.toString() ?? ''}).toList()
+          : defaultFaqs;
 
       return Column(
-        children: homeCtrl.faqs.map((faq) {
+        children: faqList.map((faq) {
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.borderGrey.withOpacity(0.4), width: 0.8),
               boxShadow: const [
                 BoxShadow(
-                  color: Color.fromRGBO(50, 50, 93, 0.12),
+                  color: Color.fromRGBO(0, 0, 0, 0.02),
                   offset: Offset(0, 1),
                   blurRadius: 3,
-                  spreadRadius: -1,
+                  spreadRadius: 0,
+                ),
+                BoxShadow(
+                  color: Color.fromRGBO(27, 31, 35, 0.15),
+                  offset: Offset(0, 0),
+                  blurRadius: 0,
+                  spreadRadius: 1,
                 ),
               ],
             ),
@@ -813,7 +812,7 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.scaffoldBg.withOpacity(0.5),
+                      color: AppColors.softYellow.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
@@ -869,6 +868,26 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
 //  SHARED HELPERS & COMPONENTS
 // ─────────────────────────────────────────────
 
+/// Tries to parse common date strings (ISO 8601, dd-MM-yyyy, etc.)
+/// and returns them in compact Indian format: 12 Jun 2025
+/// If not a date, returns the original string unchanged.
+String _fmtDate(String? raw) {
+  if (raw == null || raw.isEmpty) return raw ?? '';
+  try {
+    final d = DateTime.parse(raw);
+    return DateFormat('dd MMM yyyy').format(d);
+  } catch (_) {
+    // try dd-MM-yyyy or dd/MM/yyyy
+    for (final fmt in ['dd-MM-yyyy', 'dd/MM/yyyy', 'MM/dd/yyyy']) {
+      try {
+        final d = DateFormat(fmt).parseStrict(raw);
+        return DateFormat('dd MMM yyyy').format(d);
+      } catch (_) {}
+    }
+    return raw; // not a date, return as-is
+  }
+}
+
 Widget _buildInfoCard(String title, IconData icon, Color color, List<_InfoRow> rows) {
   return _PageCard(
     child: Column(
@@ -897,16 +916,16 @@ class _PageCard extends StatelessWidget {
         border: Border.all(color: AppColors.borderGrey.withOpacity(0.4), width: 0.8),
         boxShadow: const [
           BoxShadow(
-            color: Color.fromRGBO(50, 50, 93, 0.25),
-            offset: Offset(0, 2),
-            blurRadius: 5,
-            spreadRadius: -1,
-          ),
-          BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.3),
+            color: Color.fromRGBO(0, 0, 0, 0.02),
             offset: Offset(0, 1),
             blurRadius: 3,
-            spreadRadius: -1,
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: Color.fromRGBO(27, 31, 35, 0.15),
+            offset: Offset(0, 0),
+            blurRadius: 0,
+            spreadRadius: 1,
           ),
         ],
       ),
@@ -960,6 +979,7 @@ class _InfoRowWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (row.value == null || row.value!.isEmpty) return const SizedBox.shrink();
+    final displayValue = _fmtDate(row.value);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -979,7 +999,7 @@ class _InfoRowWidget extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              row.value!,
+              displayValue,
               style: GoogleFonts.montserrat(
                 fontSize: 12.0, 
                 fontWeight: FontWeight.bold, 
@@ -1010,10 +1030,16 @@ class _DocTile extends StatelessWidget {
         border: Border.all(color: hasDoc ? const Color(0xFFE2E8F0) : const Color(0xFFFEE2E2)),
         boxShadow: const [
           BoxShadow(
-            color: Color.fromRGBO(50, 50, 93, 0.12),
-            offset: Offset(0, 2),
-            blurRadius: 5,
-            spreadRadius: -1,
+            color: Color.fromRGBO(0, 0, 0, 0.02),
+            offset: Offset(0, 1),
+            blurRadius: 3,
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: Color.fromRGBO(27, 31, 35, 0.15),
+            offset: Offset(0, 0),
+            blurRadius: 0,
+            spreadRadius: 1,
           ),
         ],
       ),
@@ -1256,16 +1282,16 @@ class _StatBox extends StatelessWidget {
           border: Border.all(color: AppColors.borderGrey.withOpacity(0.4), width: 0.8),
           boxShadow: const [
             BoxShadow(
-              color: Color.fromRGBO(50, 50, 93, 0.25),
-              offset: Offset(0, 2),
-              blurRadius: 5,
-              spreadRadius: -1,
-            ),
-            BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.3),
+              color: Color.fromRGBO(0, 0, 0, 0.02),
               offset: Offset(0, 1),
               blurRadius: 3,
-              spreadRadius: -1,
+              spreadRadius: 0,
+            ),
+            BoxShadow(
+              color: Color.fromRGBO(27, 31, 35, 0.15),
+              offset: Offset(0, 0),
+              blurRadius: 0,
+              spreadRadius: 1,
             ),
           ],
         ),
@@ -1574,11 +1600,28 @@ class _HolidayBookingSheetState extends State<_HolidayBookingSheet> {
     };
 
     try {
-      final success = await ctrl.submitHolidayActivation(payload);
-      if (success) {
+      final errorMessage = await ctrl.submitHolidayActivation(payload);
+      if (errorMessage == null) {
         Get.back();
-        Get.snackbar('Success', 'Activation request submitted! Our concierge will contact you shortly.', 
-            backgroundColor: AppColors.primaryYellow, colorText: Colors.white, duration: const Duration(seconds: 4));
+        Get.snackbar(
+          'Success',
+          'Activation request submitted! Our concierge will contact you shortly.',
+          backgroundColor: const Color(0xFFDCFCE7),
+          colorText: const Color(0xFF15803D),
+          icon: const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF15803D)),
+          snackPosition: SnackPosition.TOP,
+          duration: const Duration(seconds: 4),
+        );
+      } else {
+        Get.snackbar(
+          'Booking Failed',
+          errorMessage,
+          backgroundColor: const Color(0xFFFEE2E2),
+          colorText: const Color(0xFFB91C1C),
+          icon: const Icon(Icons.error_outline_rounded, color: Color(0xFFB91C1C)),
+          snackPosition: SnackPosition.TOP,
+          duration: const Duration(seconds: 5),
+        );
       }
     } catch (e) {
       Get.snackbar('Error', 'Something went wrong. Please try again.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);

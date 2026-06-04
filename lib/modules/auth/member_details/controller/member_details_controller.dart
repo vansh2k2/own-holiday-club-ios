@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../login/model/user_model.dart';
@@ -83,22 +84,38 @@ class MemberDetailsController extends GetxController {
     }
   }
 
-  Future<bool> submitHolidayActivation(Map<String, dynamic> data) async {
+  Future<String?> submitHolidayActivation(Map<String, dynamic> data) async {
+    final userId = user.value?.id ?? '';
+    final url = 'https://api.ownholidayclub.com/api/profile/$userId/holiday-bookings';
+    print('\n--- 🚀 [API REQUEST] POST HOLIDAY BOOKING ---');
+    print('🔗 URL: $url');
+    print('📦 REQUEST BODY: $data');
+
     try {
       isBooking.value = true;
-      final response = await authRepo.bookHoliday(data);
+      if (userId.isEmpty) throw 'User ID is missing';
+      final response = await authRepo.submitSlotBooking(userId, data);
+      
+      print('✅ STATUS CODE: ${response.statusCode}');
+      print('📦 RESPONSE BODY: ${response.body}');
+      print('--------------------------------------------\n');
       
       if (response.statusCode == 200 || response.statusCode == 201) {
         Get.find<AccountController>().refreshProfile();
-        return true;
+        return null;
       } else {
         final error = response.body;
         print('Activation Error: $error');
-        return false;
+        try {
+          final errJson = jsonDecode(error);
+          return errJson['message'] ?? 'Failed to book holiday';
+        } catch (_) {
+          return error.isNotEmpty ? error : 'Failed to book holiday';
+        }
       }
     } catch (e) {
       print('Activation Exception: $e');
-      return false;
+      return e.toString();
     } finally {
       isBooking.value = false;
     }

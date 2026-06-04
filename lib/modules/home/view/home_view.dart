@@ -215,197 +215,207 @@ class HomeView extends GetView<HomeController> {
                   ],
                 ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               // ─── Top Destinations Horizontal Scroll ───────────
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Container(
+                width: double.infinity,
+                color: const Color(0xFFF5F7FA),
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Top Destinations',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryBlack,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => Get.toNamed(Routes.DESTINATIONS_REEL),
-                      child: const Text(
-                        'View All',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primaryYellow,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 240,
-                child: Obx(() {
-                  if (controller.isLoading.value) {
-                    return ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: 4,
-                      itemBuilder: (context, i) => Container(
-                        width: 160,
-                        margin: const EdgeInsets.only(right: 14, bottom: 4),
-                        child: Skeleton(borderRadius: 20.0),
-                      ),
-                    );
-                  }
-                  return ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: (controller.destinations.length >= 5 ? 6 : controller.destinations.length + 1),
-                    itemBuilder: (context, i) {
-                      final bool isExploreMore = (controller.destinations.length >= 5 && i == 5) || 
-                                              (controller.destinations.length < 5 && i == controller.destinations.length);
-                      
-                      if (isExploreMore) {
-                        return GestureDetector(
-                          onTap: () => Get.toNamed(Routes.DESTINATIONS_REEL),
-                          child: Container(
-                            width: 160,
-                            margin: const EdgeInsets.only(right: 14, bottom: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryWhite,
-                              border: Border.all(color: Colors.grey.shade300, width: 0.5),
-                            ),
-                            child: const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.arrow_forward_ios_rounded, color: AppColors.primaryYellow, size: 30),
-                                SizedBox(height: 10),
-                                Text(
-                                  'Explore All',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                    color: AppColors.primaryBlack,
-                                  ),
-                                ),
-                              ],
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Top Destinations',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primaryBlack,
                             ),
                           ),
-                        );
-                      }
-                      final dest = controller.destinations[i];
-                      return FadeInRight(
-                        delay: Duration(milliseconds: i * 80),
-                        child: GestureDetector(
-                          onTap: () => controller.goToDestinationDetails(dest),
-                          child: Container(
-                            width: 160,
-                            height: 230,
-                            margin: const EdgeInsets.only(right: 14, bottom: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.zero,
-                              border: Border.all(color: Colors.grey.shade300, width: 0.5),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.04),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
+                          GestureDetector(
+                            onTap: () => Get.toNamed(Routes.DESTINATIONS_REEL),
+                            child: const Text(
+                              'View All',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primaryYellow,
+                              ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildDynamicImage(
-                                  dest['image'] ?? '',
-                                  height: 125,
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 265,
+                      child: Obx(() {
+                        if (controller.isLoading.value) {
+                          return ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            itemCount: 4,
+                            itemBuilder: (context, i) => Container(
+                              width: 160,
+                              margin: const EdgeInsets.only(right: 14, bottom: 4),
+                              child: Skeleton(borderRadius: 20.0),
+                            ),
+                          );
+                        }
+                        return ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          itemCount: (controller.destinations.length >= 5 ? 6 : controller.destinations.length + 1),
+                          itemBuilder: (context, i) {
+                            final bool isExploreMore = (controller.destinations.length >= 5 && i == 5) || 
+                                                    (controller.destinations.length < 5 && i == controller.destinations.length);
+                            
+                            if (isExploreMore) {
+                              return GestureDetector(
+                                onTap: () => Get.toNamed(Routes.DESTINATIONS_REEL),
+                                child: Container(
                                   width: 160,
+                                  margin: const EdgeInsets.only(right: 14, bottom: 4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryWhite,
+                                    border: Border.all(color: Colors.grey.shade300, width: 0.5),
+                                  ),
+                                  child: const Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.arrow_forward_ios_rounded, color: AppColors.primaryYellow, size: 30),
+                                      SizedBox(height: 10),
+                                      Text(
+                                        'Explore All',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                          color: AppColors.primaryBlack,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8),
+                              );
+                            }
+                            final dest = controller.destinations[i];
+                            return FadeInRight(
+                              delay: Duration(milliseconds: i * 80),
+                              child: GestureDetector(
+                                onTap: () => controller.goToDestinationDetails(dest),
+                                child: Container(
+                                  width: 160,
+                                  height: 255,
+                                  margin: const EdgeInsets.only(right: 14, bottom: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.zero,
+                                    border: Border.all(color: Colors.grey.shade300, width: 0.5),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.04),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              dest['name'] ?? dest['title'] ?? '',
-                                              maxLines: 1,
+                                      _buildDynamicImage(
+                                        dest['image'] ?? '',
+                                        height: 150,
+                                        width: 160,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    dest['name'] ?? dest['title'] ?? '',
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      fontWeight: FontWeight.w600,
+                                                      fontSize: 13,
+                                                      color: AppColors.primaryBlack,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  dest['category']?.toString().toUpperCase() ?? '',
+                                                  style: GoogleFonts.montserrat(
+                                                    fontSize: 8,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppColors.primaryYellow,
+                                                    letterSpacing: 0.5,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              dest['tagline'] ?? dest['shortDescription'] ?? '',
+                                              maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 13,
-                                                color: AppColors.primaryBlack,
+                                                color: AppColors.greyText,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w500,
+                                                height: 1.2,
                                               ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            dest['category']?.toString().toUpperCase() ?? '',
-                                            style: GoogleFonts.montserrat(
-                                              fontSize: 8,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.primaryYellow,
-                                              letterSpacing: 0.5,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        dest['tagline'] ?? dest['shortDescription'] ?? '',
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: AppColors.greyText,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w500,
-                                          height: 1.2,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 18),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primaryYellow,
-                                          borderRadius: BorderRadius.zero,
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              'BOOK NOW',
-                                              style: GoogleFonts.montserrat(
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w600,
-                                                color: AppColors.primaryBlack,
+                                            const SizedBox(height: 18),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.primaryYellow,
+                                                borderRadius: BorderRadius.zero,
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    'BOOK NOW',
+                                                    style: GoogleFonts.montserrat(
+                                                      fontSize: 9,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: AppColors.primaryBlack,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  const Icon(Icons.arrow_forward_ios_rounded, size: 9, color: AppColors.primaryBlack),
+                                                ],
                                               ),
                                             ),
-                                            const SizedBox(width: 4),
-                                            const Icon(Icons.arrow_forward_ios_rounded, size: 9, color: AppColors.primaryBlack),
                                           ],
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                }),
-              ),
+                              ),
+                            );
+                          },
+                        );
+                      }),
+                    ),
+                  ],
+                ),
+            ),
 
-              const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
               // ─── Banner Carousel ──────────────────────────────
               const Padding(
@@ -541,18 +551,18 @@ class HomeView extends GetView<HomeController> {
                   if (controller.isLoading.value && controller.featuredExperiences.isEmpty) {
                     return ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.only(left: 20, right: 8),
                       itemCount: 2,
                       itemBuilder: (_, i) => Container(
                         width: screenWidth * 0.88,
-                        margin: const EdgeInsets.only(right: 20),
-                        child: Skeleton(borderRadius: 24.0),
+                        margin: const EdgeInsets.only(right: 12),
+                        child: Skeleton(borderRadius: 12.0),
                       ),
                     );
                   }
                   return ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 10), // Adjust padding for list
+                    padding: const EdgeInsets.only(left: 20, right: 8),
                     itemCount: controller.featuredExperiences.length,
                     itemBuilder: (_, i) =>
                         _ExperienceCard(exp: controller.featuredExperiences[i], width: screenWidth * 0.88),
@@ -664,97 +674,102 @@ class HomeView extends GetView<HomeController> {
                   Get.back();
                   Get.toNamed(Routes.PRIVACY_POLICY);
                 }),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Obx(() => Column(
+                    children: [
+                      if (!accountController.isLoggedIn.value)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryYellow,
+                            foregroundColor: AppColors.primaryBlack,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(vertical: 11),
+                          ),
+                          onPressed: () {
+                            Get.back(); // Close drawer
+                            Get.toNamed(Routes.MEMBER_LOGIN);
+                          },
+                          child: const Text('MEMBER LOGIN',
+                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, letterSpacing: 1.0)),
+                        ),
+                      ),
+                      if (accountController.isLoggedIn.value)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryYellow,
+                            foregroundColor: AppColors.primaryBlack,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(vertical: 11),
+                          ),
+                          onPressed: () {
+                            Get.back(); // Close drawer
+                            Get.toNamed(Routes.MEMBER_DETAILS);
+                          },
+                          child: const Text('MY PROFILE',
+                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, letterSpacing: 1.0)),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primaryBlack,
+                            side: const BorderSide(color: AppColors.primaryBlack),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(vertical: 11),
+                          ),
+                          onPressed: () {
+                            Get.back(); // Close drawer
+                            Get.bottomSheet(
+                              const GeneralEnquiryForm(),
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                            );
+                          },
+                          child: const Text('ENQUIRY',
+                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, letterSpacing: 1.0)),
+                        ),
+                      ),
+                      if (accountController.isLoggedIn.value) ...[
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.red,
+                              side: const BorderSide(color: Colors.red),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                            ),
+                            onPressed: () {
+                              Get.back();
+                              accountController.logout();
+                            },
+                            icon: const Icon(Icons.logout_rounded, size: 18),
+                            label: const Text('Logout',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                          ),
+                        ),
+                      ],
+                    ],
+                  )),
+                ),
+                const SizedBox(height: 20),
               ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Obx(() => Column(
-              children: [
-                if (!accountController.isLoggedIn.value)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryYellow,
-                      foregroundColor: AppColors.primaryBlack,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    onPressed: () {
-                      Get.back(); // Close drawer
-                      Get.toNamed(Routes.MEMBER_LOGIN);
-                    },
-                    child: const Text('MEMBER LOGIN',
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, letterSpacing: 1.0)),
-                  ),
-                ),
-                if (accountController.isLoggedIn.value)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryYellow,
-                      foregroundColor: AppColors.primaryBlack,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    onPressed: () {
-                      Get.back(); // Close drawer
-                      Get.toNamed(Routes.MEMBER_DETAILS);
-                    },
-                    child: const Text('MY PROFILE',
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, letterSpacing: 1.0)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primaryBlack,
-                      side: const BorderSide(color: AppColors.primaryBlack),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    onPressed: () {
-                      Get.back(); // Close drawer
-                      Get.bottomSheet(
-                        const GeneralEnquiryForm(),
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                      );
-                    },
-                    child: const Text('ENQUIRY',
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, letterSpacing: 1.0)),
-                  ),
-                ),
-                if (accountController.isLoggedIn.value) ...[
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      onPressed: () => accountController.logout(),
-                      icon: const Icon(Icons.logout_rounded, size: 20),
-                      label: const Text('Logout',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
-              ],
-            )),
           ),
         ],
       ),
@@ -818,9 +833,9 @@ class _ExperienceCardState extends State<_ExperienceCard> {
   Widget build(BuildContext context) {
     return Container(
       width: widget.width,
-      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      margin: const EdgeInsets.only(right: 12, top: 10, bottom: 10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -830,7 +845,7 @@ class _ExperienceCardState extends State<_ExperienceCard> {
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(12),
         child: Stack(
           children: [
             SizedBox(
@@ -1030,11 +1045,22 @@ class _HeroCarouselState extends State<_HeroCarousel> {
             },
           ),
         ),
-        // Gradient overlay — (Removed color overlay from images)
+        // Gradient overlay — added elegant overlay for text readability
         Positioned.fill(
           child: IgnorePointer(
             child: Container(
-              color: Colors.transparent,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.55),
+                    Colors.black.withOpacity(0.15),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.5, 1.0],
+                ),
+              ),
             ),
           ),
         ),

@@ -144,179 +144,321 @@ class MembershipBottomSheet {
   }
 
   static Widget _buildDarkPlanCard(DashboardController controller, MembershipTier plan, int index) {
-    final planColor = controller.getPlanColor(plan.name, index);
+    final planColors = _getPlanColors(plan.name, index);
+
+    // Get the exact features list matching the image mockup
+    final cardFeatures = _getCardFeatures(plan.name, plan.features);
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.primaryWhite,
-        borderRadius: BorderRadius.circular(35),
-        border: Border.all(color: AppColors.borderGrey, width: 1),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: planColors.bgGradient,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: planColors.primary.withOpacity(0.35), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryBlack.withOpacity(0.1),
-            blurRadius: 30,
-            offset: const Offset(0, 20),
+            color: planColors.primary.withOpacity(0.12),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(35),
+        borderRadius: BorderRadius.circular(24),
         child: Stack(
           children: [
-            // Background Gradient Glow
+            // Soft translucent decorative circle in background
             Positioned(
-              top: -100,
-              right: -100,
+              bottom: -40,
+              right: -40,
               child: Container(
-                width: 250,
-                height: 250,
+                width: 140,
+                height: 140,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      planColor.withOpacity(0.15),
-                      Colors.transparent,
-                    ],
-                  ),
+                  color: planColors.primary.withOpacity(0.10),
                 ),
               ),
             ),
-
+            
             Column(
               children: [
-                // Plan Icon Header
+                // Top Border / Stripe representing the plan
                 Container(
-                  height: 100,
+                  height: 8,
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        planColor.withOpacity(0.2),
-                        Colors.transparent,
-                      ],
-                    ),
+                  color: planColors.primary,
+                ),
+                
+                // Header Section (Icon + Plan Title + Subtitle)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: planColors.primary.withOpacity(0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.workspace_premium_rounded,
+                          color: planColors.primary,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              plan.name.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                                color: planColors.primary,
+                                letterSpacing: -0.3,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              planColors.subtitle,
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.primaryBlack.withOpacity(0.65),
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  child: Center(
-                    child: Icon(
-                      Icons.workspace_premium_rounded,
-                      size: 50,
-                      color: planColor,
+                ),
+                
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Divider(color: planColors.primary.withOpacity(0.15), height: 1, thickness: 1.0),
+                ),
+                
+                // Pricing Section
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (plan.name.toLowerCase().contains('privilege')) ...[
+                          // Strikethrough Original Price
+                          const Text(
+                            '₹ 52,789',
+                            style: TextStyle(
+                              fontSize: 13.0,
+                              color: AppColors.greyText,
+                              fontWeight: FontWeight.w500,
+                              decoration: TextDecoration.lineThrough,
+                              decorationColor: Colors.red,
+                              decorationThickness: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    const TextSpan(
+                                      text: 'Pay ',
+                                      style: TextStyle(
+                                        fontSize: 14.0,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColors.primaryBlack,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: '₹ 1',
+                                      style: TextStyle(
+                                        fontSize: 26.0,
+                                        fontWeight: FontWeight.w900,
+                                        color: planColors.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              RichText(
+                                text: const TextSpan(
+                                  style: TextStyle(fontSize: 11.0, color: AppColors.primaryBlack),
+                                  children: [
+                                    TextSpan(text: 'Admin Fee: '),
+                                    TextSpan(
+                                      text: '₹ 0',
+                                      style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF2E7D32).withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: const Color(0xFF2E7D32).withOpacity(0.2), width: 1),
+                                ),
+                                child: const Text(
+                                  'LIMITED',
+                                  style: TextStyle(
+                                    fontSize: 8.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF2E7D32),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ] else ...[
+                          // Standard plans pricing
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                plan.name.toLowerCase().contains('memorable')
+                                    ? '₹ 2,10,789'
+                                    : plan.name.toLowerCase().contains('golden') || plan.name.toLowerCase().contains('gold')
+                                        ? '₹ 4,20,789'
+                                        : '₹ 6,30,789',
+                                style: TextStyle(
+                                  fontSize: 26.0,
+                                  fontWeight: FontWeight.w900,
+                                  color: planColors.primary,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              RichText(
+                                text: const TextSpan(
+                                  style: TextStyle(fontSize: 11.0, color: AppColors.primaryBlack),
+                                  children: [
+                                    TextSpan(text: 'Admin Fee: '),
+                                    TextSpan(
+                                      text: '₹ 5,789',
+                                      style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
                 
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Divider(color: planColors.primary.withOpacity(0.15), height: 1, thickness: 1.0),
+                ),
+                
+                // Benefits List (Scrollable list inside card)
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(28, 0, 28, 20),
+                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          plan.name ?? 'Plan',
-                          style: const TextStyle(
-                            fontSize: 15.0, 
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryBlack,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.visible,
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.end,
-                          children: [
-                            if (plan.id == 'ohc-privilege' && plan.actuallyPrice != null && plan.actuallyPrice!.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 8.0, bottom: 2.0),
-                                child: Text(
-                                  '₹ ${plan.actuallyPrice!.replaceAll('₹', '').replaceAll('Rs.', '').replaceAll('Rs', '').trim()}',
-                                  style: const TextStyle(
-                                    fontSize: 13.0,
-                                    fontWeight: FontWeight.normal,
-                                    color: AppColors.greyText,
-                                    decoration: TextDecoration.lineThrough,
-                                    decorationColor: AppColors.brownAccent,
-                                    decorationThickness: 2.0,
-                                  ),
-                                ),
-                              ),
-                             Text(
-                              '₹ ${plan.price.replaceAll('₹', '').replaceAll('Rs.', '').replaceAll('Rs', '').trim()}'
-                              ' + ₹ ${plan.adminFee?.replaceAll('₹', '').replaceAll('Rs.', '').replaceAll('Rs', '').trim() ?? '0'} (Admin Fee)',
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                                color: planColor,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        const Text(
-                          'BENEFITS',
+                          'INCLUDED BENEFITS',
                           style: TextStyle(
-                            fontSize: 12.0,
+                            fontSize: 9.5,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.greyText,
-                            letterSpacing: 2,
+                            color: AppColors.primaryBlack.withOpacity(0.4),
+                            letterSpacing: 1.2,
                           ),
                         ),
                         const SizedBox(height: 10),
-                        if (plan.features != null)
-                          ...List.generate(
-                            plan.features.length,
-                            (i) => Padding(
-                              padding: const EdgeInsets.only(bottom: 14.0),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.verified_rounded, color: planColor, size: 18),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Text(
-                                      plan.features[i],
-                                      style: const TextStyle(
-                                        fontSize: 12.0,
-                                        color: AppColors.bodyText,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                        ...List.generate(
+                          cardFeatures.length,
+                          (i) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 1.0),
+                                  child: Icon(
+                                    Icons.check_circle_rounded,
+                                    color: planColors.primary,
+                                    size: 14,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    cardFeatures[i],
+                                    style: const TextStyle(
+                                      fontSize: 11.0,
+                                      color: AppColors.primaryBlack,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.25,
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
+                        ),
                       ],
                     ),
                   ),
                 ),
                 
-                // Buy Button
+                // Filled CTA Button (Solid theme color of the card with white text)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                   child: SizedBox(
                     width: double.infinity,
-                    height: 48,
+                    height: 44,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: planColor,
-                        foregroundColor: AppColors.primaryBlack,
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 10,
-                        shadowColor: planColor.withOpacity(0.4),
+                        backgroundColor: planColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 2,
+                        shadowColor: planColors.primary.withOpacity(0.3),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       onPressed: () {
                         Navigator.pop(Get.context!);
                         Get.toNamed(Routes.MEMBERSHIP_FORM, arguments: plan);
                       },
                       child: Text(
-                        (Get.isRegistered<AccountController>() && Get.find<AccountController>().userData.value?.membership != null)
+                        ((Get.isRegistered<AccountController>() && Get.find<AccountController>().userData.value?.membership != null)
                             ? 'UPDATE NOW'
-                            : 'BUY NOW',
-                        style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5, fontSize: 13.0),
+                            : 'SELECT TIER >'),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.0,
+                          fontSize: 12.0,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -328,4 +470,92 @@ class MembershipBottomSheet {
       ),
     );
   }
+
+  // --- Static Private Helpers for Mockup Alignment ---
+
+  static _PlanColors _getPlanColors(String? name, int index) {
+    final lowercase = name?.toLowerCase() ?? '';
+    if (lowercase.contains('privilege')) {
+      return _PlanColors(
+        primary: const Color(0xFF1E88E5), // Sky Blue
+        bgGradient: [const Color(0xFFF4FAFF), const Color(0xFFE3F2FD)], // Extremely light blue
+        subtitle: "Special 5-year introductory offer for your luxury journey.",
+      );
+    } else if (lowercase.contains('memorable')) {
+      return _PlanColors(
+        primary: const Color(0xFFC27D38), // Bronze/Gold
+        bgGradient: [const Color(0xFFFFFDF5), const Color(0xFFFFF9E6)], // Super soft cream/gold
+        subtitle: "Create memorable vacations for a full decade.",
+      );
+    } else if (lowercase.contains('golden') || lowercase.contains('gold')) {
+      return _PlanColors(
+        primary: const Color(0xFF0F9D58), // Emerald Green
+        bgGradient: [const Color(0xFFF5FBF6), const Color(0xFFE8F5E9)], // Super soft mint green
+        subtitle: "Two decades of elevated luxury experiences.",
+      );
+    } else if (lowercase.contains('diamond')) {
+      return _PlanColors(
+        primary: const Color(0xFF7B1FA2), // Royal Purple
+        bgGradient: [const Color(0xFFFAF6FC), const Color(0xFFF3E5F5)], // Super soft light lavender
+        subtitle: "Three decades of ultimate luxury and exclusive global access.",
+      );
+    }
+    
+    // Fallback based on index
+    final fallbacks = [
+      _PlanColors(primary: const Color(0xFF1E88E5), bgGradient: [const Color(0xFFF4FAFF), const Color(0xFFE3F2FD)], subtitle: "Experience luxury journey."),
+      _PlanColors(primary: const Color(0xFFC27D38), bgGradient: [const Color(0xFFFFFDF5), const Color(0xFFFFF9E6)], subtitle: "Vacations for a full decade."),
+      _PlanColors(primary: const Color(0xFF0F9D58), bgGradient: [const Color(0xFFF5FBF6), const Color(0xFFE8F5E9)], subtitle: "Elevated luxury experiences."),
+      _PlanColors(primary: const Color(0xFF7B1FA2), bgGradient: [const Color(0xFFFAF6FC), const Color(0xFFF3E5F5)], subtitle: "Ultimate luxury global access."),
+    ];
+    return fallbacks[index % fallbacks.length];
+  }
+
+  static List<String> _getCardFeatures(String? name, List<String> apiFeatures) {
+    final lowercase = name?.toLowerCase() ?? '';
+    if (lowercase.contains('privilege')) {
+      return [
+        "3 Nights / 4 Days for 3 Years",
+        "4 Nights / 5 Days for 2 Years",
+        "Valid for 5 Years",
+        "Standard Concierge",
+      ];
+    } else if (lowercase.contains('memorable')) {
+      return [
+        "6 nights / 7 days for 10 years",
+        "Valid for 10 Years",
+        "Special Offer 2 Year Extra",
+        "Transferable to Family",
+        "Access to Premium Resorts",
+        "Priority Booking",
+      ];
+    } else if (lowercase.contains('golden') || lowercase.contains('gold')) {
+      return [
+        "6 nights / 7 days for 20 years",
+        "Valid for 20 Years",
+        "Special Offer 3 Year Extra",
+        "Transferable to Family",
+        "All Premium Luxury Resorts",
+        "Dedicated VIP Concierge",
+      ];
+    } else if (lowercase.contains('diamond')) {
+      return [
+        "6 nights / 7 days for 30 years",
+        "Valid for 30 Years",
+        "Special Offer 5 Years Extra",
+        "Transferable to Family",
+        "All Golden Benefits Included",
+        "Personalized Travel Planning",
+        "Access to Elite Global Resorts",
+      ];
+    }
+    return apiFeatures;
+  }
+}
+
+class _PlanColors {
+  final Color primary;
+  final List<Color> bgGradient;
+  final String subtitle;
+  _PlanColors({required this.primary, required this.bgGradient, required this.subtitle});
 }

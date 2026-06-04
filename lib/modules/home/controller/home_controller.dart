@@ -29,6 +29,12 @@ class HomeController extends GetxController {
   final heroPageController = PageController();
   var currentHeroPage = 0.obs;
 
+  final privacyPolicyContent = ''.obs;
+  final privacyPolicyTitle = ''.obs;
+  final termsContent = ''.obs;
+  final termsTitle = ''.obs;
+  var isCmsLoading = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -63,6 +69,9 @@ class HomeController extends GetxController {
       // Fetch FAQ
       fetchFaqs();
 
+      // Fetch Privacy/Terms CMS Pages
+      fetchCmsPages();
+
       // Fetch Services Categories
       var serviceResponse = await serviceRepo.getExploreServices();
       if (serviceResponse.statusCode == 200) {
@@ -74,6 +83,10 @@ class HomeController extends GetxController {
 
       // Fetch Service Details for Portfolio/Gallery
       var sdResponse = await serviceRepo.getServiceDetailsList();
+      print('--- 🚀 [API RESPONSE] SERVICE DETAILS LIST ---');
+      print('STATUS CODE: ${sdResponse.statusCode}');
+      print('RESPONSE BODY: ${sdResponse.body}');
+      print('---------------------------------------------');
       if (sdResponse.statusCode == 200) {
         var body = jsonDecode(sdResponse.body);
         if (body['success'] == true) {
@@ -105,6 +118,10 @@ class HomeController extends GetxController {
 
       // Fetch Destinations
       var destResponse = await serviceRepo.getDestinations();
+      print('--- 🚀 [API RESPONSE] DESTINATIONS ---');
+      print('STATUS CODE: ${destResponse.statusCode}');
+      print('RESPONSE BODY: ${destResponse.body}');
+      print('--------------------------------------');
       if (destResponse.statusCode == 200) {
         var body = jsonDecode(destResponse.body);
         if (body['success'] == true) {
@@ -142,7 +159,12 @@ class HomeController extends GetxController {
 
   Future<void> fetchFaqs() async {
     try {
+      print('--- 🚀 [API REQUEST] GET FAQ ---');
+      print('🔗 URL: https://api.ownholidayclub.com/api/faq/membership');
       var response = await serviceRepo.getFaqs();
+      print('✅ STATUS CODE: ${response.statusCode}');
+      print('📦 RESPONSE BODY: ${response.body}');
+      print('---------------------------------');
       if (response.statusCode == 200) {
         var body = jsonDecode(response.body);
         if (body['success'] == true && body['data'] != null) {
@@ -151,6 +173,46 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       print('Error fetching FAQs: $e');
+    }
+  }
+
+  Future<void> fetchCmsPages() async {
+    isCmsLoading.value = true;
+    try {
+      print('--- 🚀 [API REQUEST] GET CMS PAGES ---');
+      print('🔗 URL: https://api.ownholidayclub.com/api/cms/pages');
+      var response = await serviceRepo.getCmsPages();
+      print('✅ STATUS CODE: ${response.statusCode}');
+      print('📦 RESPONSE BODY: ${response.body}');
+      print('---------------------------------');
+      if (response.statusCode == 200) {
+        var body = jsonDecode(response.body);
+        if (body['pages'] != null && body['pages'] is List) {
+          final pagesList = List<dynamic>.from(body['pages']);
+          
+          final privacyPage = pagesList.firstWhere(
+            (p) => p['slug'] == 'privacy-policy',
+            orElse: () => null,
+          );
+          if (privacyPage != null) {
+            privacyPolicyTitle.value = privacyPage['title'] ?? 'Privacy Policy';
+            privacyPolicyContent.value = privacyPage['body'] ?? '';
+          }
+          
+          final termsPage = pagesList.firstWhere(
+            (p) => p['slug'] == 'terms-and-conditions' || p['slug'] == 'terms-conditions' || p['slug'] == 'terms&conditions',
+            orElse: () => null,
+          );
+          if (termsPage != null) {
+            termsTitle.value = termsPage['title'] ?? 'Terms & Conditions';
+            termsContent.value = termsPage['body'] ?? '';
+          }
+        }
+      }
+    } catch (e) {
+      print('Error fetching CMS pages: $e');
+    } finally {
+      isCmsLoading.value = false;
     }
   }
 

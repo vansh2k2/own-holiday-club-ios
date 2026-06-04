@@ -35,8 +35,28 @@ class ServiceRepo {
     return await apiClient.postData(ApiConstants.holidayLeads, data);
   }
 
+  Future<http.Response> sendMobileOtp(String mobile) async {
+    return await apiClient.postData("${ApiConstants.holidayLeads}/mobile/send-otp", {"mobile": mobile});
+  }
+
+  Future<http.Response> verifyMobileOtp(String mobile, String otp) async {
+    return await apiClient.postData("${ApiConstants.holidayLeads}/mobile/verify-otp", {"mobile": mobile, "otp": otp});
+  }
+
+  Future<http.Response> sendEmailOtp(String email) async {
+    return await apiClient.postData("${ApiConstants.holidayLeads}/email/send-otp", {"email": email});
+  }
+
+  Future<http.Response> verifyEmailOtp(String email, String otp) async {
+    return await apiClient.postData("${ApiConstants.holidayLeads}/email/verify-otp", {"email": email, "otp": otp});
+  }
+
   Future<http.Response> getFaqs() async {
     return await apiClient.getData("${ApiConstants.faq}/membership");
+  }
+
+  Future<http.Response> getCmsPages() async {
+    return await apiClient.getData("https://api.ownholidayclub.com/api/cms/pages");
   }
 
   Future<http.Response> getHeroSlides() async {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:own_holiday_app/utils/app_colors.dart';
 import 'package:own_holiday_app/modules/account/controller/account_controller.dart';
@@ -11,47 +12,84 @@ class MyBookingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accountController = Get.find<AccountController>();
-    
+
     return Scaffold(
-      backgroundColor: AppColors.lightGrey,
+      backgroundColor: AppColors.scaffoldBg,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'My Booking History',
-          style: TextStyle(fontWeight: FontWeight.normal, color: AppColors.primaryBlack),
+          style: GoogleFonts.montserrat(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: AppColors.primaryBlack),
         ),
         backgroundColor: Colors.white,
-        elevation: 0,
+        elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primaryBlack),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: AppColors.primaryBlack, size: 20),
           onPressed: () => Get.back(),
         ),
       ),
       body: Obx(() {
-        final bookings = accountController.userData.value?.holidayBookings ?? [];
-        
-        if (bookings.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.event_busy_rounded, size: 80, color: AppColors.borderGrey),
-                const SizedBox(height: 16),
-                Text(
-                  'No bookings found',
-                  style: TextStyle(color: AppColors.primaryBlack, fontSize: 9.0, fontWeight: FontWeight.normal),
-                ),
-              ],
-            ),
-          );
-        }
+        final bookings =
+            accountController.userData.value?.holidayBookings ?? [];
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: bookings.length,
-          itemBuilder: (context, index) {
-            final booking = bookings[index];
-            return _BookingCard(booking: booking);
-          },
+        return RefreshIndicator(
+          onRefresh: () async => accountController.refreshProfile(),
+          color: const Color(0xFFC9A84C),
+          backgroundColor: Colors.white,
+          child: bookings.isEmpty
+              ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.6,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8F9FA),
+                              borderRadius: BorderRadius.circular(40),
+                              border: Border.all(
+                                  color: const Color(0xFFEDEFF2), width: 1),
+                            ),
+                            child: const Icon(Icons.event_busy_rounded,
+                                size: 40, color: AppColors.greyText),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No bookings yet',
+                            style: GoogleFonts.montserrat(
+                                color: AppColors.primaryBlack,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Your holiday booking requests will appear here.',
+                            style: GoogleFonts.montserrat(
+                                color: AppColors.greyText,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              : ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  itemCount: bookings.length,
+                  itemBuilder: (context, index) {
+                    return _BookingCard(booking: bookings[index]);
+                  },
+                ),
         );
       }),
     );
@@ -62,112 +100,194 @@ class _BookingCard extends StatelessWidget {
   final BookingModel booking;
   const _BookingCard({required this.booking});
 
+  static const _boxShadow = [
+    BoxShadow(
+      color: Color.fromRGBO(0, 0, 0, 0.02),
+      offset: Offset(0, 1),
+      blurRadius: 3,
+      spreadRadius: 0,
+    ),
+    BoxShadow(
+      color: Color.fromRGBO(27, 31, 35, 0.15),
+      offset: Offset(0, 0),
+      blurRadius: 0,
+      spreadRadius: 1,
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final df = DateFormat('dd MMM yyyy');
+    final place = booking.place ?? 'Unknown Destination';
+    final requestId = booking.id != null && booking.id!.length >= 6
+        ? '#${booking.id!.substring(booking.id!.length - 6).toUpperCase()}'
+        : '#N/A';
+    final requestedDate = booking.requestedAt != null
+        ? df.format(DateTime.parse(booking.requestedAt!))
+        : 'Date Unknown';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryBlack.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: const Color(0xFFEDEFF2), width: 1),
+        boxShadow: _boxShadow,
       ),
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryYellow.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            childrenPadding: EdgeInsets.zero,
+            expandedCrossAxisAlignment: CrossAxisAlignment.start,
+            // ── Collapsed header ──────────────────────────────────────
+            title: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0A1628),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.flight_takeoff_rounded,
+                      color: Color(0xFFC9A84C), size: 22),
                 ),
-                child: const Icon(Icons.hotel_class_rounded, color: AppColors.primaryYellow, size: 24),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      booking.place ?? 'Unknown Destination',
-                      style: const TextStyle(
-                        fontSize: 9.0,
-                        fontWeight: FontWeight.normal,
-                        color: AppColors.primaryBlack,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        place,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF0A1628),
+                        ),
                       ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Request ID: $requestId',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 11,
+                          color: AppColors.greyText,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Row(
+                children: [
+                  _StatusBadge(status: booking.status ?? 'booking'),
+                  const Spacer(),
+                  const Icon(Icons.access_time_rounded,
+                      size: 12, color: AppColors.greyText),
+                  const SizedBox(width: 4),
+                  Text(
+                    requestedDate,
+                    style: GoogleFonts.montserrat(
+                        fontSize: 11,
+                        color: AppColors.greyText,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+            ),
+            // ── Expanded details ──────────────────────────────────────
+            children: [
+              const Divider(height: 1, color: Color(0xFFEDEFF2)),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Column(
+                  children: [
+                    _detailRow(
+                      Icons.calendar_today_rounded,
+                      'Check-in',
+                      booking.checkIn != null
+                          ? df.format(DateTime.parse(booking.checkIn!))
+                          : 'N/A',
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Request ID: #${booking.id?.substring(booking.id!.length - 6).toUpperCase() ?? "N/A"}',
-                      style: TextStyle(fontSize: 8.0, color: AppColors.greyText, fontWeight: FontWeight.normal),
+                    const SizedBox(height: 2),
+                    const Divider(height: 16, color: Color(0xFFF4F5F7)),
+                    _detailRow(
+                      Icons.calendar_month_rounded,
+                      'Check-out',
+                      booking.checkOut != null
+                          ? df.format(DateTime.parse(booking.checkOut!))
+                          : 'N/A',
                     ),
+                    const SizedBox(height: 2),
+                    const Divider(height: 16, color: Color(0xFFF4F5F7)),
+                    _detailRow(
+                      Icons.group_outlined,
+                      'Guests',
+                      '${booking.adults ?? 0} Adults, ${booking.kids ?? 0} Kids',
+                    ),
+                    if (booking.slotNumber != null) ...[
+                      const SizedBox(height: 2),
+                      const Divider(height: 16, color: Color(0xFFF4F5F7)),
+                      _detailRow(
+                        Icons.confirmation_number_outlined,
+                        'Slot',
+                        'Slot #${booking.slotNumber}',
+                      ),
+                    ],
+                    if (booking.confirmedAt != null) ...[
+                      const SizedBox(height: 2),
+                      const Divider(height: 16, color: Color(0xFFF4F5F7)),
+                      _detailRow(
+                        Icons.check_circle_outline_rounded,
+                        'Confirmed On',
+                        DateFormat('dd MMM yyyy, hh:mm a')
+                            .format(DateTime.parse(booking.confirmedAt!)),
+                        valueColor: const Color(0xFF047857),
+                      ),
+                    ],
                   ],
                 ),
               ),
             ],
           ),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Row(
-              children: [
-                _StatusBadge(status: booking.status ?? 'booking'),
-                const Spacer(),
-                Text(
-                  booking.requestedAt != null 
-                    ? DateFormat('dd MMM yyyy').format(DateTime.parse(booking.requestedAt!))
-                    : 'Date Unknown',
-                  style: TextStyle(fontSize: 8.0, color: AppColors.greyText),
-                ),
-              ],
-            ),
-          ),
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-              child: Column(
-                children: [
-                  const Divider(height: 1),
-                  const SizedBox(height: 16),
-                  _buildDetailRow(Icons.calendar_today_rounded, 'Check-in', 
-                      booking.checkIn != null ? DateFormat('dd MMM yyyy').format(DateTime.parse(booking.checkIn!)) : 'N/A'),
-                  _buildDetailRow(Icons.calendar_month_rounded, 'Check-out', 
-                      booking.checkOut != null ? DateFormat('dd MMM yyyy').format(DateTime.parse(booking.checkOut!)) : 'N/A'),
-                  _buildDetailRow(Icons.people_outline_rounded, 'Guests', 
-                      '${booking.adults ?? 0} Adults, ${booking.kids ?? 0} Children'),
-                  if (booking.slotNumber != null)
-                    _buildDetailRow(Icons.confirmation_number_outlined, 'Slot Number', '#${booking.slotNumber}'),
-                  if (booking.confirmedAt != null)
-                    _buildDetailRow(Icons.check_circle_outline_rounded, 'Confirmed On', 
-                        DateFormat('dd MMM yyyy HH:mm').format(DateTime.parse(booking.confirmedAt!))),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: AppColors.greyText),
-          const SizedBox(width: 12),
-          Text(label, style: TextStyle(color: AppColors.primaryBlack, fontSize: 8.0, fontWeight: FontWeight.normal)),
-          const Spacer(),
-          Text(value, style: const TextStyle(color: AppColors.primaryBlack, fontSize: 8.0, fontWeight: FontWeight.normal)),
-        ],
-      ),
+  Widget _detailRow(IconData icon, String label, String value,
+      {Color? valueColor}) {
+    return Row(
+      children: [
+        Icon(icon, size: 15, color: AppColors.greyText),
+        const SizedBox(width: 10),
+        Text(
+          label,
+          style: GoogleFonts.montserrat(
+            fontSize: 12,
+            color: AppColors.greyText,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const Spacer(),
+        Text(
+          value,
+          style: GoogleFonts.montserrat(
+            fontSize: 12,
+            color: valueColor ?? const Color(0xFF0A1628),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -178,34 +298,43 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color color;
+    final s = status.toLowerCase();
+
+    Color bg, border, text;
     String label;
-    
-    switch (status.toLowerCase()) {
-      case 'booked':
-      case 'confirmed':
-        color = AppColors.primaryYellow;
-        label = 'CONFIRMED';
-        break;
-      case 'cancelled':
-        color = AppColors.brownAccent;
-        label = 'CANCELLED';
-        break;
-      default:
-        color = AppColors.primaryYellow;
-        label = 'PENDING';
+
+    if (s == 'booked' || s == 'confirmed' || s == 'approved' || s == 'used') {
+      bg = const Color(0xFFECFDF5);
+      border = const Color(0xFF059669);
+      text = const Color(0xFF047857);
+      label = 'CONFIRMED';
+    } else if (s == 'cancelled') {
+      bg = const Color(0xFFFEF2F2);
+      border = const Color(0xFFEF4444);
+      text = const Color(0xFFB91C1C);
+      label = 'CANCELLED';
+    } else {
+      bg = const Color(0xFFFFFBEB);
+      border = const Color(0xFFF59E0B);
+      text = const Color(0xFFB45309);
+      label = 'PENDING';
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        color: bg,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: border, width: 1),
       ),
       child: Text(
         label,
-        style: TextStyle(color: color, fontSize: 8.0, fontWeight: FontWeight.normal, letterSpacing: 0.5),
+        style: GoogleFonts.montserrat(
+          color: text,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.6,
+        ),
       ),
     );
   }

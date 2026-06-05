@@ -333,9 +333,8 @@ class MembershipBottomSheet {
                           ),
                         ] else ...[
                           // Standard plans pricing
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 plan.name.toLowerCase().contains('memorable')
@@ -350,7 +349,7 @@ class MembershipBottomSheet {
                                   letterSpacing: -0.5,
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(height: 2),
                               RichText(
                                 text: const TextSpan(
                                   style: TextStyle(fontSize: 11.0, color: AppColors.primaryBlack),

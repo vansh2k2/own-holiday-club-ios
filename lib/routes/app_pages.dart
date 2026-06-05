@@ -21,6 +21,7 @@ import 'package:own_holiday_app/modules/membership/view/membership_view.dart';
 import 'package:own_holiday_app/modules/membership/controller/membership_controller.dart';
 import 'package:own_holiday_app/modules/membership/view/membership_form_view.dart';
 import 'package:own_holiday_app/modules/membership/controller/membership_form_controller.dart';
+import 'package:own_holiday_app/modules/membership/view/membership_info_view.dart';
 import 'package:own_holiday_app/modules/bookings/view/my_bookings_view.dart';
 import 'package:own_holiday_app/modules/home/view/destinations_reel_view.dart';
 import 'package:own_holiday_app/modules/home/view/gallery_view.dart';
@@ -93,6 +94,10 @@ class AppPages {
       binding: BindingsBuilder(() {
         Get.put(MembershipController());
       }),
+    ),
+    GetPage(
+      name: _Paths.MEMBERSHIP_INFO,
+      page: () => const MembershipInfoView(),
     ),
     GetPage(
       name: _Paths.MEMBERSHIP_FORM,

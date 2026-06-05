@@ -243,11 +243,12 @@ class MembershipView extends GetView<MembershipController> {
                             index: index,
                             title: tier.name,
                             price: tier.price,
+                            adminFee: tier.adminFee,
                             tagline: tier.description ?? 'Membership plan',
                             iconColor: iconColor,
                             icon: icon,
                             features: tier.features,
-                            isActive: false, // You can implement logic to check if this is the current plan
+                            isActive: false,
                             onPressed: () {
                               Get.toNamed('/membership-form', arguments: tier);
                             },
@@ -271,6 +272,7 @@ class _PlanCard extends StatelessWidget {
   final int index;
   final String title;
   final String price;
+  final String? adminFee;
   final String tagline;
   final Color iconColor;
   final IconData icon;
@@ -282,6 +284,7 @@ class _PlanCard extends StatelessWidget {
     required this.index,
     required this.title,
     required this.price,
+    this.adminFee,
     required this.tagline,
     required this.iconColor,
     required this.icon,
@@ -318,16 +321,16 @@ class _PlanCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (isActive) const SizedBox(height: 10),
-                // Header row
+                // Header row — icon + title/tagline on left, price on right ONLY for card 0
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(6), // Decreased from 10
+                      padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         color: iconColor.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(10), // Decreased from 12
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(icon, color: iconColor, size: 20), // Decreased from 26
+                      child: Icon(icon, color: iconColor, size: 20),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -343,34 +346,72 @@ class _PlanCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: price,
-                            style: TextStyle(
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.normal,
-                              color: isActive
-                                  ? AppColors.primaryBlack
-                                  : iconColor,
+                    // Price shown on right ONLY for index == 0 (OHC Privilege)
+                    if (index == 0)
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: price,
+                              style: TextStyle(
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.normal,
+                                color: isActive
+                                    ? AppColors.primaryBlack
+                                    : iconColor,
+                              ),
                             ),
-                          ),
-                          const TextSpan(
-                            text: '/yr',
-                            style: TextStyle(
-                              fontSize: 12.0,
-                              color: AppColors.greyText,
+                            const TextSpan(
+                              text: '/yr',
+                              style: TextStyle(
+                                fontSize: 12.0,
+                                color: AppColors.greyText,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
+
+                // For cards other than OHC Privilege: price + adminFee left-aligned below header
+                if (index != 0) ...[
+                  const SizedBox(height: 10),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: price,
+                          style: TextStyle(
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.normal,
+                            color: isActive ? AppColors.primaryBlack : iconColor,
+                          ),
+                        ),
+                        const TextSpan(
+                          text: '/yr',
+                          style: TextStyle(
+                            fontSize: 12.0,
+                            color: AppColors.greyText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (adminFee != null && adminFee!.isNotEmpty)
+                    Text(
+                      'Admin Fee: $adminFee',
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        color: AppColors.greyText,
+                      ),
+                    ),
+                ],
+
                 const SizedBox(height: 16),
                 const Divider(height: 1, color: AppColors.borderGrey),
                 const SizedBox(height: 14),
+
                 // Features
                 ...features.map(
                   (f) => Padding(

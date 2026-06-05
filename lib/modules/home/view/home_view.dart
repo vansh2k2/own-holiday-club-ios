@@ -98,15 +98,18 @@ class HomeView extends GetView<HomeController> {
                     // 1. Background Hero Carousel (Height 440)
                     Obx(() {
                       final slides = controller.heroSlides;
-                      final List<Map<String, dynamic>> fallback = [{
-                        'image': 'assets/images/maldives_private_shore.png',
-                        'subtitle': 'ELITE EXPERIENCE',
-                        'title1': 'Dream',
-                        'title2': 'Wedding Package',
-                        'description': 'Create unforgettable memories with our premium luxury travel packages.',
-                      }];
-                      final List<Map<String, dynamic>> slideList = slides.isEmpty ? fallback : slides.toList();
-                      return _HeroCarousel(slides: slideList);
+                      if (slides.isEmpty) {
+                        return const SizedBox(
+                          height: 440,
+                          width: double.infinity,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.primaryYellow,
+                            ),
+                          ),
+                        );
+                      }
+                      return _HeroCarousel(slides: slides.toList());
                     }),
 
                     // 2. Foreground Content (Starts with overlap)
@@ -199,7 +202,7 @@ class HomeView extends GetView<HomeController> {
                                             imagePath: 'assets/images/membership_3d.png',
                                             bgColor: const Color(0xFFF3E5F5), // Soft light pastel lavender
                                             textColor: const Color(0xFF4A148C), // Dark indigo purple
-                                            onTap: () => MembershipBottomSheet.show(context),
+                                            onTap: () => Get.toNamed(Routes.MEMBERSHIP_INFO),
                                           ),
                                         ],
                                       ),
@@ -1020,7 +1023,10 @@ class _HeroCarouselState extends State<_HeroCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final firstSlide = widget.slides.isNotEmpty ? widget.slides.first : <String, dynamic>{};
+    final currentSlide = widget.slides.isNotEmpty ? widget.slides[_currentPage] : <String, dynamic>{};
+    final title1 = currentSlide['title1'] ?? '';
+    final title2 = currentSlide['title2'] ?? '';
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -1064,9 +1070,9 @@ class _HeroCarouselState extends State<_HeroCarousel> {
             ),
           ),
         ),
-        // Hero text — identical layout to original, but static
+        // Hero text — identical layout to original, but dynamic and matching website styles
         Positioned(
-          top: 30,
+          top: 35,
           left: 20,
           right: 20,
           child: IgnorePointer(
@@ -1074,46 +1080,57 @@ class _HeroCarouselState extends State<_HeroCarousel> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 FadeInDown(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryYellow,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      _stripHtml(firstSlide['subtitle'] ?? 'ELITE EXPERIENCE').toUpperCase(),
-                      style: const TextStyle(
-                        color: AppColors.primaryBlack,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                FadeInLeft(
-                  delay: const Duration(milliseconds: 150),
+                  key: ValueKey('sub_$_currentPage'),
                   child: Text(
-                    '${_stripHtml(firstSlide['title1'] ?? '')}\n${_stripHtml(firstSlide['title2'] ?? '')}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 44,
-                      fontWeight: FontWeight.w600,
-                      height: 1.1,
+                    _stripHtml(currentSlide['subtitle'] ?? 'Welcome to Luxury'),
+                    style: GoogleFonts.greatVibes(
+                      color: const Color(0xFFF59E0B),
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
                 FadeInLeft(
+                  key: ValueKey('title_$_currentPage'),
+                  delay: const Duration(milliseconds: 150),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (title1.isNotEmpty)
+                        Text(
+                          _stripHtml(title1).toUpperCase(),
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 34,
+                            fontWeight: FontWeight.bold,
+                            height: 1.15,
+                          ),
+                        ),
+                      if (title2.isNotEmpty)
+                        Text(
+                          _stripHtml(title2).toUpperCase(),
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFFF59E0B),
+                            fontSize: 34,
+                            fontWeight: FontWeight.bold,
+                            height: 1.15,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                FadeInLeft(
+                  key: ValueKey('desc_$_currentPage'),
                   delay: const Duration(milliseconds: 250),
                   child: Text(
-                    _stripHtml(firstSlide['description'] ?? ''),
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.88),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      height: 1.5,
+                    _stripHtml(currentSlide['description'] ?? ''),
+                    style: GoogleFonts.inter(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      height: 1.4,
                     ),
                   ),
                 ),

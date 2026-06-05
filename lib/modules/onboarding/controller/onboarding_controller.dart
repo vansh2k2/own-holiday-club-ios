@@ -10,17 +10,17 @@ class OnboardingController extends GetxController {
 
   final List<Map<String, String>> onboardingData = [
     {
-      'image': 'assets/images/crousal.png',
+      'image': 'assets/images/onboarding_new_1.jpg',
       'title': 'Smart Booking',
       'description': 'Experience the future of travel with our fast and secure 3D booking engine.',
     },
     {
-      'image': 'assets/images/service_flight.png',
+      'image': 'assets/images/onboarding_new_2.jpg',
       'title': 'Elite Getaways',
       'description': 'Escape to the world\'s most secluded and beautiful private shores.',
     },
     {
-      'image': 'assets/images/service_hotel.png',
+      'image': 'assets/images/onboarding_new_3.jpg',
       'title': 'Heritage Stays',
       'description': 'Live like royalty in our handpicked selection of exotic palace hotels.',
     },

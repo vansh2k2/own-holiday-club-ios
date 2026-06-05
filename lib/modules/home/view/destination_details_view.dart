@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:own_holiday_app/data/repository/auth_repo.dart';
+import 'package:own_holiday_app/data/repository/service_repo.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
@@ -10,6 +11,7 @@ import '../controller/home_controller.dart';
 import 'package:own_holiday_app/utils/app_colors.dart';
 import 'package:own_holiday_app/widgets/skeleton.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:http/http.dart' as http;
 
 class DestinationDetailsView extends StatefulWidget {
   const DestinationDetailsView({super.key});
@@ -151,14 +153,7 @@ class _DestinationDetailsViewState extends State<DestinationDetailsView> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Text(
-                        _stripHtml(destination['fullDescription'] ?? destination['location'] ?? 'Explore the beauty of this destination with OHC.'),
-                        style: GoogleFonts.montserrat(
-                          fontSize: 13.0,
-                          color: AppColors.primaryBlack,
-                          height: 1.6,
-                        ),
-                      ),
+                      _buildHtmlContent(destination['fullDescription'] ?? destination['location'] ?? 'Explore the beauty of this destination with OHC.'),
                       if (destination['highlights'] != null && destination['highlights'] is List && (destination['highlights'] as List).isNotEmpty) ...[
                         const SizedBox(height: 28),
                         Text(
@@ -576,6 +571,116 @@ class _DestinationDetailsViewState extends State<DestinationDetailsView> {
     );
   }
 
+  Widget _buildHtmlContent(String html) {
+    if (html.isEmpty) return const SizedBox.shrink();
+
+    // Clean up &nbsp; and normalize line breaks/spacings
+    String cleaned = html.replaceAll('&nbsp;', ' ').trim();
+
+    List<Widget> widgets = [];
+    
+    // A simple yet very effective parser for Quill/CKEditor HTML:
+    // Split the text into segments by common block tags: <p>, <h3>, <h2>, <li>, <ul>, <div>, <br>
+    final regExp = RegExp(r'<(/?[a-zA-Z0-9]+)[^>]*>');
+    Iterable<RegExpMatch> matches = regExp.allMatches(cleaned);
+    
+    int lastIndex = 0;
+    String currentTag = '';
+    
+    void addSegment(String text, String tag) {
+      String trimmed = text.replaceAll(RegExp(r'<[^>]*>'), '').trim();
+      if (trimmed.isEmpty) return;
+
+      if (tag == 'li') {
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('• ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryYellow)),
+                Expanded(
+                  child: Text(
+                    trimmed,
+                    style: GoogleFonts.montserrat(
+                      fontSize: 13.0,
+                      color: AppColors.primaryBlack,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      } else if (tag == 'h1' || tag == 'h2' || tag == 'h3' || tag == 'h4' || tag == 'h5' || tag == 'h6' || tag == 'strong') {
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(top: 16, bottom: 8),
+            child: Text(
+              trimmed,
+              style: GoogleFonts.montserrat(
+                fontSize: 15.0,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryBlack,
+              ),
+            ),
+          ),
+        );
+      } else {
+        // Normal paragraph
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              trimmed,
+              textAlign: TextAlign.justify,
+              style: GoogleFonts.montserrat(
+                fontSize: 13.0,
+                color: AppColors.primaryBlack,
+                height: 1.6,
+              ),
+            ),
+          ),
+        );
+      }
+    }
+
+    for (final match in matches) {
+      String tag = match.group(1) ?? '';
+      int start = match.start;
+      
+      if (start > lastIndex) {
+        String text = cleaned.substring(lastIndex, start);
+        addSegment(text, currentTag);
+      }
+      
+      if (!tag.startsWith('/')) {
+        currentTag = tag.toLowerCase();
+      } else {
+        currentTag = '';
+      }
+      lastIndex = match.end;
+    }
+    
+    if (lastIndex < cleaned.length) {
+      String text = cleaned.substring(lastIndex);
+      addSegment(text, currentTag);
+    }
+
+    if (widgets.isEmpty) {
+      return Text(
+        _stripHtml(html),
+        style: GoogleFonts.montserrat(fontSize: 13.0, color: AppColors.primaryBlack, height: 1.6),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: widgets,
+    );
+  }
+
   Widget _buildBottomAction() {
     return Positioned(
       bottom: 20,
@@ -685,6 +790,10 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
   final _emailCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _msgCtrl = TextEditingController();
+  final _locationCtrl = TextEditingController();
+  List<String> _locationSuggestions = [];
+  bool _isLoadingSuggestions = false;
+  Timer? _debounceTimer;
   DateTime? _checkIn;
   DateTime? _checkOut;
   int _adults = 2;
@@ -692,6 +801,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
   bool _isSubmitting = false;
 
   final AuthRepo _authRepo = Get.find<AuthRepo>();
+  final ServiceRepo _serviceRepo = Get.find<ServiceRepo>();
   bool _isMobileOtpSent = false;
   bool _isMobileVerified = false;
   bool _isSendingMobileOtp = false;
@@ -737,6 +847,71 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
     ],
   };
 
+  @override
+  void dispose() {
+    _locationCtrl.dispose();
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchLocationSuggestions(String query) async {
+    if (query.length < 2) {
+      setState(() {
+        _locationSuggestions = [];
+      });
+      return;
+    }
+
+    setState(() => _isLoadingSuggestions = true);
+
+    try {
+      final response = await http.post(
+        Uri.parse('https://places.googleapis.com/v1/places:autocomplete'),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': 'AIzaSyDarNwOH5Gfi1KseDZ82fkh2b0wn66uudg',
+        },
+        body: jsonEncode({
+          'input': query,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['suggestions'] != null) {
+          final List suggestions = data['suggestions'];
+          setState(() {
+            _locationSuggestions = suggestions
+                .map((s) => s['placePrediction']['text']['text'].toString())
+                .toList();
+          });
+        } else {
+          setState(() {
+            _locationSuggestions = [];
+          });
+        }
+      } else {
+        setState(() {
+          _locationSuggestions = [];
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching suggestions: $e");
+      setState(() {
+        _locationSuggestions = [];
+      });
+    } finally {
+      setState(() => _isLoadingSuggestions = false);
+    }
+  }
+
+  void _onLocationChanged(String val) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      _fetchLocationSuggestions(val);
+    });
+  }
+
   Future<void> _sendMobileOtp() async {
     final mobile = _phoneCtrl.text;
     if (mobile.length != 10) {
@@ -746,7 +921,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
     }
     setState(() => _isSendingMobileOtp = true);
     try {
-      final response = await _authRepo.sendMobileOtp(mobile);
+      final response = await _serviceRepo.sendMobileOtp(mobile);
       if (response.statusCode == 200) {
         setState(() {
           _tempMobile = mobile;
@@ -778,7 +953,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
     if (_tempMobile == null) return;
     setState(() => _isVerifyingMobileOtp = true);
     try {
-      final response = await _authRepo.verifyMobileOtp(_tempMobile!, otp);
+      final response = await _serviceRepo.verifyMobileOtp(_tempMobile!, otp);
       if (response.statusCode == 200) {
         setState(() {
           _isMobileVerified = true;
@@ -912,6 +1087,27 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                 Icons.phone_outlined,
                 keyboard: TextInputType.phone,
                 readOnly: _isMobileVerified,
+                headerTrailing: (_isMobileOtpSent && !_isMobileVerified)
+                    ? InkWell(
+                        onTap: () {
+                          setState(() {
+                            _isMobileOtpSent = false;
+                            if (_tempMobile != null) {
+                              _phoneCtrl.text = _tempMobile!;
+                            }
+                          });
+                        },
+                        child: Text(
+                          'EDIT NUMBER',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 9.5,
+                            color: AppColors.primaryYellow,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      )
+                    : null,
                 suffixIcon: Padding(
                   padding: const EdgeInsets.only(right: 4),
                   child: _isMobileVerified
@@ -998,6 +1194,8 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                   Expanded(child: _buildCounter('Kids', _kids, (v) => setState(() => _kids = v))),
                 ],
               ),
+              const SizedBox(height: 12),
+              _buildLocationAutocompleteField(),
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -1211,18 +1409,46 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
   }
 
   Widget _buildCounter(String label, int val, Function(int) onChange) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label.toUpperCase(),
+    Widget titleWidget;
+    if (label == 'Kids') {
+      titleWidget = RichText(
+        text: TextSpan(
+          text: 'KIDS ',
           style: GoogleFonts.montserrat(
             fontSize: 10.0,
             fontWeight: FontWeight.w600,
             color: const Color(0xFF8F9399),
             letterSpacing: 1.0,
           ),
+          children: [
+            TextSpan(
+              text: '(BELOW 10 YEARS)',
+              style: GoogleFonts.montserrat(
+                fontSize: 10.0,
+                fontWeight: FontWeight.w600,
+                color: Colors.red,
+                letterSpacing: 1.0,
+              ),
+            ),
+          ],
         ),
+      );
+    } else {
+      titleWidget = Text(
+        label.toUpperCase(),
+        style: GoogleFonts.montserrat(
+          fontSize: 10.0,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF8F9399),
+          letterSpacing: 1.0,
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        titleWidget,
         const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1309,8 +1535,8 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
           onTap: isLoading ? null : onTap,
           borderRadius: BorderRadius.circular(8),
           child: Container(
-            height: 36,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
               color: bgColor ?? AppColors.primaryYellow,
               borderRadius: BorderRadius.circular(8),
@@ -1318,8 +1544,8 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
             alignment: Alignment.center,
             child: isLoading
                 ? const SizedBox(
-                    height: 14,
-                    width: 14,
+                    height: 12,
+                    width: 12,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       color: AppColors.primaryBlack,
@@ -1328,7 +1554,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                 : Text(
                     label,
                     style: GoogleFonts.montserrat(
-                      fontSize: 11.0,
+                      fontSize: 9.5,
                       fontWeight: FontWeight.bold,
                       color: textColor ?? AppColors.primaryBlack,
                       letterSpacing: 0.5,
@@ -1340,12 +1566,105 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
     );
   }
 
+  Widget _buildLocationAutocompleteField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'LOCATION',
+          style: GoogleFonts.montserrat(
+            fontSize: 10.0,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF8F9399),
+            letterSpacing: 1.0,
+          ),
+        ),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: _locationCtrl,
+          style: GoogleFonts.montserrat(fontSize: 13.0, fontWeight: FontWeight.normal, color: AppColors.primaryBlack),
+          decoration: InputDecoration(
+            hintText: 'Search location...',
+            hintStyle: GoogleFonts.montserrat(fontSize: 13.0, color: AppColors.greyText),
+            prefixIcon: const Icon(Icons.location_on_outlined, size: 16, color: AppColors.greyText),
+            suffixIcon: _isLoadingSuggestions
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryYellow),
+                    ),
+                  )
+                : null,
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: AppColors.lightGrey, width: 1.0),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: AppColors.lightGrey, width: 1.0),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.primaryYellow, width: 1.5),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          ),
+          onChanged: _onLocationChanged,
+          validator: (v) => v!.isEmpty ? 'Required' : null,
+        ),
+        if (_locationSuggestions.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Container(
+            constraints: const BoxConstraints(maxHeight: 200),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.lightGrey, width: 1.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ListView.separated(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              itemCount: _locationSuggestions.length,
+              separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFEDEFF2)),
+              itemBuilder: (context, index) {
+                final suggestion = _locationSuggestions[index];
+                return ListTile(
+                  dense: true,
+                  title: Text(
+                    suggestion,
+                    style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.primaryBlack),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _locationCtrl.text = suggestion;
+                      _locationSuggestions = [];
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   void _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    // Mobile OTP verification is optional for mobile app
     if (!_isMobileVerified) {
-      Get.snackbar('Verification Required', 'Please verify your phone number with OTP first.',
-          backgroundColor: AppColors.brownAccent, colorText: Colors.white);
-      return;
+      debugPrint("Mobile number not verified, proceeding anyway.");
     }
     if (!_isEmailVerified && !_isEmailSkipped) {
       Get.snackbar('Verification Required', 'Please verify your email address or skip verification.',
@@ -1354,6 +1673,10 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
     }
     if (_checkIn == null || _checkOut == null) {
       Get.snackbar('Error', 'Please select dates', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+      return;
+    }
+    if (_locationCtrl.text.isEmpty) {
+      Get.snackbar('Error', 'Please select a location.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
       return;
     }
     if (_budget.isEmpty) {
@@ -1372,6 +1695,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
       'checkOut': _checkOut!.toIso8601String(),
       'adults': _adults,
       'kids': _kids,
+      'location': _locationCtrl.text,
       'travelType': _travelType,
       'budget': _budget,
       'message': _msgCtrl.text,

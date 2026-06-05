@@ -677,6 +677,10 @@ class HomeView extends GetView<HomeController> {
                   Get.back();
                   Get.toNamed(Routes.PRIVACY_POLICY);
                 }),
+                _DrawerItem(Icons.info_outline_rounded, 'About Us', () {
+                  Get.back();
+                  Get.toNamed(Routes.ABOUT_US);
+                }),
                 const SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),

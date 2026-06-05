@@ -121,10 +121,9 @@ class MembershipFormController extends GetxController {
 
   Future<void> nextStep() async {
     if (currentStep.value == 1) {
+      // Mobile OTP verification is optional for mobile app
       if (!isMobileVerified.value) {
-        Get.snackbar('Verification Required', 'Please verify your mobile number first',
-            backgroundColor: AppColors.primaryYellow, colorText: Colors.white);
-        return;
+        debugPrint("Mobile number not verified, proceeding anyway.");
       }
       if (!isEmailVerified.value) {
         Get.snackbar('Verification Required', 'Please verify your email address first',

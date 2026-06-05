@@ -8,15 +8,27 @@ class ApiClient extends GetxService {
 
   ApiClient({required this.baseUrl});
 
+  Map<String, String> _getHeaders(Map<String, String>? customHeaders) {
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      'X-Source': 'mobile-app',
+    };
+    if (customHeaders != null) {
+      headers.addAll(customHeaders);
+    }
+    return headers;
+  }
+
   Future<http.Response> getData(String uri, {Map<String, String>? headers}) async {
     try {
       print('\n--- 🚀 API REQUEST [GET] ---');
       print('🔗 URL: $uri');
-      if (headers != null) print('📑 HEADERS: ${jsonEncode(headers)}');
+      final reqHeaders = _getHeaders(headers);
+      print('📑 HEADERS: ${jsonEncode(reqHeaders)}');
       
       http.Response response = await client.get(
         Uri.parse(uri),
-        headers: headers ?? {'Content-Type': 'application/json'},
+        headers: reqHeaders,
       );
       
       print('✅ STATUS CODE: ${response.statusCode}');
@@ -34,12 +46,13 @@ class ApiClient extends GetxService {
       print('\n--- 🚀 API REQUEST [POST] ---');
       print('🔗 URL: $uri');
       print('📝 BODY: ${jsonEncode(body)}');
-      if (headers != null) print('📑 HEADERS: ${jsonEncode(headers)}');
+      final reqHeaders = _getHeaders(headers);
+      print('📑 HEADERS: ${jsonEncode(reqHeaders)}');
 
       http.Response response = await client.post(
         Uri.parse(uri),
         body: jsonEncode(body),
-        headers: headers ?? {'Content-Type': 'application/json'},
+        headers: reqHeaders,
       );
       
       print('✅ STATUS CODE: ${response.statusCode}');
@@ -57,12 +70,13 @@ class ApiClient extends GetxService {
       print('\n--- 🚀 API REQUEST [PUT] ---');
       print('🔗 URL: $uri');
       print('📝 BODY: ${jsonEncode(body)}');
-      if (headers != null) print('📑 HEADERS: ${jsonEncode(headers)}');
+      final reqHeaders = _getHeaders(headers);
+      print('📑 HEADERS: ${jsonEncode(reqHeaders)}');
 
       http.Response response = await client.put(
         Uri.parse(uri),
         body: jsonEncode(body),
-        headers: headers ?? {'Content-Type': 'application/json'},
+        headers: reqHeaders,
       );
       
       print('✅ STATUS CODE: ${response.statusCode}');
@@ -79,11 +93,12 @@ class ApiClient extends GetxService {
     try {
       print('\n--- 🚀 API REQUEST [DELETE] ---');
       print('🔗 URL: $uri');
-      if (headers != null) print('📑 HEADERS: ${jsonEncode(headers)}');
+      final reqHeaders = _getHeaders(headers);
+      print('📑 HEADERS: ${jsonEncode(reqHeaders)}');
 
       http.Response response = await client.delete(
         Uri.parse(uri),
-        headers: headers ?? {'Content-Type': 'application/json'},
+        headers: reqHeaders,
       );
       
       print('✅ STATUS CODE: ${response.statusCode}');

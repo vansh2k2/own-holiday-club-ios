@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:own_holiday_app/utils/app_colors.dart';
 import 'package:own_holiday_app/data/repository/service_repo.dart';
 import 'package:own_holiday_app/modules/home/controller/home_controller.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
 
 class GeneralEnquiryForm extends StatefulWidget {
   const GeneralEnquiryForm({super.key});
@@ -22,6 +24,10 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
   final _mobileOtpController = TextEditingController();
   final _emailOtpController = TextEditingController();
   final _messageController = TextEditingController();
+  final _locationController = TextEditingController();
+  List<String> _locationSuggestions = [];
+  bool _isLoadingSuggestions = false;
+  Timer? _debounceTimer;
 
   int _step = 1;
   bool _isSubmitting = false;
@@ -92,6 +98,71 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
     if (_destinations.isEmpty) {
       _fetchDestinations();
     }
+  }
+
+  @override
+  void dispose() {
+    _locationController.dispose();
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchLocationSuggestions(String query) async {
+    if (query.length < 2) {
+      setState(() {
+        _locationSuggestions = [];
+      });
+      return;
+    }
+
+    setState(() => _isLoadingSuggestions = true);
+
+    try {
+      final response = await http.post(
+        Uri.parse('https://places.googleapis.com/v1/places:autocomplete'),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': 'AIzaSyDarNwOH5Gfi1KseDZ82fkh2b0wn66uudg',
+        },
+        body: jsonEncode({
+          'input': query,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['suggestions'] != null) {
+          final List suggestions = data['suggestions'];
+          setState(() {
+            _locationSuggestions = suggestions
+                .map((s) => s['placePrediction']['text']['text'].toString())
+                .toList();
+          });
+        } else {
+          setState(() {
+            _locationSuggestions = [];
+          });
+        }
+      } else {
+        setState(() {
+          _locationSuggestions = [];
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching suggestions: $e");
+      setState(() {
+        _locationSuggestions = [];
+      });
+    } finally {
+      setState(() => _isLoadingSuggestions = false);
+    }
+  }
+
+  void _onLocationChanged(String val) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      _fetchLocationSuggestions(val);
+    });
   }
 
   Future<void> _fetchDestinations() async {
@@ -240,9 +311,9 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
       Get.snackbar("Error", "Please enter your full name.");
       return;
     }
+    // Mobile OTP verification is optional for mobile app
     if (!_isMobileVerified) {
-      Get.snackbar("Error", "Please verify your mobile number with OTP first.");
-      return;
+      debugPrint("Mobile number not verified, proceeding anyway.");
     }
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
@@ -263,6 +334,10 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
       Get.snackbar("Error", "Please select a destination.");
       return;
     }
+    if (_locationController.text.trim().isEmpty) {
+      Get.snackbar("Error", "Please enter a specific location.");
+      return;
+    }
     if (_checkInDate == null || _checkOutDate == null) {
       Get.snackbar("Error", "Please select check-in and check-out dates.");
       return;
@@ -280,6 +355,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
         "email": _emailController.text.trim(),
         "phone": _phoneController.text.trim(),
         "location": _selectedDestination,
+        "searchLocation": _locationController.text.trim(),
         "locationType": _locationType,
         "checkIn": DateFormat('yyyy-MM-dd').format(_checkInDate!),
         "checkOut": DateFormat('yyyy-MM-dd').format(_checkOutDate!),
@@ -489,8 +565,8 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                       const SizedBox(width: 10),
                       _isMobileVerified
                           ? Container(
-                              height: 48,
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              height: 40,
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFECFDF5),
                                 borderRadius: BorderRadius.circular(10),
@@ -499,22 +575,22 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                               alignment: Alignment.center,
                               child: Text(
                                 "✓ VERIFIED",
-                                style: GoogleFonts.poppins(color: const Color(0xFF047857), fontSize: 11, fontWeight: FontWeight.bold),
+                                style: GoogleFonts.poppins(color: const Color(0xFF047857), fontSize: 10, fontWeight: FontWeight.bold),
                               ),
                             )
                           : SizedBox(
-                              height: 48,
+                              height: 40,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF0D1321),
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10),
                                 ),
                                 onPressed: _isSendingMobileOtp ? null : _sendMobileOtp,
                                 child: _isSendingMobileOtp
-                                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                    : Text(_isMobileOtpSent ? "RESEND" : "GET OTP", style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.bold)),
+                                    ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                    : Text(_isMobileOtpSent ? "RESEND" : "GET OTP", style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.bold)),
                               ),
                             ),
                     ],
@@ -591,8 +667,8 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                       const SizedBox(width: 10),
                       (_isEmailVerified || _isEmailSkipped)
                           ? Container(
-                              height: 48,
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              height: 40,
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
                               decoration: BoxDecoration(
                                 color: _isEmailVerified ? const Color(0xFFECFDF5) : const Color(0xFFF1F3F5),
                                 borderRadius: BorderRadius.circular(10),
@@ -603,7 +679,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                                 _isEmailVerified ? "✓ VERIFIED" : "SKIPPED",
                                 style: GoogleFonts.poppins(
                                   color: _isEmailVerified ? const Color(0xFF047857) : const Color(0xFF495057),
-                                  fontSize: 11,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -618,12 +694,12 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                                       backgroundColor: const Color(0xFF0D1321),
                                       foregroundColor: Colors.white,
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      padding: const EdgeInsets.symmetric(horizontal: 10),
                                     ),
                                     onPressed: _isSendingEmailOtp ? null : _sendEmailOtp,
                                     child: _isSendingEmailOtp
                                         ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                        : Text(_isEmailOtpSent ? "RESEND" : "GET OTP", style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.bold)),
+                                        : Text(_isEmailOtpSent ? "RESEND" : "GET OTP", style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.bold)),
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -636,7 +712,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                                   ),
                                   child: Text(
                                     "Skip",
-                                    style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey[600], decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+                                    style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey[600], decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ],
@@ -777,6 +853,8 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                           },
                         ),
                   const SizedBox(height: 18),
+                  _buildLocationAutocompleteField(),
+                  const SizedBox(height: 18),
 
                   // Check-in & Check-out Dates
                   Row(
@@ -847,6 +925,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                             _buildLabel("ADULTS"),
                             DropdownButtonFormField<int>(
                               value: _adults,
+                              isExpanded: true,
                               dropdownColor: Colors.white,
                               style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF0D1321)),
                               decoration: _inputDecoration(null, Icons.people_outline_rounded),
@@ -869,6 +948,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                             _buildLabel("KIDS (BELOW 10 YEARS)"),
                             DropdownButtonFormField<int>(
                               value: _kids,
+                              isExpanded: true,
                               dropdownColor: Colors.white,
                               style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF0D1321)),
                               decoration: _inputDecoration(null, Icons.child_care_rounded),
@@ -1048,6 +1128,33 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
   }
 
   Widget _buildLabel(String text) {
+    if (text == "KIDS (BELOW 10 YEARS)") {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 6.0, left: 2.0),
+        child: RichText(
+          text: TextSpan(
+            text: "KIDS ",
+            style: GoogleFonts.poppins(
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[700],
+              letterSpacing: 1.0,
+            ),
+            children: [
+              TextSpan(
+                text: "(BELOW 10 YEARS)",
+                style: GoogleFonts.poppins(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.only(bottom: 6.0, left: 2.0),
       child: Text(
@@ -1091,8 +1198,8 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
     return InkWell(
       onTap: onTap,
       child: Container(
-        height: 48,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        height: 40,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
@@ -1100,12 +1207,12 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_month_outlined, size: 20, color: Colors.grey),
-            const SizedBox(width: 10),
+            const Icon(Icons.calendar_month_outlined, size: 18, color: Colors.grey),
+            const SizedBox(width: 8),
             Text(
               label,
               style: GoogleFonts.poppins(
-                fontSize: 13,
+                fontSize: 11.5,
                 fontWeight: hasDate ? FontWeight.bold : FontWeight.normal,
                 color: hasDate ? const Color(0xFF0D1321) : Colors.grey,
               ),
@@ -1116,14 +1223,100 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
     );
   }
 
+  Widget _buildLocationAutocompleteField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel("SPECIFIC LOCATION"),
+        TextFormField(
+          controller: _locationController,
+          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF0D1321)),
+          decoration: InputDecoration(
+            hintText: "Search precise location...",
+            hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 12.5),
+            prefixIcon: const Icon(Icons.location_on_outlined, size: 20, color: Colors.grey),
+            suffixIcon: _isLoadingSuggestions
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFC8102E)),
+                    ),
+                  )
+                : null,
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            isDense: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Color(0xFFCED4DA)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Color(0xFFCED4DA)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: AppColors.primaryYellow, width: 1.5),
+            ),
+          ),
+          onChanged: _onLocationChanged,
+          validator: (v) => v!.isEmpty ? "Required" : null,
+        ),
+        if (_locationSuggestions.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Container(
+            constraints: const BoxConstraints(maxHeight: 200),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFCED4DA)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ListView.separated(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              itemCount: _locationSuggestions.length,
+              separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFEDEFF2)),
+              itemBuilder: (context, index) {
+                final suggestion = _locationSuggestions[index];
+                return ListTile(
+                  dense: true,
+                  title: Text(
+                    suggestion,
+                    style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF0D1321)),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _locationController.text = suggestion;
+                      _locationSuggestions = [];
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   InputDecoration _inputDecoration(String? hint, IconData icon) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 12.5),
-      prefixIcon: Icon(icon, size: 20, color: Colors.grey),
+      hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 11.5),
+      prefixIcon: Icon(icon, size: 18, color: Colors.grey),
       filled: true,
       fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+      contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       isDense: true,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
@@ -1135,7 +1328,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFF0D1321), width: 1.5),
+        borderSide: const BorderSide(color: AppColors.primaryYellow, width: 1.5),
       ),
     );
   }

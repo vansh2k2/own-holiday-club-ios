@@ -19,6 +19,10 @@ class ServiceRepo {
     return await apiClient.getData(ApiConstants.serviceDetails);
   }
 
+  Future<http.Response> getServiceDetailsBySlug(String slug) async {
+    return await apiClient.getData("${ApiConstants.baseUrl}/service-details/slug/$slug");
+  }
+
   Future<http.Response> getServiceDetails(String slug) async {
     return await apiClient.getData("${ApiConstants.serviceDetails}?slug=$slug");
   }

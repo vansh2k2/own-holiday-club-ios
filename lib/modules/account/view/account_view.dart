@@ -124,103 +124,7 @@ class AccountView extends GetView<AccountController> {
                         Icons.info_outline_rounded, 
                         'About Own Holiday', 
                         'Learn more about our services',
-                        onTap: () {
-                          Get.bottomSheet(
-                            Container(
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                              ),
-                              padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Container(
-                                        width: 40,
-                                        height: 4,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.borderGrey,
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 20),
-                                    Text(
-                                      "ABOUT OWN HOLIDAY CLUB",
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: const Color(0xFFC8102E),
-                                        letterSpacing: 1.5,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      "A New Era of Luxury Travels",
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w800,
-                                        color: const Color(0xFF0D1321),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      "Own Holiday Club is a premier vacation ownership and luxury travel brand designed to provide unforgettable holiday experiences. Our members enjoy access to selected premium resort destinations, curated travel packages, customized booking services, and top-tier hospitality support worldwide.",
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 13,
-                                        color: const Color(0xFF495057),
-                                        height: 1.5,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      "Contact Us",
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: const Color(0xFF0D1321),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.email_outlined, size: 16, color: Colors.grey),
-                                        const SizedBox(width: 8),
-                                        Text("support@ownholidayclub.com", style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.phone_outlined, size: 16, color: Colors.grey),
-                                        const SizedBox(width: 8),
-                                        Text("+91 1800-XXX-XXXX", style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700])),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 24),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFF0D1321),
-                                          foregroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                          padding: const EdgeInsets.symmetric(vertical: 12),
-                                        ),
-                                        onPressed: () => Get.back(),
-                                        child: Text("CLOSE", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            isScrollControlled: true,
-                          );
-                        },
+                        onTap: () => Get.toNamed(Routes.ABOUT_US),
                       ),
                       _buildMenuItem(
                         Icons.help_outline_rounded, 
@@ -372,6 +276,10 @@ class AccountView extends GetView<AccountController> {
                 _DrawerItem(Icons.privacy_tip_outlined, 'Privacy Policy', () {
                   Get.back();
                   Get.toNamed(Routes.PRIVACY_POLICY);
+                }),
+                _DrawerItem(Icons.info_outline_rounded, 'About Us', () {
+                  Get.back();
+                  Get.toNamed(Routes.ABOUT_US);
                 }),
               ],
             ),

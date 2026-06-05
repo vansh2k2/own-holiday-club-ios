@@ -30,6 +30,7 @@ import 'package:own_holiday_app/modules/home/view/destination_details_view.dart'
 import 'package:own_holiday_app/modules/home/view/service_details_view.dart';
 import 'package:own_holiday_app/modules/home/view/services_reel_view.dart';
 import 'package:own_holiday_app/modules/account/view/privacy_policy_view.dart';
+import 'package:own_holiday_app/modules/account/view/about_us_view.dart';
 
 part 'app_routes.dart';
 
@@ -140,6 +141,10 @@ class AppPages {
     GetPage(
       name: _Paths.PRIVACY_POLICY,
       page: () => const PrivacyPolicyView(),
+    ),
+    GetPage(
+      name: _Paths.ABOUT_US,
+      page: () => const AboutUsView(),
     ),
   ];
 }

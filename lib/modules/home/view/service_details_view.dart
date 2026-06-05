@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:animate_do/animate_do.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:own_holiday_app/data/repository/auth_repo.dart';
+import 'package:own_holiday_app/data/repository/service_repo.dart';
 import 'dart:async';
 import '../controller/home_controller.dart';
 import 'package:own_holiday_app/utils/app_colors.dart';
 import 'package:own_holiday_app/widgets/skeleton.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:http/http.dart' as http;
 
 class ServiceDetailsView extends StatefulWidget {
   const ServiceDetailsView({super.key});
@@ -24,22 +25,55 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   Timer? _timer;
+  List<Map<String, dynamic>> _subCategories = [];
+  bool _isLoadingSubCategories = false;
 
   @override
   void initState() {
     super.initState();
     final Map<String, dynamic> args = Get.arguments ?? {};
-    
-    // Try to find full details from the controller's cache
+
     final fullDetail = controller.allServicesWithGallery.firstWhere(
       (s) => s['serviceTitle'] == args['title'] || s['slug'] == args['title'].toString().toLowerCase().replaceAll(' ', '-'),
       orElse: () => <String, dynamic>{},
     );
 
     // Merge: args (card info) + fullDetail (gallery, fullDesc, etc.)
+    // Keep args['subServices'] if fullDetail['subServices'] is null or empty
+    final mergedSubServices = (fullDetail['subServices'] is List && (fullDetail['subServices'] as List).isNotEmpty)
+        ? fullDetail['subServices']
+        : args['subServices'];
+
     service = {...args, ...fullDetail};
-    
+    if (mergedSubServices != null) {
+      service['subServices'] = mergedSubServices;
+    }
+
     _startAutoScroll();
+
+    // Pre-populate from already-merged subServices (instant)
+    final existing = service['subServices'];
+    if (existing is List && existing.isNotEmpty) {
+      _subCategories = existing
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+      print('✅ [SERVICE DETAILS] Pre-loaded ${_subCategories.length} subServices from merged data');
+    }
+
+    // Resolve slug — try multiple possible field names, fallback to slugified title
+    final slug = (service['slug'] ??
+            service['serviceSlug'] ??
+            service['service_slug'] ??
+            service['title']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-') ??
+            '')
+        .toString()
+        .trim();
+
+    print('🚀 [SERVICE DETAILS] service keys: ${service.keys.toList()}');
+    print('🚀 [SERVICE DETAILS] resolved slug: "$slug"');
+
+    if (slug.isNotEmpty) _fetchSubCategories(slug);
   }
 
   void _startAutoScroll() {
@@ -64,6 +98,71 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
     _timer?.cancel();
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchSubCategories(String slug) async {
+    // ── Build URL and log everything ────────────────────────
+    final url = 'https://api.ownholidayclub.com/api/service-details/slug/$slug';
+    print('╔══════════════════════════════════════════════════════════');
+    print('║ 🔍 [SERVICE CATEGORIES] API REQUEST');
+    print('║ 🔗 URL : $url');
+    print('║ 📋 ALL SERVICE KEYS: ${service.keys.toList()}');
+    print('║ 📋 SLUG USED       : $slug');
+    print('╚══════════════════════════════════════════════════════════');
+
+    if (mounted) setState(() => _isLoadingSubCategories = true);
+    try {
+      final response = await controller.serviceRepo.getServiceDetailsBySlug(slug);
+      print('╔══════════════════════════════════════════════════════════');
+      print('║ ✅ [SERVICE CATEGORIES] API RESPONSE');
+      print('║ 📊 STATUS CODE : ${response.statusCode}');
+      print('║ 📦 BODY        : ${response.body}');
+      print('╚══════════════════════════════════════════════════════════');
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        if (body['success'] == true && body['data'] != null) {
+          final data = body['data'];
+          print('║ 🗝️  DATA KEYS: ${(data as Map).keys.toList()}');
+          // Primary key is subServices — fallback to others
+          final raw = data['subServices'] ??
+              data['serviceDetails'] ??
+              data['categories'] ??
+              data['subCategories'] ??
+              data['items'] ??
+              data['types'] ??
+              data['details'] ??
+              [];
+          print('║ 📋 RAW CATEGORIES COUNT: ${raw is List ? raw.length : "not a list"}');
+            if (raw is List && raw.isNotEmpty && mounted) {
+              setState(() => _subCategories = raw
+                  .whereType<Map>()
+                  .map((e) => Map<String, dynamic>.from(e))
+                  .toList());
+              print('║ ✅ Loaded ${_subCategories.length} sub-categories from API');
+              if (_subCategories.isNotEmpty) {
+                print('🔍 FIRST SUB-CATEGORY KEYS: ${_subCategories[0].keys.toList()}');
+                print('🔍 FIRST SUB-CATEGORY DETAILS: ${_subCategories[0]}');
+                for (int k = 0; k < _subCategories.length; k++) {
+                  print('📷 Sub-cat $k: Title: "${_subCategories[k]['title']}" | Image: "${_subCategories[k]['image']}" | Thumbnail: "${_subCategories[k]['thumbnail']}" | ExploreImage: "${_subCategories[k]['exploreImage']}" | Icon: "${_subCategories[k]['icon']}"');
+                }
+              }
+            } else {
+            print('║ ⚠️  subServices empty or missing — keeping pre-loaded data (${_subCategories.length} items)');
+          }
+        } else {
+          print('║ ⚠️  success=false or data=null. Full body: ${response.body}');
+        }
+      } else {
+        print('║ ❌ Non-200 status: ${response.statusCode}');
+        print('║ 📦 ERROR BODY: ${response.body}');
+      }
+    } catch (e, st) {
+      print('║ ❌ EXCEPTION: $e');
+      print('║ 📋 STACKTRACE: $st');
+    } finally {
+      if (mounted) setState(() => _isLoadingSubCategories = false);
+    }
   }
 
   String _stripHtml(String html) {
@@ -150,21 +249,7 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
                           height: 1.6,
                         ),
                       ),
-                      if (service['highlights'] != null && service['highlights'] is List && (service['highlights'] as List).isNotEmpty) ...[
-                        const SizedBox(height: 28),
-                        Text(
-                          "What's Included",
-                          style: GoogleFonts.montserrat(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryBlack,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        for (var hl in (service['highlights'] as List))
-                          if (hl.toString().trim().isNotEmpty)
-                            _buildHighlightItem(Icons.check_circle_outline_rounded, hl.toString(), 'Included Benefit'),
-                      ],
+                      // Highlights / What's Included section removed by user request
                       if (service['properties'] != null && service['properties'] is List && (service['properties'] as List).isNotEmpty) ...[
                         const SizedBox(height: 28),
                         Text(
@@ -188,6 +273,70 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
                           ),
                         ),
                       ],
+                      // ── Sub-Categories Grid ─────────────────────
+                      if (_isLoadingSubCategories) ...[
+                        const SizedBox(height: 28),
+                        const Center(child: CircularProgressIndicator(color: AppColors.primaryYellow)),
+                      ] else if (_subCategories.isNotEmpty) ...[
+                        const SizedBox(height: 32),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppColors.primaryYellow.withOpacity(0.18),
+                                AppColors.primaryYellow.withOpacity(0.02),
+                                Colors.transparent,
+                              ],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            border: const Border(
+                              left: BorderSide(color: AppColors.primaryYellow, width: 4),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.grid_view_rounded,
+                                color: AppColors.primaryBlack,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  '${service['serviceTitle'] ?? service['title'] ?? 'SERVICE'} CATEGORIES',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 13.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primaryBlack,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Discover our curated sub-services and experiences tailored specifically to your needs.',
+                          style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.greyText, height: 1.4),
+                        ),
+                        const SizedBox(height: 16),
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 0.78,
+                          ),
+                          itemCount: _subCategories.length,
+                          itemBuilder: (ctx, i) => _buildSubCategoryCard(_subCategories[i], i),
+                        ),
+                      ],
                       const SizedBox(height: 32),
                     ],
                   ),
@@ -198,6 +347,102 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
           _buildBottomAction(),
           _buildBackButton(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSubCategoryCard(Map<String, dynamic> cat, int index) {
+    final title = cat['title']?.toString() ?? cat['name']?.toString() ?? 'Category';
+    final desc = _stripHtml(cat['shortDescription']?.toString() ?? cat['description']?.toString() ?? '');
+    final imageUrl = cat['image']?.toString() ?? cat['thumbnail']?.toString() ?? '';
+    final num = (index + 1).toString().padLeft(2, '0');
+    return GestureDetector(
+      onTap: () => _showServiceInquiryForm(context, preSelectedCategory: title),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Number badge
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+              child: Container(
+                width: 24, height: 24,
+                decoration: const BoxDecoration(
+                  color: AppColors.primaryBlack,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(num, style: GoogleFonts.montserrat(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white)),
+              ),
+            ),
+            // Title
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.montserrat(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppColors.primaryBlack),
+              ),
+            ),
+            const SizedBox(height: 2),
+            // Description
+            if (desc.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  desc,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.montserrat(fontSize: 9.5, color: AppColors.greyText, height: 1.3),
+                ),
+              ),
+            const Spacer(),
+            // Image with fallback
+            Builder(
+              builder: (context) {
+                final fallbackUrl = service['image']?.toString() ?? '';
+                final finalImageUrl = imageUrl.isNotEmpty ? imageUrl : fallbackUrl;
+                return ClipRRect(
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                  child: SizedBox(
+                    height: 80,
+                    width: double.infinity,
+                    child: finalImageUrl.isNotEmpty && finalImageUrl.startsWith('http')
+                        ? CachedNetworkImage(
+                            imageUrl: finalImageUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (c, u) => const Skeleton(),
+                            errorWidget: (c, u, e) => fallbackUrl.isNotEmpty && fallbackUrl.startsWith('http') && finalImageUrl != fallbackUrl
+                                ? CachedNetworkImage(
+                                    imageUrl: fallbackUrl,
+                                    fit: BoxFit.cover,
+                                    placeholder: (c, u) => const Skeleton(),
+                                    errorWidget: (c, u, e) => Container(color: Colors.grey.shade100),
+                                  )
+                                : Container(color: Colors.grey.shade100),
+                          )
+                        : (finalImageUrl.isNotEmpty
+                            ? Image.asset(finalImageUrl, fit: BoxFit.cover)
+                            : Container(color: Colors.grey.shade100)),
+                  ),
+                );
+              }
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -334,12 +579,16 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
     );
   }
 
-  void _showServiceInquiryForm(BuildContext context) {
+  void _showServiceInquiryForm(BuildContext context, {String? preSelectedCategory}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ServiceInquiryFormSheet(service: service),
+      builder: (context) => ServiceInquiryFormSheet(
+        service: service,
+        serviceCategories: _subCategories,
+        preSelectedCategory: preSelectedCategory,
+      ),
     );
   }
 
@@ -476,60 +725,7 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
     );
   }
 
-  Widget _buildHighlightItem(IconData icon, String title, String subtitle) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFB300).withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 18, color: const Color(0xFFFFB300)),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 13.0,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryBlack,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 11.0,
-                    color: AppColors.greyText,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildPropertyCard(dynamic prop) {
     if (prop == null || prop is! Map) return const SizedBox.shrink();
@@ -661,7 +857,15 @@ class WaveClipper extends CustomClipper<Path> {
 
 class ServiceInquiryFormSheet extends StatefulWidget {
   final Map<String, dynamic> service;
-  const ServiceInquiryFormSheet({super.key, required this.service});
+  final List<Map<String, dynamic>> serviceCategories;
+  final String? preSelectedCategory;
+
+  const ServiceInquiryFormSheet({
+    super.key,
+    required this.service,
+    this.serviceCategories = const [],
+    this.preSelectedCategory,
+  });
 
   @override
   State<ServiceInquiryFormSheet> createState() => _ServiceInquiryFormSheetState();
@@ -673,13 +877,17 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
   final _emailCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _msgCtrl = TextEditingController();
+  final _locationCtrl = TextEditingController();
+  List<String> _locationSuggestions = [];
+  bool _isLoadingSuggestions = false;
+  Timer? _debounceTimer;
   DateTime? _checkIn;
   DateTime? _checkOut;
   int _adults = 2;
-  int _kids = 0;
   bool _isSubmitting = false;
 
   final AuthRepo _authRepo = Get.find<AuthRepo>();
+  final ServiceRepo _serviceRepo = Get.find<ServiceRepo>();
   bool _isMobileOtpSent = false;
   bool _isMobileVerified = false;
   bool _isSendingMobileOtp = false;
@@ -693,38 +901,101 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
   bool _isEmailSkipped = false;
   String? _tempEmail;
 
-  String _travelType = 'Holiday';
+  String? _selectedService;
+  String? _selectedCategory;
   String _budget = '';
 
-  final List<String> _travelTypes = ['Holiday', 'Events', 'Wedding', 'Outing'];
+  @override
+  void initState() {
+    super.initState();
+    _selectedCategory = widget.preSelectedCategory;
+    if (_selectedCategory != null) {
+      _selectedService = widget.service['title'] ?? widget.service['serviceTitle'];
+    }
+  }
 
-  final Map<String, List<Map<String, String>>> _budgetOptions = {
-    'Holiday': [
-      {'label': 'Below 5,000 (per day)', 'value': 'Below 5000'},
-      {'label': '5,000 - 7,000 (per day)', 'value': '5000 - 7000'},
-      {'label': '7,000 - 10,000 (per day)', 'value': '7000 - 10000'},
-      {'label': 'Above 10,000 (per day)', 'value': 'Above 10000'},
-    ],
-    'Events': [
-      {'label': 'Below 1,000 (per person)', 'value': 'Below 1000'},
-      {'label': '1,000 - 2,000 (per person)', 'value': '1000 - 2000'},
-      {'label': '2,000 - 3,000 (per person)', 'value': '2000 - 3000'},
-      {'label': 'Above 3,000 (per person)', 'value': 'Above 3000'},
-    ],
-    'Wedding': [
-      {'label': 'Below 1,500 (per person)', 'value': 'Below 1500'},
-      {'label': '1,500 - 2,500 (per person)', 'value': '1500 - 2500'},
-      {'label': '2,500 - 3,500 (per person)', 'value': '2500 - 3500'},
-      {'label': 'Above 3,500 (per person)', 'value': 'Above 3500'},
-    ],
-    'Outing': [
-      {'label': 'Below 500 (per person)', 'value': 'Below 500'},
-      {'label': '1,000 - 2,000 (per person)', 'value': '1000 - 2000'},
-      {'label': '3,000 - 5,000 (per person)', 'value': '3000 - 5000'},
-      {'label': 'Above 5,000 (per person)', 'value': 'Above 5000'},
-    ],
-  };
+  @override
+  void dispose() {
+    _locationCtrl.dispose();
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
 
+  Future<void> _fetchLocationSuggestions(String query) async {
+    if (query.length < 2) {
+      setState(() {
+        _locationSuggestions = [];
+      });
+      return;
+    }
+
+    setState(() => _isLoadingSuggestions = true);
+
+    try {
+      final response = await http.post(
+        Uri.parse('https://places.googleapis.com/v1/places:autocomplete'),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': 'AIzaSyDarNwOH5Gfi1KseDZ82fkh2b0wn66uudg',
+        },
+        body: jsonEncode({
+          'input': query,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['suggestions'] != null) {
+          final List suggestions = data['suggestions'];
+          setState(() {
+            _locationSuggestions = suggestions
+                .map((s) => s['placePrediction']['text']['text'].toString())
+                .toList();
+          });
+        } else {
+          setState(() {
+            _locationSuggestions = [];
+          });
+        }
+      } else {
+        setState(() {
+          _locationSuggestions = [];
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching suggestions: $e");
+      setState(() {
+        _locationSuggestions = [];
+      });
+    } finally {
+      setState(() => _isLoadingSuggestions = false);
+    }
+  }
+
+  void _onLocationChanged(String val) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      _fetchLocationSuggestions(val);
+    });
+  }
+
+  List<Map<String, dynamic>> get _currentCategories {
+    if (_selectedService == null) {
+      return [];
+    }
+    final homeCtrl = Get.find<HomeController>();
+    final svc = homeCtrl.services.firstWhere(
+      (s) => s['title'] == _selectedService || s['serviceTitle'] == _selectedService,
+      orElse: () => <String, dynamic>{},
+    );
+    if (svc.isNotEmpty && svc['subServices'] is List) {
+      return List<Map<String, dynamic>>.from(svc['subServices']);
+    }
+    if (_selectedService == (widget.service['title'] ?? widget.service['serviceTitle'])) {
+      return widget.serviceCategories;
+    }
+    return [];
+  }
   Future<void> _sendMobileOtp() async {
     final mobile = _phoneCtrl.text;
     if (mobile.length != 10) {
@@ -734,7 +1005,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
     }
     setState(() => _isSendingMobileOtp = true);
     try {
-      final response = await _authRepo.sendMobileOtp(mobile);
+      final response = await _serviceRepo.sendMobileOtp(mobile);
       if (response.statusCode == 200) {
         setState(() {
           _tempMobile = mobile;
@@ -766,7 +1037,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
     if (_tempMobile == null) return;
     setState(() => _isVerifyingMobileOtp = true);
     try {
-      final response = await _authRepo.verifyMobileOtp(_tempMobile!, otp);
+      final response = await _serviceRepo.verifyMobileOtp(_tempMobile!, otp);
       if (response.statusCode == 200) {
         setState(() {
           _isMobileVerified = true;
@@ -880,19 +1151,19 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                   decoration: BoxDecoration(color: AppColors.borderGrey, borderRadius: BorderRadius.circular(2)),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               Text(
                 'Service Inquiry',
-                style: GoogleFonts.montserrat(fontSize: 16.0, fontWeight: FontWeight.bold, color: AppColors.primaryBlack),
+                style: GoogleFonts.montserrat(fontSize: 15.0, fontWeight: FontWeight.bold, color: AppColors.primaryBlack),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 3),
               Text(
                 'Complete the details below to inquire about ${widget.service['title']}.',
-                style: GoogleFonts.montserrat(fontSize: 12.0, color: AppColors.greyText),
+                style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.greyText),
               ),
-              const SizedBox(height: 16),
-              _buildField(_nameCtrl, 'Full Name', 'Enter your full name', Icons.person_outline),
               const SizedBox(height: 12),
+              _buildField(_nameCtrl, 'Full Name', 'Enter your full name', Icons.person_outline),
+              const SizedBox(height: 8),
               _buildField(
                 _phoneCtrl,
                 'Phone Number',
@@ -900,6 +1171,27 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                 Icons.phone_outlined,
                 keyboard: TextInputType.phone,
                 readOnly: _isMobileVerified,
+                headerTrailing: (_isMobileOtpSent && !_isMobileVerified)
+                    ? InkWell(
+                        onTap: () {
+                          setState(() {
+                            _isMobileOtpSent = false;
+                            if (_tempMobile != null) {
+                              _phoneCtrl.text = _tempMobile!;
+                            }
+                          });
+                        },
+                        child: Text(
+                          'EDIT NUMBER',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 9.5,
+                            color: AppColors.primaryYellow,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      )
+                    : null,
                 suffixIcon: Padding(
                   padding: const EdgeInsets.only(right: 4),
                   child: _isMobileVerified
@@ -913,7 +1205,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                         ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               _buildField(
                 _emailCtrl,
                 'Email Address',
@@ -936,7 +1228,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                             child: Text(
                               'VERIFY INSTEAD',
                               style: GoogleFonts.montserrat(
-                                fontSize: 10.0,
+                                fontSize: 9.5,
                                 color: AppColors.primaryYellow,
                                 fontWeight: FontWeight.bold,
                                 decoration: TextDecoration.underline,
@@ -948,7 +1240,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                             child: Text(
                               'SKIP VERIFICATION',
                               style: GoogleFonts.montserrat(
-                                fontSize: 10.0,
+                                fontSize: 9.5,
                                 color: AppColors.greyText,
                                 fontWeight: FontWeight.bold,
                                 decoration: TextDecoration.underline,
@@ -970,44 +1262,43 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                             ),
                           )),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Row(
                 children: [
-                  Expanded(child: _buildDateField('Preferred Date', 'mm/dd/yyyy', _checkIn, (d) => setState(() => _checkIn = d))),
+                  Expanded(child: _buildDateField('Check-In Date', 'mm/dd/yyyy', _checkIn, (d) => setState(() => _checkIn = d))),
                   const SizedBox(width: 12),
-                  Expanded(child: _buildDateField('End Date', 'mm/dd/yyyy', _checkOut, (d) => setState(() => _checkOut = d), isOptional: true)),
+                  Expanded(child: _buildDateField('Check-Out Date', 'mm/dd/yyyy', _checkOut, (d) => setState(() => _checkOut = d), isOptional: true)),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Row(
                 children: [
-                  Expanded(child: _buildCounter('Expected Guests', _adults, (v) => setState(() => _adults = v))),
+                  Expanded(child: _buildCounter('No of Guests', _adults, (v) => setState(() => _adults = v))),
                   const SizedBox(width: 12),
-                  Expanded(child: _buildCounter('Staff/Misc', _kids, (v) => setState(() => _kids = v), isOptional: true)),
+                  Expanded(child: _buildLocationAutocompleteField()),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
+              // Select Service + Budget (side by side)
               Row(
                 children: [
                   Expanded(
                     child: _buildDropdown(
-                      'Travel Type',
+                      'Select Service',
                       DropdownButton<String>(
-                        value: _travelType,
+                        value: _selectedService,
                         isExpanded: true,
-                        hint: Text('Select...', style: GoogleFonts.montserrat(fontSize: 13.0, color: AppColors.greyText)),
+                        hint: Text('Select a service...', style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.greyText.withValues(alpha: 0.6)), overflow: TextOverflow.ellipsis),
                         icon: const Icon(Icons.arrow_drop_down, color: AppColors.greyText),
-                        items: _travelTypes.map((type) {
-                          return DropdownMenuItem<String>(
-                            value: type,
-                            child: Text(type, style: GoogleFonts.montserrat(fontSize: 13.0, color: AppColors.primaryBlack)),
-                          );
+                        items: Get.find<HomeController>().services.map((svc) {
+                          final n = svc['title']?.toString() ?? '';
+                          return DropdownMenuItem<String>(value: n, child: Text(n, style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.primaryBlack), overflow: TextOverflow.ellipsis));
                         }).toList(),
                         onChanged: (val) {
                           if (val != null) {
                             setState(() {
-                              _travelType = val;
-                              _budget = '';
+                              _selectedService = val;
+                              _selectedCategory = null;
                             });
                           }
                         },
@@ -1017,33 +1308,55 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildDropdown(
-                      'Estimated Budget',
+                      'Budget',
                       DropdownButton<String>(
                         value: _budget.isEmpty ? null : _budget,
                         isExpanded: true,
-                        hint: Text('Select...', style: GoogleFonts.montserrat(fontSize: 12.0, color: AppColors.greyText), overflow: TextOverflow.ellipsis),
+                        hint: Text('Select a budget...', style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.greyText.withValues(alpha: 0.6)), overflow: TextOverflow.ellipsis),
                         icon: const Icon(Icons.arrow_drop_down, color: AppColors.greyText),
-                        items: (_budgetOptions[_travelType] ?? []).map((opt) {
-                          return DropdownMenuItem<String>(
-                            value: opt['value'],
-                            child: Text(opt['label']!, style: GoogleFonts.montserrat(fontSize: 11.0, color: AppColors.primaryBlack), overflow: TextOverflow.ellipsis),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            setState(() {
-                              _budget = val;
-                            });
-                          }
-                        },
+                        items: const [
+                          DropdownMenuItem(value: 'Below 50,000', child: Text('Below 50,000', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5))),
+                          DropdownMenuItem(value: '50,000 - 1,00,000', child: Text('50K – 1 Lakh', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5))),
+                          DropdownMenuItem(value: '1,00,000 - 5,00,000', child: Text('1L – 5 Lakhs', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5))),
+                          DropdownMenuItem(value: '5,00,000 - 10,00,000', child: Text('5L – 10 Lakhs', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5))),
+                          DropdownMenuItem(value: 'Above 10,00,000', child: Text('Above 10 Lakhs', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5))),
+                        ],
+                        onChanged: (val) { if (val != null) setState(() => _budget = val); },
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
+              // Service Category full-width dropdown
+              _buildDropdown(
+                'Service Category',
+                DropdownButton<String>(
+                  value: _selectedCategory,
+                  isExpanded: true,
+                  hint: Text(
+                    _selectedService == null ? 'Select a service first...' : 'Select a category...',
+                    style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.greyText.withValues(alpha: 0.6)),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  icon: const Icon(Icons.arrow_drop_down, color: AppColors.greyText),
+                  items: _currentCategories.map((cat) {
+                    final n = cat['title']?.toString() ?? cat['name']?.toString() ?? '';
+                    return DropdownMenuItem<String>(
+                      value: n,
+                      child: Text(n, style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.primaryBlack), overflow: TextOverflow.ellipsis),
+                    );
+                  }).toList(),
+                  onChanged: _selectedService == null
+                      ? null
+                      : (val) {
+                          if (val != null) setState(() => _selectedCategory = val);
+                        },
+                ),
+              ),
+              const SizedBox(height: 8),
               _buildField(_msgCtrl, 'Special Requests', 'Any specific needs or occasions...', Icons.message_outlined, maxLines: 2, isOptional: true),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -1102,26 +1415,26 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
             Text(
               isOptional ? '${label.toUpperCase()} (OPTIONAL)' : label.toUpperCase(),
               style: GoogleFonts.montserrat(
-                fontSize: 10.0,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF8F9399),
-                letterSpacing: 1.0,
+                fontSize: 9.0,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF4A4A4A),
+                letterSpacing: 0.8,
               ),
             ),
             if (headerTrailing != null) headerTrailing,
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         TextFormField(
           controller: ctrl,
           keyboardType: keyboard,
           maxLines: maxLines,
           readOnly: readOnly,
-          style: GoogleFonts.montserrat(fontSize: 13.0, fontWeight: FontWeight.normal, color: AppColors.primaryBlack),
+          style: GoogleFonts.montserrat(fontSize: 12.0, fontWeight: FontWeight.normal, color: AppColors.primaryBlack),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: GoogleFonts.montserrat(fontSize: 13.0, color: AppColors.greyText),
-            prefixIcon: Icon(icon, size: 16, color: AppColors.greyText),
+            hintStyle: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.greyText.withValues(alpha: 0.6)),
+            prefixIcon: Icon(icon, size: 14, color: AppColors.greyText),
             suffixIcon: suffixIcon,
             filled: true,
             fillColor: Colors.white,
@@ -1137,7 +1450,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: AppColors.primaryYellow, width: 1.5),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           ),
           validator: isOptional ? null : (v) => v!.isEmpty ? 'Required' : null,
         ),
@@ -1152,13 +1465,13 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
         Text(
           isOptional ? '${label.toUpperCase()} (OPTIONAL)' : label.toUpperCase(),
           style: GoogleFonts.montserrat(
-            fontSize: 10.0,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF8F9399),
-            letterSpacing: 1.0,
+            fontSize: 9.0,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF4A4A4A),
+            letterSpacing: 0.8,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         InkWell(
           onTap: () async {
             final d = await showDatePicker(
@@ -1170,7 +1483,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
             if (d != null) onSelect(d);
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(color: AppColors.lightGrey, width: 1.0),
@@ -1178,14 +1491,14 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.greyText),
+                const Icon(Icons.calendar_today_outlined, size: 14, color: AppColors.greyText),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     date == null ? hint : DateFormat('MM/dd/yyyy').format(date),
                     style: GoogleFonts.montserrat(
-                        fontSize: 13.0,
-                        color: date == null ? AppColors.greyText : AppColors.primaryBlack,
+                        fontSize: date == null ? 11.5 : 12.0,
+                        color: date == null ? AppColors.greyText.withValues(alpha: 0.6) : AppColors.primaryBlack,
                         fontWeight: FontWeight.normal),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1205,15 +1518,15 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
         Text(
           isOptional ? '${label.toUpperCase()} (OPTIONAL)' : label.toUpperCase(),
           style: GoogleFonts.montserrat(
-            fontSize: 10.0,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF8F9399),
-            letterSpacing: 1.0,
+            fontSize: 9.0,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF4A4A4A),
+            letterSpacing: 0.8,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5.5),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(color: AppColors.lightGrey, width: 1.0),
@@ -1226,10 +1539,10 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                 (label.contains('Adult') || label.contains('Guest'))
                     ? Icons.person_outline
                     : Icons.child_care_outlined,
-                size: 16,
+                size: 14,
                 color: AppColors.greyText,
               ),
-              Text(val.toString(), style: GoogleFonts.montserrat(fontSize: 13.0, fontWeight: FontWeight.normal, color: AppColors.primaryBlack)),
+              Text(val.toString(), style: GoogleFonts.montserrat(fontSize: 12.0, fontWeight: FontWeight.normal, color: AppColors.primaryBlack)),
               Row(
                 children: [
                   InkWell(
@@ -1263,15 +1576,15 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
         Text(
           label.toUpperCase(),
           style: GoogleFonts.montserrat(
-            fontSize: 10.0,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF8F9399),
-            letterSpacing: 1.0,
+            fontSize: 9.0,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF4A4A4A),
+            letterSpacing: 0.8,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0.5),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(color: AppColors.lightGrey, width: 1.0),
@@ -1297,8 +1610,8 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
           onTap: isLoading ? null : onTap,
           borderRadius: BorderRadius.circular(8),
           child: Container(
-            height: 36,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
               color: bgColor ?? AppColors.primaryYellow,
               borderRadius: BorderRadius.circular(8),
@@ -1306,8 +1619,8 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
             alignment: Alignment.center,
             child: isLoading
                 ? const SizedBox(
-                    height: 14,
-                    width: 14,
+                    height: 12,
+                    width: 12,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       color: AppColors.primaryBlack,
@@ -1316,7 +1629,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                 : Text(
                     label,
                     style: GoogleFonts.montserrat(
-                      fontSize: 11.0,
+                      fontSize: 9.5,
                       fontWeight: FontWeight.bold,
                       color: textColor ?? AppColors.primaryBlack,
                       letterSpacing: 0.5,
@@ -1328,12 +1641,108 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
     );
   }
 
+  Widget _buildLocationAutocompleteField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'LOCATION',
+          style: GoogleFonts.montserrat(
+            fontSize: 9.0,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF4A4A4A),
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 4),
+        TextFormField(
+          controller: _locationCtrl,
+          style: GoogleFonts.montserrat(fontSize: 13.0, fontWeight: FontWeight.normal, color: AppColors.primaryBlack),
+          decoration: InputDecoration(
+            hintText: 'Search location...',
+            hintStyle: GoogleFonts.montserrat(fontSize: 13.0, color: AppColors.greyText),
+            prefixIcon: const Icon(Icons.location_on_outlined, size: 16, color: AppColors.greyText),
+            suffixIcon: _isLoadingSuggestions
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryYellow),
+                    ),
+                  )
+                : null,
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: AppColors.lightGrey, width: 1.0),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: AppColors.lightGrey, width: 1.0),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.primaryYellow, width: 1.5),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          ),
+          onChanged: _onLocationChanged,
+          validator: (v) => v!.isEmpty ? 'Required' : null,
+        ),
+        if (_locationSuggestions.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Container(
+            constraints: const BoxConstraints(maxHeight: 200),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.lightGrey, width: 1.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ListView.separated(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              itemCount: _locationSuggestions.length,
+              separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFEDEFF2)),
+              itemBuilder: (context, index) {
+                final suggestion = _locationSuggestions[index];
+                return ListTile(
+                  dense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                  title: Text(
+                    suggestion,
+                    style: GoogleFonts.montserrat(fontSize: 11, color: AppColors.primaryBlack),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _locationCtrl.text = suggestion;
+                      _locationSuggestions = [];
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   void _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    // Mobile OTP verification is optional for mobile app
     if (!_isMobileVerified) {
-      Get.snackbar('Verification Required', 'Please verify your phone number with OTP first.',
-          backgroundColor: AppColors.brownAccent, colorText: Colors.white);
-      return;
+      debugPrint("Mobile number not verified, proceeding anyway.");
     }
     if (!_isEmailVerified && !_isEmailSkipped) {
       Get.snackbar('Verification Required', 'Please verify your email address or skip verification.',
@@ -1341,7 +1750,19 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
       return;
     }
     if (_checkIn == null) {
-      Get.snackbar('Error', 'Please select a preferred date', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+      Get.snackbar('Error', 'Please select a check-in date.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+      return;
+    }
+    if (_locationCtrl.text.isEmpty) {
+      Get.snackbar('Error', 'Please select a location.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+      return;
+    }
+    if (_selectedService == null || _selectedService!.isEmpty) {
+      Get.snackbar('Error', 'Please select a service.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+      return;
+    }
+    if (_selectedCategory == null || _selectedCategory!.isEmpty) {
+      Get.snackbar('Error', 'Please select a service category.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
       return;
     }
     if (_budget.isEmpty) {
@@ -1359,8 +1780,9 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
       'checkIn': _checkIn!.toIso8601String(),
       'checkOut': _checkOut?.toIso8601String(),
       'adults': _adults,
-      'kids': _kids,
-      'travelType': _travelType,
+      'location': _locationCtrl.text,
+      'service': _selectedService ?? '',
+      'serviceCategory': _selectedCategory ?? '',
       'budget': _budget,
       'message': _msgCtrl.text,
       'serviceName': widget.service['title'] ?? 'Unknown',

@@ -330,10 +330,6 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
   }
 
   Future<void> _submitEnquiry() async {
-    if (_selectedDestination.isEmpty) {
-      Get.snackbar("Error", "Please select a destination.");
-      return;
-    }
     if (_locationController.text.trim().isEmpty) {
       Get.snackbar("Error", "Please enter a specific location.");
       return;
@@ -354,9 +350,9 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
         "name": _nameController.text.trim(),
         "email": _emailController.text.trim(),
         "phone": _phoneController.text.trim(),
-        "location": _selectedDestination,
+        "location": _locationController.text.trim(),
         "searchLocation": _locationController.text.trim(),
-        "locationType": _locationType,
+        "locationType": "General",
         "checkIn": DateFormat('yyyy-MM-dd').format(_checkInDate!),
         "checkOut": DateFormat('yyyy-MM-dd').format(_checkOutDate!),
         "adults": _adults,
@@ -799,59 +795,6 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                 ] else ...[
                   // --- STEP 2: HOLIDAY PREFERENCES ---
                   
-                  // Destination Location type toggle
-                  _buildLabel("DESTINATION LOCATION"),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _toggleButton(
-                          "DOMESTIC", 
-                          isSelected: _locationType == 'Domestic',
-                          onTap: () => setState(() {
-                            _locationType = 'Domestic';
-                            _selectedDestination = '';
-                          }),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _toggleButton(
-                          "INTERNATIONAL", 
-                          isSelected: _locationType == 'International',
-                          onTap: () => setState(() {
-                            _locationType = 'International';
-                            _selectedDestination = '';
-                          }),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Destination Dropdown
-                  _isLoadingDestinations
-                      ? const Center(child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ))
-                      : DropdownButtonFormField<String>(
-                          value: _selectedDestination.isEmpty ? null : _selectedDestination,
-                          dropdownColor: Colors.white,
-                          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF0D1321)),
-                          decoration: _inputDecoration("-- Select Destination --", Icons.location_on_outlined),
-                          items: filteredLocations.map<DropdownMenuItem<String>>((dest) {
-                            final name = dest['name'] ?? dest['title'] ?? 'Unknown';
-                            return DropdownMenuItem<String>(
-                              value: name,
-                              child: Text(name),
-                            );
-                          }).toList(),
-                          onChanged: (val) {
-                            setState(() {
-                              _selectedDestination = val ?? '';
-                            });
-                          },
-                        ),
                   const SizedBox(height: 18),
                   _buildLocationAutocompleteField(),
                   const SizedBox(height: 18),

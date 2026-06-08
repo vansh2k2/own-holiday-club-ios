@@ -231,7 +231,7 @@ class _PrivacyPolicyViewState extends State<PrivacyPolicyView> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'I/We hereby agree and authorize Rigel Hospitality Services Pvt.Ltd. and all of its divisions, affiliates, subsidiaries, related parties and other group companies (collectively the “RHSPL Group”) to access my/our basic data / contact details provided herewith, i.e. name, address, telephone number, e-mail address, birth date and / or anniversary date. I/We hereby consent to, agree and acknowledge that any of the RHSPL Group may call/ email/ SMS me/us. I/We consent to being assigned a unique identity within the RHSPL Group. If I/We wish to stop receiving communications, I/We will write to membership@ownholidayclub.com with “OPT OUT CCD” as Subject.',
+                      'I/We hereby agree and authorize Rigel Hospitality Services Pvt.Ltd. and all of its divisions, affiliates, subsidiaries, related parties and other group companies (collectively the “RHSPL Group”) to access my/our basic data / contact details provided herewith, i.e. name, address, telephone number, e-mail address, birth date and / or anniversary date. I/ We hereby consent to, agree and acknowledge that any of the RHSPL Group may call/ email/ SMS me/us... I/We provide the details herein at my/our sole discretion and confirm that no RHSPL Entity shall be held responsible or liable for any claim arising out of accessing or using my/our basic data. I/We consent to being assigned a unique identity within the RHSPL Group. I/We also agree that if at any point of time, I/We wish to stop receiving such communications from RHSPL Entity, I/We will call at Rigel Hospitality Services Pvt. Ltd designated call center number and register my/our preference or write to membership@ownholidayclub.com with “OPT OUT CCD” as Subject.',
                       style: GoogleFonts.montserrat(
                         fontSize: 11.5,
                         color: AppColors.primaryBlack.withOpacity(0.85),
@@ -244,7 +244,7 @@ class _PrivacyPolicyViewState extends State<PrivacyPolicyView> {
               
               _buildSection(
                 'For our Web Site Users',
-                'RHSPL is committed to high standards of data security. We offer SSL encryption, the industry standard security measures for transactions made over the Internet. We primarily use "cookies" to help us determine which service and support information is appropriate to your computer and to facilitate your use of our instant transactions area.\n\nLinks from our web site: Our web site contains links to other sites. Please be aware that we are not responsible for the content or privacy practices of such other sites.',
+                'RHSPL is committed to high standards of data security. We offer SSL encryption, the industry standard security measures for transactions made over the Internet. We primarily use "cookies" to help us determine which service and support information is appropriate to your computer and to facilitate your use of our instant transactions area. Accepting a cookie in no way gives us access to your computer or any personal information about you.\n\nLinks from our web site: Our web site contains links to other sites. Please be aware that we are not responsible for the content or privacy practices of such other sites.',
               ),
               
               _buildSection(
@@ -254,58 +254,108 @@ class _PrivacyPolicyViewState extends State<PrivacyPolicyView> {
               
               _buildSection(
                 'Storage, Security & Access',
-                'Storage and security: RHSPL endeavours to take all reasonable steps to keep secure any information which we hold about you. We use a sophisticated computer data network, and all access is password controlled.\n\nTransfer overseas: As a global business, RHSPL may use overseas facilities to process or back up information. We will only transfer information overseas as authorized by the applicable Privacy laws.\n\nAccessing & Changing: You are welcome to access your record or ask to change/delete inaccurate data by contacting us. For security purposes, confirmation of your identity will be required.',
+                'Storage and security: RHSPL endeavours to take all reasonable steps to keep secure any information which we hold about you. We use a sophisticated computer data network, and all access is password controlled. Data is secured in a secure data centre environment, totally private and not accessible over the Internet. Under no circumstances, including negligence, shall RHSPL have any liability in respect of personal information provided by you on this website.\n\nTransfer overseas: As a global business, RHSPL may use overseas facilities to process or back up information. We will only transfer information overseas as authorized by the applicable Privacy laws.\n\nAccessing & Changing: You are welcome to access your record or ask to change/delete inaccurate data by contacting us. For security purposes, confirmation of your identity will be required. Our file will usually be made available to you within 14 days.',
               ),
 
-              // Contact & Grievance Card
+              // Contact & Grievance Card (Dark UI)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.all(24),
                 margin: const EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.borderGrey.withOpacity(0.5)),
+                  color: const Color(0xFF0D1321), // Dark navy blue
+                  borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
                     ),
                   ],
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Stack(
                   children: [
-                    Row(
+                    // Shield Watermark
+                    Positioned(
+                      top: 10,
+                      right: -10,
+                      child: Icon(
+                        Icons.shield_outlined,
+                        size: 150,
+                        color: Colors.white.withOpacity(0.03),
+                      ),
+                    ),
+                    // Content
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            color: AppColors.softYellow,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.contact_support_outlined, size: 18, color: AppColors.primaryYellow),
-                        ),
-                        const SizedBox(width: 10),
                         Text(
                           'Data Grievance & Contact',
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 22.0,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Any complaints, requests, or concerns with regards to the use, processing, or disclosure of information provided by you may be taken up with our designated grievance redressal officer.',
                           style: GoogleFonts.montserrat(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryBlack,
+                            fontSize: 12.0,
+                            color: Colors.white.withOpacity(0.7),
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        // Contact Info
+                        _buildDarkContactItem(
+                          Icons.email_outlined,
+                          'EMAIL',
+                          'membership@ownholidayclub.com',
+                        ),
+                        const SizedBox(height: 16),
+                        _buildDarkContactItem(
+                          Icons.phone_outlined,
+                          'PHONE',
+                          '+91 9871984074',
+                          subText: 'Mon - Sat: 9.30 AM to 6.30 PM\nClosed on Sunday & National Holidays',
+                        ),
+                        const SizedBox(height: 16),
+                        _buildDarkContactItem(
+                          Icons.location_on_outlined,
+                          'ADDRESS',
+                          'Second floor, estate, MR- 01, Altf Mohan estate, room no, plot no A. 26, Saidabad, Block B, Mohan Cooperative Industrial Estate, New Delhi, Delhi 110044',
+                        ),
+                        const SizedBox(height: 24),
+                        // Complaint Box
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.white.withOpacity(0.15)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Please provide the following in your complaint:',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFFFACC15), // Yellow
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              _buildBulletPoint('Identification of the information provided by you.'),
+                              _buildBulletPoint('Clear statement if information is personal or sensitive.'),
+                              _buildBulletPoint('Your Membership ID, Mobile number and/or e-mail address.'),
+                              _buildBulletPoint('A statement that you have a good-faith belief that use of the information was processed incorrectly.'),
+                              _buildBulletPoint('A statement, under penalty of perjury, that the information is accurate.'),
+                            ],
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 16),
-                    _buildContactRow(Icons.email_outlined, 'membership@ownholidayclub.com'),
-                    const SizedBox(height: 10),
-                    _buildContactRow(Icons.phone_outlined, '+91-96675 52445 (Mon - Sat: 9.30 AM to 6.30 PM)'),
-                    const SizedBox(height: 10),
-                    _buildContactRow(
-                      Icons.location_on_outlined,
-                      'Grievance Redressal Team\n27 C, Block A, Kailash Colony,\nExtension, New Delhi, Delhi - 110048, India',
                     ),
                   ],
                 ),
@@ -376,23 +426,79 @@ class _PrivacyPolicyViewState extends State<PrivacyPolicyView> {
     );
   }
 
-  Widget _buildContactRow(IconData icon, String text) {
+  Widget _buildDarkContactItem(IconData icon, String label, String text, {String? subText}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: AppColors.greyText),
-        const SizedBox(width: 10),
+        Icon(icon, size: 18, color: const Color(0xFFFACC15)),
+        const SizedBox(width: 12),
         Expanded(
-          child: Text(
-            text,
-            style: GoogleFonts.montserrat(
-              fontSize: 12.0,
-              color: AppColors.bodyText,
-              height: 1.4,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.montserrat(
+                  fontSize: 10.0,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                  color: const Color(0xFFFACC15),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                text,
+                style: GoogleFonts.montserrat(
+                  fontSize: 13.0,
+                  color: Colors.white,
+                  height: 1.4,
+                ),
+              ),
+              if (subText != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  subText,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 10.0,
+                    color: Colors.white.withOpacity(0.5),
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildBulletPoint(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: 6, right: 10),
+            width: 4,
+            height: 4,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.montserrat(
+                fontSize: 11.5,
+                color: Colors.white.withOpacity(0.85),
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:async';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -61,9 +64,9 @@ class _BookHolidayViewState extends State<BookHolidayView> {
             : DateTime.now();
 
         final requestedCount =
-            bookings.where((b) => b.status?.toLowerCase() == 'booking').length;
+            bookings.where((b) => ['booking', 'pending'].contains(b.status?.toLowerCase())).length;
         final usedCount =
-            bookings.where((b) => b.status?.toLowerCase() == 'booked').length;
+            bookings.where((b) => ['booked', 'used', 'approved'].contains(b.status?.toLowerCase())).length;
         final remainingCount =
             (totalSlots - (requestedCount + usedCount)).clamp(0, totalSlots);
         final lengthOfStay = u.membership?.nightsPerYear ?? '6 Nights / 7 Days';
@@ -397,6 +400,23 @@ class _SlotCard extends StatelessWidget {
                         ),
                       ],
                     ),
+                    if (b.requestedAt != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(Icons.access_time_rounded,
+                              color: AppColors.greyText, size: 13),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Requested ${DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(b.requestedAt!).toLocal())}',
+                            style: GoogleFonts.montserrat(
+                                fontSize: 10.0,
+                                color: const Color(0xFFC9A84C),
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -419,7 +439,7 @@ class _SlotCard extends StatelessWidget {
 
   Widget _buildActionButton() {
     final b = booking;
-    if (b == null) {
+    if (b == null || b.status?.toLowerCase() == 'rejected' || b.status?.toLowerCase() == 'cancelled') {
       return ElevatedButton(
         onPressed: onBook,
         style: ElevatedButton.styleFrom(
@@ -516,6 +536,61 @@ class _BookingSheetState extends State<_BookingSheet> {
   int _kids = 0;
   bool _isSubmitting = false;
 
+  List<String> _locationSuggestions = [];
+  bool _isLoadingSuggestions = false;
+  Timer? _debounceTimer;
+
+  @override
+  void dispose() {
+    _placeController.dispose();
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchLocationSuggestions(String query) async {
+    if (query.length < 2) {
+      setState(() => _locationSuggestions = []);
+      return;
+    }
+    setState(() => _isLoadingSuggestions = true);
+    try {
+      final response = await http.post(
+        Uri.parse('https://places.googleapis.com/v1/places:autocomplete'),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': 'AIzaSyDarNwOH5Gfi1KseDZ82fkh2b0wn66uudg',
+        },
+        body: jsonEncode({'input': query}),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['suggestions'] != null) {
+          final List suggestions = data['suggestions'];
+          setState(() {
+            _locationSuggestions = suggestions
+                .map((s) => s['placePrediction']['text']['text'].toString())
+                .toList();
+          });
+        } else {
+          setState(() => _locationSuggestions = []);
+        }
+      } else {
+        setState(() => _locationSuggestions = []);
+      }
+    } catch (e) {
+      setState(() => _locationSuggestions = []);
+    } finally {
+      if (mounted) setState(() => _isLoadingSuggestions = false);
+    }
+  }
+
+  void _onLocationChanged(String val) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      _fetchLocationSuggestions(val);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -568,6 +643,7 @@ class _BookingSheetState extends State<_BookingSheet> {
                 validator: (val) => val == null || val.trim().isEmpty
                     ? 'Please enter a destination'
                     : null,
+                onChanged: _onLocationChanged,
                 decoration: InputDecoration(
                   hintText: 'Enter destination...',
                   hintStyle: GoogleFonts.montserrat(
@@ -581,7 +657,39 @@ class _BookingSheetState extends State<_BookingSheet> {
                       borderSide: BorderSide.none),
                 ),
               ),
-              const SizedBox(height: 16),
+              if (_locationSuggestions.isNotEmpty)
+                Container(
+                  margin: const EdgeInsets.only(top: 4, bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.borderGrey),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))
+                    ],
+                  ),
+                  constraints: const BoxConstraints(maxHeight: 180),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    itemCount: _locationSuggestions.length,
+                    itemBuilder: (context, index) {
+                      final loc = _locationSuggestions[index];
+                      return ListTile(
+                        dense: true,
+                        leading: const Icon(Icons.location_on, color: AppColors.primaryYellow, size: 18),
+                        title: Text(loc, style: GoogleFonts.montserrat(fontSize: 12.0)),
+                        onTap: () {
+                          _placeController.text = loc;
+                          setState(() => _locationSuggestions = []);
+                          FocusScope.of(context).unfocus();
+                        },
+                      );
+                    },
+                  ),
+                ),
+              if (_locationSuggestions.isEmpty)
+                const SizedBox(height: 16),
 
               Row(
                 children: [

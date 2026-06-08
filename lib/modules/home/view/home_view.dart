@@ -427,7 +427,6 @@ class HomeView extends GetView<HomeController> {
                   images: [
                     'assets/images/slide1.png',
                     'assets/images/slide2.png',
-                    'assets/images/slide3.png',
                   ],
                 ),
               ),
@@ -1081,12 +1080,13 @@ class _HeroCarouselState extends State<_HeroCarousel> {
           right: 20,
           child: IgnorePointer(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 FadeInDown(
                   key: ValueKey('sub_$_currentPage'),
                   child: Text(
                     _stripHtml(currentSlide['subtitle'] ?? 'Welcome to Luxury'),
+                    textAlign: TextAlign.center,
                     style: GoogleFonts.greatVibes(
                       color: const Color(0xFFF59E0B),
                       fontSize: 32,
@@ -1099,11 +1099,12 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                   key: ValueKey('title_$_currentPage'),
                   delay: const Duration(milliseconds: 150),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       if (title1.isNotEmpty)
                         Text(
                           _stripHtml(title1).toUpperCase(),
+                          textAlign: TextAlign.center,
                           style: GoogleFonts.inter(
                             color: Colors.white,
                             fontSize: 34,
@@ -1114,6 +1115,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                       if (title2.isNotEmpty)
                         Text(
                           _stripHtml(title2).toUpperCase(),
+                          textAlign: TextAlign.center,
                           style: GoogleFonts.inter(
                             color: const Color(0xFFF59E0B),
                             fontSize: 34,
@@ -1130,10 +1132,11 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                   delay: const Duration(milliseconds: 250),
                   child: Text(
                     _stripHtml(currentSlide['description'] ?? ''),
+                    textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
+                      color: Colors.white.withOpacity(0.95),
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w500,
                       height: 1.4,
                     ),
                   ),

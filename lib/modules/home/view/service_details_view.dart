@@ -324,16 +324,11 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
                           style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.greyText, height: 1.4),
                         ),
                         const SizedBox(height: 16),
-                        GridView.builder(
+                        ListView.separated(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 0.78,
-                          ),
                           itemCount: _subCategories.length,
+                          separatorBuilder: (ctx, i) => const SizedBox(height: 16),
                           itemBuilder: (ctx, i) => _buildSubCategoryCard(_subCategories[i], i),
                         ),
                       ],
@@ -392,24 +387,19 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
                 title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.montserrat(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppColors.primaryBlack),
+                style: GoogleFonts.montserrat(fontSize: 14.0, fontWeight: FontWeight.bold, color: AppColors.primaryBlack),
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 6),
             // Description
             if (desc.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                 child: Text(
                   desc,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.montserrat(fontSize: 9.5, color: AppColors.greyText, height: 1.3),
+                  style: GoogleFonts.montserrat(fontSize: 12.0, color: AppColors.greyText, height: 1.4),
                 ),
               ),
-            const Spacer(),
             // Image with fallback
             Builder(
               builder: (context) {
@@ -418,7 +408,7 @@ class _ServiceDetailsViewState extends State<ServiceDetailsView> {
                 return ClipRRect(
                   borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
                   child: SizedBox(
-                    height: 80,
+                    height: 160,
                     width: double.infinity,
                     child: finalImageUrl.isNotEmpty && finalImageUrl.startsWith('http')
                         ? CachedNetworkImage(
@@ -905,12 +895,48 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
   String? _selectedCategory;
   String _budget = '';
 
+  final List<String> _serviceOptions = ['Holiday', 'Events', 'Wedding', 'Outing'];
+
+  final Map<String, List<Map<String, String>>> _budgetOptions = {
+    'Holiday': [
+      {'label': 'Below 5,000 (per day)', 'value': 'Below 5000'},
+      {'label': '5,000 - 7,000 (per day)', 'value': '5000 - 7000'},
+      {'label': '7,000 - 10,000 (per day)', 'value': '7000 - 10000'},
+      {'label': 'Above 10,000 (per day)', 'value': 'Above 10000'},
+    ],
+    'Events': [
+      {'label': 'Below 1,000 (per person)', 'value': 'Below 1000'},
+      {'label': '1,000 - 2,000 (per person)', 'value': '1000 - 2000'},
+      {'label': '2,000 - 3,000 (per person)', 'value': '2000 - 3000'},
+      {'label': 'Above 3,000 (per person)', 'value': 'Above 3000'},
+    ],
+    'Wedding': [
+      {'label': 'Below 1,500 (per person)', 'value': 'Below 1500'},
+      {'label': '1,500 - 2,500 (per person)', 'value': '1500 - 2500'},
+      {'label': '2,500 - 3,500 (per person)', 'value': '2500 - 3500'},
+      {'label': 'Above 3,500 (per person)', 'value': 'Above 3500'},
+    ],
+    'Outing': [
+      {'label': 'Below 500 (per person)', 'value': 'Below 500'},
+      {'label': '1,000 - 2,000 (per person)', 'value': '1000 - 2000'},
+      {'label': '3,000 - 5,000 (per person)', 'value': '3000 - 5000'},
+      {'label': 'Above 5,000 (per person)', 'value': 'Above 5000'},
+    ],
+  };
+
   @override
   void initState() {
     super.initState();
     _selectedCategory = widget.preSelectedCategory;
-    if (_selectedCategory != null) {
-      _selectedService = widget.service['title'] ?? widget.service['serviceTitle'];
+    final initialService = widget.service['title']?.toString() ?? widget.service['serviceTitle']?.toString() ?? '';
+    if (initialService.isNotEmpty) {
+      final match = _serviceOptions.firstWhere(
+        (opt) => initialService.toLowerCase().contains(opt.toLowerCase()) || opt.toLowerCase().contains(initialService.toLowerCase()),
+        orElse: () => '',
+      );
+      if (match.isNotEmpty) {
+        _selectedService = match;
+      }
     }
   }
 
@@ -985,7 +1011,11 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
     }
     final homeCtrl = Get.find<HomeController>();
     final svc = homeCtrl.services.firstWhere(
-      (s) => s['title'] == _selectedService || s['serviceTitle'] == _selectedService,
+      (s) {
+        final title = (s['title'] ?? s['serviceTitle'] ?? '').toString().toLowerCase();
+        final sel = _selectedService!.toLowerCase();
+        return title.contains(sel) || sel.contains(title);
+      },
       orElse: () => <String, dynamic>{},
     );
     if (svc.isNotEmpty && svc['subServices'] is List) {
@@ -1290,15 +1320,15 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                         isExpanded: true,
                         hint: Text('Select a service...', style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.greyText.withValues(alpha: 0.6)), overflow: TextOverflow.ellipsis),
                         icon: const Icon(Icons.arrow_drop_down, color: AppColors.greyText),
-                        items: Get.find<HomeController>().services.map((svc) {
-                          final n = svc['title']?.toString() ?? '';
-                          return DropdownMenuItem<String>(value: n, child: Text(n, style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.primaryBlack), overflow: TextOverflow.ellipsis));
+                        items: _serviceOptions.map((svc) {
+                          return DropdownMenuItem<String>(value: svc, child: Text(svc, style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.primaryBlack), overflow: TextOverflow.ellipsis));
                         }).toList(),
                         onChanged: (val) {
                           if (val != null) {
                             setState(() {
                               _selectedService = val;
                               _selectedCategory = null;
+                              _budget = '';
                             });
                           }
                         },
@@ -1314,19 +1344,21 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                         isExpanded: true,
                         hint: Text('Select a budget...', style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.greyText.withValues(alpha: 0.6)), overflow: TextOverflow.ellipsis),
                         icon: const Icon(Icons.arrow_drop_down, color: AppColors.greyText),
-                        items: const [
-                          DropdownMenuItem(value: 'Below 50,000', child: Text('Below 50,000', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5))),
-                          DropdownMenuItem(value: '50,000 - 1,00,000', child: Text('50K – 1 Lakh', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5))),
-                          DropdownMenuItem(value: '1,00,000 - 5,00,000', child: Text('1L – 5 Lakhs', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5))),
-                          DropdownMenuItem(value: '5,00,000 - 10,00,000', child: Text('5L – 10 Lakhs', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5))),
-                          DropdownMenuItem(value: 'Above 10,00,000', child: Text('Above 10 Lakhs', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.5))),
-                        ],
-                        onChanged: (val) { if (val != null) setState(() => _budget = val); },
+                        items: _selectedService != null ? (_budgetOptions[_selectedService!] ?? []).map((opt) {
+                          return DropdownMenuItem<String>(
+                            value: opt['value'],
+                            child: Text(opt['label']!, style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.primaryBlack), overflow: TextOverflow.ellipsis),
+                          );
+                        }).toList() : [],
+                        onChanged: _selectedService == null ? null : (val) {
+                          if (val != null) setState(() => _budget = val);
+                        },
                       ),
                     ),
                   ),
                 ],
               ),
+
               const SizedBox(height: 8),
               // Service Category full-width dropdown
               _buildDropdown(
@@ -1354,6 +1386,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                         },
                 ),
               ),
+
               const SizedBox(height: 8),
               _buildField(_msgCtrl, 'Special Requests', 'Any specific needs or occasions...', Icons.message_outlined, maxLines: 2, isOptional: true),
               const SizedBox(height: 16),

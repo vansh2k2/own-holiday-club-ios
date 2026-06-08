@@ -815,7 +815,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
   bool _isEmailSkipped = false;
   String? _tempEmail;
 
-  String _travelType = 'Holiday';
+  String? _travelType;
   String _budget = '';
 
   final List<String> _travelTypes = ['Holiday', 'Events', 'Wedding', 'Outing'];
@@ -1201,11 +1201,11 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                 children: [
                   Expanded(
                     child: _buildDropdown(
-                      'Travel Type',
+                      'SELECT SERVICE',
                       DropdownButton<String>(
                         value: _travelType,
                         isExpanded: true,
-                        hint: Text('Select...', style: GoogleFonts.montserrat(fontSize: 13.0, color: AppColors.greyText)),
+                        hint: Text('Select a service...', style: GoogleFonts.montserrat(fontSize: 13.0, color: AppColors.greyText)),
                         icon: const Icon(Icons.arrow_drop_down, color: AppColors.greyText),
                         items: _travelTypes.map((type) {
                           return DropdownMenuItem<String>(
@@ -1227,19 +1227,19 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildDropdown(
-                      'Estimated Budget',
+                      'Budget',
                       DropdownButton<String>(
                         value: _budget.isEmpty ? null : _budget,
                         isExpanded: true,
-                        hint: Text('Select...', style: GoogleFonts.montserrat(fontSize: 12.0, color: AppColors.greyText), overflow: TextOverflow.ellipsis),
+                        hint: Text('Select a budget...', style: GoogleFonts.montserrat(fontSize: 12.0, color: AppColors.greyText), overflow: TextOverflow.ellipsis),
                         icon: const Icon(Icons.arrow_drop_down, color: AppColors.greyText),
-                        items: (_budgetOptions[_travelType] ?? []).map((opt) {
+                        items: _travelType != null ? (_budgetOptions[_travelType!] ?? []).map((opt) {
                           return DropdownMenuItem<String>(
                             value: opt['value'],
                             child: Text(opt['label']!, style: GoogleFonts.montserrat(fontSize: 11.0, color: AppColors.primaryBlack), overflow: TextOverflow.ellipsis),
                           );
-                        }).toList(),
-                        onChanged: (val) {
+                        }).toList() : [],
+                        onChanged: _travelType == null ? null : (val) {
                           if (val != null) {
                             setState(() {
                               _budget = val;
@@ -1677,6 +1677,10 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
     }
     if (_locationCtrl.text.isEmpty) {
       Get.snackbar('Error', 'Please select a location.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+      return;
+    }
+    if (_travelType == null) {
+      Get.snackbar('Error', 'Please select a service.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
       return;
     }
     if (_budget.isEmpty) {

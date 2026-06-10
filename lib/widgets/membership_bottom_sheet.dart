@@ -20,7 +20,7 @@ class MembershipBottomSheet {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.90,
+          height: MediaQuery.of(context).size.height * 0.85,
           decoration: const BoxDecoration(
             color: AppColors.scaffoldBg,
             borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
@@ -323,13 +323,13 @@ class MembershipBottomSheet {
                               ),
                               const SizedBox(height: 2),
                               RichText(
-                                text: const TextSpan(
-                                  style: TextStyle(fontSize: 11.0, color: AppColors.primaryBlack),
+                                text: TextSpan(
+                                  style: const TextStyle(fontSize: 11.0, color: AppColors.primaryBlack),
                                   children: [
-                                    TextSpan(text: 'Admin Fee: '),
+                                    const TextSpan(text: 'Admin Fee: '),
                                     TextSpan(
-                                      text: '₹ 0',
-                                      style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),
+                                      text: plan.adminFee != null ? '₹ ${plan.adminFee}' : '₹ 0',
+                                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),
                                     ),
                                   ],
                                 ),
@@ -356,13 +356,13 @@ class MembershipBottomSheet {
                               ),
                               const SizedBox(height: 2),
                               RichText(
-                                text: const TextSpan(
-                                  style: TextStyle(fontSize: 11.0, color: AppColors.primaryBlack),
+                                text: TextSpan(
+                                  style: const TextStyle(fontSize: 11.0, color: AppColors.primaryBlack),
                                   children: [
-                                    TextSpan(text: 'Admin Fee: '),
+                                    const TextSpan(text: 'Admin Fee: '),
                                     TextSpan(
-                                      text: '₹ 5,789',
-                                      style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),
+                                      text: plan.adminFee != null ? '₹ ${plan.adminFee}' : '₹ 0',
+                                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),
                                     ),
                                   ],
                                 ),

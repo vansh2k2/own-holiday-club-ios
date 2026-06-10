@@ -1426,7 +1426,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
               style: GoogleFonts.montserrat(
                 fontSize: 10.0,
                 fontWeight: FontWeight.w600,
-                color: Colors.red,
+                color: const Color(0xFF8F9399),
                 letterSpacing: 1.0,
               ),
             ),

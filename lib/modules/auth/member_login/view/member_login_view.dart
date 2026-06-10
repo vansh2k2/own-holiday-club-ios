@@ -191,9 +191,21 @@ class MemberLoginView extends GetView<MemberLoginController> {
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             left: 20,
-            child: Image.asset(
-              'assets/images/own-holiday-club-logo.png',
-              height: 70,
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.3),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
+                ],
+                borderRadius: BorderRadius.circular(35),
+              ),
+              child: Image.asset(
+                'assets/images/own-holiday-club-logo.png',
+                height: 70,
+              ),
             ),
           ),
         ],

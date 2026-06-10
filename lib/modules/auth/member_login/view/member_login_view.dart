@@ -16,7 +16,7 @@ class MemberLoginView extends GetView<MemberLoginController> {
           children: [
             _buildSlitHeader(context),
             Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -43,7 +43,7 @@ class MemberLoginView extends GetView<MemberLoginController> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 20),
                   
                   // Form Fields
                   FadeInUp(
@@ -86,7 +86,7 @@ class MemberLoginView extends GetView<MemberLoginController> {
                     ),
                   ),
                   
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 20),
                   
                   // Login Button
                   FadeInUp(
@@ -119,7 +119,7 @@ class MemberLoginView extends GetView<MemberLoginController> {
                     )),
                   ),
                   
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 20),
                   
                   FadeInUp(
                     delay: const Duration(milliseconds: 500),
@@ -156,42 +156,17 @@ class MemberLoginView extends GetView<MemberLoginController> {
   }
 
   Widget _buildSlitHeader(BuildContext context) {
-    final height = MediaQuery.of(context).size.height * 0.35;
+    final height = MediaQuery.of(context).size.height * 0.38;
     return SizedBox(
       height: height,
       width: double.infinity,
       child: Stack(
         children: [
-          // Slit 1
+          // Background Image
           Positioned.fill(
-            child: ClipPath(
-              clipper: SlitClipper(0),
-              child: Image.asset(
-                'assets/images/maldives_private_shore.png',
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          // Slit 2
-          Positioned.fill(
-            child: ClipPath(
-              clipper: SlitClipper(1),
-              child: Image.asset(
-                'assets/images/santorini_experience.png',
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(color: AppColors.primaryBlack),
-              ),
-            ),
-          ),
-          // Slit 3
-          Positioned.fill(
-            child: ClipPath(
-              clipper: SlitClipper(2),
-              child: Image.asset(
-                'assets/images/taj_mahal_palace.png',
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(color: AppColors.primaryYellow),
-              ),
+            child: Image.asset(
+              'assets/images/login_bg.jpg',
+              fit: BoxFit.cover,
             ),
           ),
           // Overlay Gradient
@@ -211,32 +186,14 @@ class MemberLoginView extends GetView<MemberLoginController> {
               ),
             ),
           ),
-          // Back Button
+
+          // Logo in top left of header
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             left: 20,
-            child: GestureDetector(
-              onTap: () => Get.back(),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.primaryBlack),
-              ),
-            ),
-          ),
-          // Logo in center bottom of header
-          Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Image.asset(
-                'assets/images/own-holiday-club-logo.png',
-                height: 50,
-              ),
+            child: Image.asset(
+              'assets/images/own-holiday-club-logo.png',
+              height: 70,
             ),
           ),
         ],
@@ -299,38 +256,4 @@ class MemberLoginView extends GetView<MemberLoginController> {
       ],
     );
   }
-}
-
-class SlitClipper extends CustomClipper<Path> {
-  final int index;
-  SlitClipper(this.index);
-
-  @override
-  Path getClip(Size size) {
-    Path path = Path();
-    double slitWidth = size.width / 3;
-    
-    if (index == 0) {
-      path.moveTo(0, 0);
-      path.lineTo(slitWidth + 20, 0);
-      path.lineTo(slitWidth - 20, size.height);
-      path.lineTo(0, size.height);
-    } else if (index == 1) {
-      path.moveTo(slitWidth + 20, 0);
-      path.lineTo(slitWidth * 2 + 20, 0);
-      path.lineTo(slitWidth * 2 - 20, size.height);
-      path.lineTo(slitWidth - 20, size.height);
-    } else {
-      path.moveTo(slitWidth * 2 + 20, 0);
-      path.lineTo(size.width, 0);
-      path.lineTo(size.width, size.height);
-      path.lineTo(slitWidth * 2 - 20, size.height);
-    }
-    
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

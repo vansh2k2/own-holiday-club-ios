@@ -36,10 +36,13 @@ class HomeView extends GetView<HomeController> {
               child: Row(
                 children: [
                   // Own Holiday Logo
-                  Image.asset(
-                    'assets/images/own-holiday-club-logo.png',
-                    height: 48,
-                    fit: BoxFit.contain,
+                  Transform.scale(
+                    scale: 1.2,
+                    child: Image.asset(
+                      'assets/images/own-holiday-club-logo.png',
+                      height: 48,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                   const Spacer(),
                   // Profile Icon → opens right drawer
@@ -178,13 +181,6 @@ class HomeView extends GetView<HomeController> {
                                             onTap: () => MembershipBottomSheet.show(context),
                                           ),
                                           _QuickAccessCard(
-                                            title: 'Plan\nEvent',
-                                            imagePath: 'assets/images/plan_event.png',
-                                            bgColor: const Color(0xFFD1ECF1), // Soft light pastel blue
-                                            textColor: const Color(0xFF072A52), // Dark royal blue
-                                            onTap: () => Get.toNamed(Routes.SERVICES_REEL),
-                                          ),
-                                          _QuickAccessCard(
                                             title: 'Book\nHoliday',
                                             imagePath: 'assets/images/book_holiday_3d.png',
                                             bgColor: const Color(0xFFD4EDDA), // Soft light pastel green
@@ -196,6 +192,13 @@ class HomeView extends GetView<HomeController> {
                                                 backgroundColor: Colors.transparent,
                                               );
                                             },
+                                          ),
+                                          _QuickAccessCard(
+                                            title: 'Plan Wedding/\nEvent',
+                                            imagePath: 'assets/images/plan_event.png',
+                                            bgColor: const Color(0xFFD1ECF1), // Soft light pastel blue
+                                            textColor: const Color(0xFF072A52), // Dark royal blue
+                                            onTap: () => Get.toNamed(Routes.SERVICES_REEL),
                                           ),
                                           _QuickAccessCard(
                                             title: 'OHC\nMembership',
@@ -1090,7 +1093,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                       _stripHtml(currentSlide['subtitle'] ?? 'Welcome to Luxury'),
                       textAlign: TextAlign.center,
                       style: GoogleFonts.greatVibes(
-                        color: const Color(0xFFF59E0B),
+                        color: _extractColor(currentSlide['subtitle'] ?? '') ?? const Color(0xFFF59E0B),
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1109,7 +1112,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                           _stripHtml(title1).toUpperCase().replaceAll('STAY & CELEBRATION', 'STAY\u00A0&\u00A0CELEBRATION'),
                           textAlign: TextAlign.center,
                           style: GoogleFonts.inter(
-                            color: Colors.white,
+                            color: _extractColor(title1) ?? Colors.white,
                             fontSize: 31,
                             fontWeight: FontWeight.bold,
                             height: 1.3,
@@ -1120,7 +1123,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                           _stripHtml(title2).toUpperCase().replaceAll('STAY & CELEBRATION', 'STAY\u00A0&\u00A0CELEBRATION'),
                           textAlign: TextAlign.center,
                           style: GoogleFonts.inter(
-                            color: const Color(0xFFF59E0B),
+                            color: _extractColor(title2) ?? const Color(0xFFF59E0B),
                             fontSize: 31,
                             fontWeight: FontWeight.bold,
                             height: 1.3,
@@ -1181,6 +1184,39 @@ class _HeroCarouselState extends State<_HeroCarousel> {
         .replaceAll('&gt;', '>')
         .replaceAll('&quot;', '"')
         .replaceAll('&#39;', "'");
+  }
+
+  Color? _extractColor(String htmlString) {
+    if (htmlString.isEmpty) return null;
+    final match = RegExp(r'color\s*[:=]\s*["\u0027]?(#[0-9a-fA-F]{3,8}|rgb(?:a)?\([^)]+\))').firstMatch(htmlString);
+    if (match != null) {
+      final colorStr = match.group(1)!;
+      if (colorStr.startsWith('#')) {
+        String hex = colorStr.replaceAll('#', '');
+        if (hex.length == 3) {
+          hex = '${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}';
+        }
+        if (hex.length == 6) {
+          hex = 'FF$hex';
+        }
+        try {
+          return Color(int.parse(hex, radix: 16));
+        } catch (_) {
+          return null;
+        }
+      } else if (colorStr.startsWith('rgb')) {
+        final rgbMatch = RegExp(r'rgb(?:a)?\((\d+),\s*(\d+),\s*(\d+)').firstMatch(colorStr);
+        if (rgbMatch != null) {
+          return Color.fromRGBO(
+            int.parse(rgbMatch.group(1)!),
+            int.parse(rgbMatch.group(2)!),
+            int.parse(rgbMatch.group(3)!),
+            1.0,
+          );
+        }
+      }
+    }
+    return null;
   }
 }
 

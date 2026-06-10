@@ -929,8 +929,8 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                               decoration: BoxDecoration(
-                                color: isSelected ? const Color(0xFFC8102E) : Colors.white,
-                                border: Border.all(color: isSelected ? const Color(0xFFC8102E) : const Color(0xFFCED4DA)),
+                                color: isSelected ? const Color(0xFF1591DC) : Colors.white,
+                                border: Border.all(color: isSelected ? const Color(0xFF1591DC) : const Color(0xFFCED4DA)),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(

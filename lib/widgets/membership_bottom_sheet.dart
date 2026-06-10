@@ -83,7 +83,7 @@ class MembershipBottomSheet {
                 ),
                 const SizedBox(height: 35),
                 Obx(() => SizedBox(
-                  height: 430,
+                  height: 460,
                   child: controller.isLoading.value 
                     ? Stack(
                         children: [

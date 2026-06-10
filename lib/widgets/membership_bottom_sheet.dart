@@ -273,32 +273,55 @@ class MembershipBottomSheet {
                             ),
                           ),
                           const SizedBox(height: 2),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Pay ',
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        const TextSpan(
+                                          text: 'Pay ',
+                                          style: TextStyle(
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppColors.primaryBlack,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: '₹ 1',
+                                          style: TextStyle(
+                                            fontSize: 26.0,
+                                            fontWeight: FontWeight.w900,
+                                            color: planColors.primary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF2E7D32).withOpacity(0.08),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: const Color(0xFF2E7D32).withOpacity(0.2), width: 1),
+                                    ),
+                                    child: const Text(
+                                      'LIMITED',
                                       style: TextStyle(
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppColors.primaryBlack,
+                                        fontSize: 8.0,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF2E7D32),
+                                        letterSpacing: 0.5,
                                       ),
                                     ),
-                                    TextSpan(
-                                      text: '₹ 1',
-                                      style: TextStyle(
-                                        fontSize: 26.0,
-                                        fontWeight: FontWeight.w900,
-                                        color: planColors.primary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(height: 2),
                               RichText(
                                 text: const TextSpan(
                                   style: TextStyle(fontSize: 11.0, color: AppColors.primaryBlack),
@@ -309,24 +332,6 @@ class MembershipBottomSheet {
                                       style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),
                                     ),
                                   ],
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF2E7D32).withOpacity(0.08),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: const Color(0xFF2E7D32).withOpacity(0.2), width: 1),
-                                ),
-                                child: const Text(
-                                  'LIMITED',
-                                  style: TextStyle(
-                                    fontSize: 8.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF2E7D32),
-                                    letterSpacing: 0.5,
-                                  ),
                                 ),
                               ),
                             ],

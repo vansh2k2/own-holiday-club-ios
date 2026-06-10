@@ -49,7 +49,7 @@ class MemberLoginView extends GetView<MemberLoginController> {
                   FadeInUp(
                     delay: const Duration(milliseconds: 200),
                     child: _buildTextField(
-                      controller: controller.memberIdController,
+                      textController: controller.memberIdController,
                       label: 'Member ID',
                       icon: Icons.badge_outlined,
                       hint: 'Enter your member ID',
@@ -59,7 +59,7 @@ class MemberLoginView extends GetView<MemberLoginController> {
                   FadeInUp(
                     delay: const Duration(milliseconds: 300),
                     child: _buildTextField(
-                      controller: controller.passwordController,
+                      textController: controller.passwordController,
                       label: 'Password',
                       icon: Icons.lock_outline_rounded,
                       hint: 'Enter your password',
@@ -245,12 +245,13 @@ class MemberLoginView extends GetView<MemberLoginController> {
   }
 
   Widget _buildTextField({
-    required TextEditingController controller,
+    required TextEditingController textController,
     required String label,
     required IconData icon,
     required String hint,
     bool isPassword = false,
   }) {
+    final loginCtrl = Get.find<MemberLoginController>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -269,18 +270,31 @@ class MemberLoginView extends GetView<MemberLoginController> {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.borderGrey.withOpacity(0.5)),
           ),
-          child: TextField(
-            controller: controller,
-            obscureText: isPassword,
-            style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13.0),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(color: AppColors.greyText.withOpacity(0.6), fontSize: 12.0),
-              prefixIcon: Icon(icon, color: AppColors.primaryBlack, size: 20),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            ),
-          ),
+          child: Obx(() {
+            final isVisible = loginCtrl.isPasswordVisible.value;
+            return TextField(
+              controller: textController,
+              obscureText: isPassword && !isVisible,
+              style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13.0),
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: TextStyle(color: AppColors.greyText.withOpacity(0.6), fontSize: 12.0),
+                prefixIcon: Icon(icon, color: AppColors.primaryBlack, size: 20),
+                suffixIcon: isPassword 
+                  ? IconButton(
+                      icon: Icon(
+                        isVisible ? Icons.visibility : Icons.visibility_off,
+                        color: AppColors.greyText,
+                        size: 20,
+                      ),
+                      onPressed: () => loginCtrl.isPasswordVisible.toggle(),
+                    )
+                  : null,
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              ),
+            );
+          }),
         ),
       ],
     );

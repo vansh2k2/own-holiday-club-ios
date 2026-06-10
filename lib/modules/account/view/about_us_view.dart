@@ -129,7 +129,7 @@ class AboutUsView extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Own Holiday Club  ·  Est. 2012',
+                    'Own Holiday Club  ·  Since. 2012',
                     style: GoogleFonts.poppins(
                       fontSize: 11.5,
                       color: AppColors.greyText,

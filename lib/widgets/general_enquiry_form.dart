@@ -487,7 +487,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                           ),
                         ),
                         Text(
-                          _step == 1 ? "VERIFY CONTACT INFO" : "HOLIDAY PREFERENCES",
+                          _step == 1 ? "SEND YOUR QUERY" : "HOLIDAY PREFERENCES",
                           style: GoogleFonts.poppins(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
@@ -910,12 +910,12 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                   ),
                   const SizedBox(height: 18),
 
-                  // Travel Type & Budget
-                  _buildLabel("TRAVEL TYPE & BUDGET"),
+                  // Travel Type
+                  _buildLabel("TRAVEL TYPE"),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: ['Holiday', 'Events', 'Wedding', 'Outing'].map((cat) {
+                      children: ['Holiday'].map((cat) {
                         final isSelected = _travelType == cat;
                         return Padding(
                           padding: const EdgeInsets.only(right: 6.0),
@@ -951,6 +951,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                   const SizedBox(height: 10),
 
                   // Budget Dropdown Options
+                  _buildLabel("SELECT YOUR BUDGET"),
                   DropdownButtonFormField<String>(
                     value: _selectedBudget,
                     dropdownColor: Colors.white,
@@ -1071,33 +1072,6 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
   }
 
   Widget _buildLabel(String text) {
-    if (text == "KIDS (BELOW 10 YEARS)") {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 6.0, left: 2.0),
-        child: RichText(
-          text: TextSpan(
-            text: "KIDS ",
-            style: GoogleFonts.poppins(
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[700],
-              letterSpacing: 1.0,
-            ),
-            children: [
-              TextSpan(
-                text: "(BELOW 10 YEARS)",
-                style: GoogleFonts.poppins(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red,
-                  letterSpacing: 1.0,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
     return Padding(
       padding: const EdgeInsets.only(bottom: 6.0, left: 2.0),
       child: Text(

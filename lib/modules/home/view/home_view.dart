@@ -647,7 +647,7 @@ class HomeView extends GetView<HomeController> {
           // Items
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 10),
+              padding: const EdgeInsets.only(top: 10, bottom: 100),
               children: [
                 _DrawerItem(Icons.home_rounded, 'Home', () => Get.back()),
                 _DrawerItem(Icons.card_membership_rounded, 'Membership', () {
@@ -1075,7 +1075,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
         ),
         // Hero text — identical layout to original, but dynamic and matching website styles
         Positioned(
-          top: 35,
+          top: 190,
           left: 20,
           right: 20,
           child: IgnorePointer(
@@ -1084,17 +1084,20 @@ class _HeroCarouselState extends State<_HeroCarousel> {
               children: [
                 FadeInDown(
                   key: ValueKey('sub_$_currentPage'),
-                  child: Text(
-                    _stripHtml(currentSlide['subtitle'] ?? 'Welcome to Luxury'),
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.greatVibes(
-                      color: const Color(0xFFF59E0B),
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
+                  child: Transform.translate(
+                    offset: const Offset(0, 20), // Shifting 'For' downwards
+                    child: Text(
+                      _stripHtml(currentSlide['subtitle'] ?? 'Welcome to Luxury'),
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.greatVibes(
+                        color: const Color(0xFFF59E0B),
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 10),
                 FadeInLeft(
                   key: ValueKey('title_$_currentPage'),
                   delay: const Duration(milliseconds: 150),
@@ -1103,24 +1106,24 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                     children: [
                       if (title1.isNotEmpty)
                         Text(
-                          _stripHtml(title1).toUpperCase(),
+                          _stripHtml(title1).toUpperCase().replaceAll('STAY & CELEBRATION', 'STAY\u00A0&\u00A0CELEBRATION'),
                           textAlign: TextAlign.center,
                           style: GoogleFonts.inter(
                             color: Colors.white,
-                            fontSize: 34,
+                            fontSize: 31,
                             fontWeight: FontWeight.bold,
-                            height: 1.15,
+                            height: 1.3,
                           ),
                         ),
                       if (title2.isNotEmpty)
                         Text(
-                          _stripHtml(title2).toUpperCase(),
+                          _stripHtml(title2).toUpperCase().replaceAll('STAY & CELEBRATION', 'STAY\u00A0&\u00A0CELEBRATION'),
                           textAlign: TextAlign.center,
                           style: GoogleFonts.inter(
                             color: const Color(0xFFF59E0B),
-                            fontSize: 34,
+                            fontSize: 31,
                             fontWeight: FontWeight.bold,
-                            height: 1.15,
+                            height: 1.3,
                           ),
                         ),
                     ],

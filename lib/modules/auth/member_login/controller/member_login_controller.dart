@@ -12,6 +12,7 @@ class MemberLoginController extends GetxController {
   final memberIdController = TextEditingController();
   final passwordController = TextEditingController();
   final isLoading = false.obs;
+  final isPasswordVisible = false.obs;
   
   final Rxn<UserModel> user = Rxn<UserModel>();
 

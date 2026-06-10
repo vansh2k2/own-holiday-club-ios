@@ -20,7 +20,6 @@ class MembershipBottomSheet {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.85,
           decoration: const BoxDecoration(
             color: AppColors.scaffoldBg,
             borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
@@ -28,6 +27,7 @@ class MembershipBottomSheet {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 15),
                 // Top Bar with Close Button
@@ -82,7 +82,8 @@ class MembershipBottomSheet {
                   ),
                 ),
                 const SizedBox(height: 35),
-                Obx(() => Expanded(
+                Obx(() => SizedBox(
+                  height: 430,
                   child: controller.isLoading.value 
                     ? Stack(
                         children: [

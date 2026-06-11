@@ -32,12 +32,13 @@ class HomeView extends GetView<HomeController> {
             // ─── Sticky Top Bar ──────────────────────────────
             Container(
               color: AppColors.primaryWhite,
-              padding: EdgeInsets.fromLTRB(16, topPad + 8, 16, 8),
+              padding: EdgeInsets.fromLTRB(16, topPad + 8, 16, 0),
               child: Row(
                 children: [
+                  const SizedBox(width: 12),
                   // Own Holiday Logo
                   Transform.scale(
-                    scale: 1.2,
+                    scale: 1.45,
                     child: Image.asset(
                       'assets/images/own-holiday-club-logo.png',
                       height: 48,
@@ -45,6 +46,24 @@ class HomeView extends GetView<HomeController> {
                     ),
                   ),
                   const Spacer(),
+                  SizedBox(
+                    height: 48,
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 2),
+                        child: Text(
+                          'Since 2012',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryBlack,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
                   // Profile Icon → opens right drawer
                   GestureDetector(
                     onTap: () => Scaffold.of(scaffoldCtx).openEndDrawer(),

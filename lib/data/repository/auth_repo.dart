@@ -57,4 +57,26 @@ class AuthRepo {
   Future<http.Response> submitSlotBooking(String userId, Map<String, dynamic> data) async {
     return await apiClient.postData("${ApiConstants.baseUrl}/profile/$userId/holiday-bookings", data);
   }
+
+  // Forgot Password
+  Future<http.Response> forgotPasswordSendOtp(String identifier) async {
+    return await apiClient.postData("${ApiConstants.baseUrl}/auth/forgot-password/send-otp", {
+      "identifier": identifier,
+    });
+  }
+
+  Future<http.Response> verifyForgotPasswordOtp(String identifier, String otp) async {
+    return await apiClient.postData("${ApiConstants.baseUrl}/auth/forgot-password/verify-otp", {
+      "identifier": identifier,
+      "otp": otp,
+    });
+  }
+
+  Future<http.Response> resetPassword(String identifier, String otp, String newPassword) async {
+    return await apiClient.putData("${ApiConstants.baseUrl}/auth/forgot-password/reset", {
+      "identifier": identifier,
+      "otp": otp,
+      "password": newPassword,
+    });
+  }
 }

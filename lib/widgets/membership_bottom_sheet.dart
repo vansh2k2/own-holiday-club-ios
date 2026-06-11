@@ -231,7 +231,7 @@ class MembershipBottomSheet {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              planColors.subtitle,
+                              plan.description?.isNotEmpty == true ? plan.description! : planColors.subtitle,
                               style: TextStyle(
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.w500,
@@ -261,18 +261,30 @@ class MembershipBottomSheet {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (plan.name.toLowerCase().contains('privilege')) ...[
-                          // Strikethrough Original Price
-                          const Text(
-                            '₹ 52,789',
-                            style: TextStyle(
-                              fontSize: 13.0,
-                              color: AppColors.greyText,
-                              fontWeight: FontWeight.w500,
-                              decoration: TextDecoration.lineThrough,
-                              decorationColor: Colors.red,
-                              decorationThickness: 1.5,
+                          if (plan.actuallyPrice != null && plan.actuallyPrice!.isNotEmpty)
+                            Text(
+                              plan.actuallyPrice!.contains('₹') ? plan.actuallyPrice! : '₹ ${plan.actuallyPrice}',
+                              style: const TextStyle(
+                                fontSize: 13.0,
+                                color: AppColors.greyText,
+                                fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.lineThrough,
+                                decorationColor: Colors.red,
+                                decorationThickness: 1.5,
+                              ),
+                            )
+                          else
+                            const Text(
+                              '₹ 52,789',
+                              style: TextStyle(
+                                fontSize: 13.0,
+                                color: AppColors.greyText,
+                                fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.lineThrough,
+                                decorationColor: Colors.red,
+                                decorationThickness: 1.5,
+                              ),
                             ),
-                          ),
                           const SizedBox(height: 2),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,7 +304,7 @@ class MembershipBottomSheet {
                                           ),
                                         ),
                                         TextSpan(
-                                          text: '₹ 1',
+                                          text: plan.price.contains('₹') ? plan.price : '₹ ${plan.price}',
                                           style: TextStyle(
                                             fontSize: 26.0,
                                             fontWeight: FontWeight.w900,
@@ -329,7 +341,7 @@ class MembershipBottomSheet {
                                   children: [
                                     const TextSpan(text: 'Admin Fee: '),
                                     TextSpan(
-                                      text: plan.adminFee != null ? '₹ ${plan.adminFee}' : '₹ 0',
+                                      text: plan.adminFee != null ? (plan.adminFee!.contains('₹') ? plan.adminFee! : '₹ ${plan.adminFee}') : '₹ 0',
                                       style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),
                                     ),
                                   ],
@@ -343,11 +355,7 @@ class MembershipBottomSheet {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                plan.name.toLowerCase().contains('memorable')
-                                    ? '₹ 2,10,789'
-                                    : plan.name.toLowerCase().contains('golden') || plan.name.toLowerCase().contains('gold')
-                                        ? '₹ 4,20,789'
-                                        : '₹ 6,30,789',
+                                plan.price.contains('₹') ? plan.price : '₹ ${plan.price}',
                                 style: TextStyle(
                                   fontSize: 26.0,
                                   fontWeight: FontWeight.w900,
@@ -362,7 +370,7 @@ class MembershipBottomSheet {
                                   children: [
                                     const TextSpan(text: 'Admin Fee: '),
                                     TextSpan(
-                                      text: plan.adminFee != null ? '₹ ${plan.adminFee}' : '₹ 0',
+                                      text: plan.adminFee != null ? (plan.adminFee!.contains('₹') ? plan.adminFee! : '₹ ${plan.adminFee}') : '₹ 0',
                                       style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),
                                     ),
                                   ],
@@ -517,6 +525,9 @@ class MembershipBottomSheet {
   }
 
   static List<String> _getCardFeatures(String? name, List<String> apiFeatures) {
+    if (apiFeatures.isNotEmpty) {
+      return apiFeatures;
+    }
     final lowercase = name?.toLowerCase() ?? '';
     if (lowercase.contains('privilege')) {
       return [

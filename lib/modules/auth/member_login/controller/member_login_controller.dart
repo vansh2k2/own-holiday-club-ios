@@ -16,6 +16,14 @@ class MemberLoginController extends GetxController {
   
   final Rxn<UserModel> user = Rxn<UserModel>();
 
+  // Forgot Password States
+  final isForgotPassword = false.obs;
+  final fpStep = 0.obs; // 0: send-otp, 1: verify-otp, 2: reset
+  final fpIdentifierController = TextEditingController();
+  final fpOtpController = TextEditingController();
+  final fpNewPasswordController = TextEditingController();
+  final isFpPasswordVisible = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -33,7 +41,8 @@ class MemberLoginController extends GetxController {
       Get.snackbar(
         'Error',
         'Please enter Member ID and Password',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
+        borderRadius: 4,
         backgroundColor: AppColors.brownAccent,
         colorText: Colors.white,
       );
@@ -64,7 +73,8 @@ class MemberLoginController extends GetxController {
         Get.snackbar(
           'Success',
           data['message'] ?? 'Login successful',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
+        borderRadius: 4,
           backgroundColor: AppColors.primaryYellow,
           colorText: Colors.white,
         );
@@ -73,6 +83,177 @@ class MemberLoginController extends GetxController {
         Get.snackbar(
           'Login Failed',
           data['message'] ?? 'Invalid credentials',
+          snackPosition: SnackPosition.TOP,
+        borderRadius: 4,
+          backgroundColor: AppColors.brownAccent,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Something went wrong. Please try again.',
+        snackPosition: SnackPosition.TOP,
+        borderRadius: 4,
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Forgot Password Methods
+  void toggleForgotPassword() {
+    isForgotPassword.value = !isForgotPassword.value;
+    fpStep.value = 0;
+    fpIdentifierController.clear();
+    fpOtpController.clear();
+    fpNewPasswordController.clear();
+  }
+
+  void sendForgotPasswordOtp() async {
+    if (fpIdentifierController.text.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please enter Membership ID or Email',
+        snackPosition: SnackPosition.TOP,
+        borderRadius: 4,
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      final response = await authRepo.forgotPasswordSendOtp(fpIdentifierController.text);
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        fpStep.value = 1;
+        Get.snackbar(
+          'Success',
+          data['message'] ?? 'OTP sent successfully to your registered email/mobile',
+          snackPosition: SnackPosition.TOP,
+        borderRadius: 4,
+          backgroundColor: AppColors.primaryYellow,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          data['message'] ?? 'Failed to send OTP',
+          snackPosition: SnackPosition.TOP,
+        borderRadius: 4,
+          backgroundColor: AppColors.brownAccent,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Something went wrong. Please try again.',
+        snackPosition: SnackPosition.TOP,
+        borderRadius: 4,
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void verifyForgotPasswordOtp() async {
+    if (fpOtpController.text.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please enter the OTP',
+        snackPosition: SnackPosition.TOP,
+        borderRadius: 4,
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      final response = await authRepo.verifyForgotPasswordOtp(
+        fpIdentifierController.text,
+        fpOtpController.text,
+      );
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        fpStep.value = 2;
+        Get.snackbar(
+          'Success',
+          data['message'] ?? 'OTP verified successfully. Set a new password now.',
+          snackPosition: SnackPosition.TOP,
+        borderRadius: 4,
+          backgroundColor: AppColors.primaryYellow,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          data['message'] ?? 'Failed to verify OTP',
+          snackPosition: SnackPosition.TOP,
+        borderRadius: 4,
+          backgroundColor: AppColors.brownAccent,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Something went wrong. Please try again.',
+        snackPosition: SnackPosition.TOP,
+        borderRadius: 4,
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void resetPassword() async {
+    if (fpOtpController.text.isEmpty || fpNewPasswordController.text.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please enter OTP and New Password',
+        snackPosition: SnackPosition.TOP,
+        borderRadius: 4,
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      final response = await authRepo.resetPassword(
+        fpIdentifierController.text,
+        fpOtpController.text,
+        fpNewPasswordController.text,
+      );
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        toggleForgotPassword();
+        Get.snackbar(
+          'Success',
+          data['message'] ?? 'Password reset successfully. Please login.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: AppColors.primaryYellow,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          data['message'] ?? 'Failed to reset password',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: AppColors.brownAccent,
           colorText: Colors.white,
@@ -95,6 +276,9 @@ class MemberLoginController extends GetxController {
   void onClose() {
     memberIdController.dispose();
     passwordController.dispose();
+    fpIdentifierController.dispose();
+    fpOtpController.dispose();
+    fpNewPasswordController.dispose();
     super.onClose();
   }
 }

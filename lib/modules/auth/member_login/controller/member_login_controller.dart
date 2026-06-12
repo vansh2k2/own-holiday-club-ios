@@ -49,6 +49,39 @@ class MemberLoginController extends GetxController {
       return;
     }
 
+    // --- Google Play Reviewer Dummy Login Bypass ---
+    if (memberIdController.text == 'google_review' && passwordController.text == 'Test@123') {
+      final dummyUser = UserModel(
+        id: 'dummy_reviewer_id',
+        name: 'Google Reviewer',
+        email: 'google_review@example.com',
+        mobile: '1234567890',
+        membershipId: 'google_review',
+        isActive: true,
+        membership: UserMembershipModel(
+           status: 'Active',
+           name: 'Premium',
+        ),
+      );
+      
+      final accountController = Get.find<AccountController>();
+      user.value = dummyUser;
+      accountController.saveUser(dummyUser);
+      
+      Get.snackbar(
+        'Success',
+        'Login successful',
+        snackPosition: SnackPosition.TOP,
+        borderRadius: 4,
+        backgroundColor: AppColors.primaryYellow,
+        colorText: Colors.white,
+      );
+      
+      Get.offAllNamed(Routes.MEMBER_DETAILS);
+      return;
+    }
+    // ------------------------------------------------
+
     isLoading.value = true;
     try {
       final response = await authRepo.login(

@@ -29,7 +29,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "rigel.ownholiday.club"
+        applicationId = "com.ownholiday.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

@@ -1127,25 +1127,31 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       if (title1.isNotEmpty)
-                        Text(
-                          _stripHtml(title1).toUpperCase().replaceAll('STAY & CELEBRATION', 'STAY\u00A0&\u00A0CELEBRATION'),
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            color: _extractColor(title1) ?? Colors.white,
-                            fontSize: 31,
-                            fontWeight: FontWeight.bold,
-                            height: 1.3,
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            _stripHtml(title1).toUpperCase().replaceAll('STAY & CELEBRATION', 'STAY\u00A0&\u00A0CELEBRATION'),
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              color: _extractColor(title1) ?? Colors.white,
+                              fontSize: 31,
+                              fontWeight: FontWeight.bold,
+                              height: 1.3,
+                            ),
                           ),
                         ),
                       if (title2.isNotEmpty)
-                        Text(
-                          _stripHtml(title2).toUpperCase().replaceAll('STAY & CELEBRATION', 'STAY\u00A0&\u00A0CELEBRATION'),
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            color: _extractColor(title2) ?? const Color(0xFFF59E0B),
-                            fontSize: 31,
-                            fontWeight: FontWeight.bold,
-                            height: 1.3,
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            _stripHtml(title2).toUpperCase().replaceAll('STAY & CELEBRATION', 'STAY\u00A0&\u00A0CELEBRATION'),
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              color: _extractColor(title2) ?? const Color(0xFFF59E0B),
+                              fontSize: 31,
+                              fontWeight: FontWeight.bold,
+                              height: 1.3,
+                            ),
                           ),
                         ),
                     ],

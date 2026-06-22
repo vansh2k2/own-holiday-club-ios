@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:own_holiday_app/utils/app_colors.dart';
 import 'package:own_holiday_app/data/repository/service_repo.dart';
 
@@ -63,7 +64,7 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
         Get.snackbar(
           "Success", 
           "Your enquiry has been submitted successfully. Our team will contact you soon.",
-          backgroundColor: AppColors.primaryYellow,
+          backgroundColor: Colors.black,
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
         );
@@ -94,249 +95,310 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
       child: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Form(
             key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 50,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: AppColors.borderGrey,
-                    borderRadius: BorderRadius.circular(10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "Request an Itinerary",
-                style: TextStyle(
-                  fontSize: 13.0,
-                  fontWeight: FontWeight.normal,
-                  color: AppColors.primaryBlack,
+                const SizedBox(height: 16),
+                Text(
+                  "Request an Itinerary",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "Complete the details below to begin planning your journey to ${widget.destination['name'] ?? widget.destination['title']}.",
-                style: TextStyle(
-                  fontSize: 12.0,
-                  color: AppColors.primaryBlack,
-                ),
-              ),
-              const SizedBox(height: 24),
-              
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      controller: _nameController,
-                      label: "Full Name",
-                      icon: Icons.person_outline,
-                      validator: (v) => v!.isEmpty ? "Required" : null,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _buildTextField(
-                      controller: _phoneController,
-                      label: "Phone Number",
-                      icon: Icons.phone_outlined,
-                      keyboardType: TextInputType.phone,
-                      validator: (v) => v!.isEmpty ? "Required" : null,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                controller: _emailController,
-                label: "Email Address",
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-                validator: (v) => v!.isEmpty || !v.contains('@') ? "Valid email required" : null,
-              ),
-              const SizedBox(height: 16),
-              
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildDatePicker(
-                      label: _startDate == null ? "Check-in" : DateFormat('MM/dd/yyyy').format(_startDate!),
-                      icon: Icons.calendar_today_outlined,
-                      onTap: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-                        );
-                        if (date != null) setState(() => _startDate = date);
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _buildDatePicker(
-                      label: _endDate == null ? "Check-out" : DateFormat('MM/dd/yyyy').format(_endDate!),
-                      icon: Icons.calendar_today_outlined,
-                      onTap: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: _startDate?.add(const Duration(days: 1)) ?? DateTime.now(),
-                          firstDate: _startDate?.add(const Duration(days: 1)) ?? DateTime.now(),
-                          lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-                        );
-                        if (date != null) setState(() => _endDate = date);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildCounterField(
-                      label: "Adults",
-                      icon: Icons.group_outlined,
-                      value: _adults,
-                      onChanged: (v) => setState(() => _adults = v),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _buildCounterField(
-                      label: "Children",
-                      icon: Icons.child_care_outlined,
-                      value: _children,
-                      onChanged: (v) => setState(() => _children = v),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              
-              _buildTextField(
-                controller: _messageController,
-                label: "Special Requests or Preferences... (Optional)",
-                maxLines: 3,
-              ),
-              const SizedBox(height: 24),
-              
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryBlack,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 0,
-                  ),
-                  onPressed: _isSubmitting ? null : _submitEnquiry,
-                  child: _isSubmitting 
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "SUBMIT INQUIRY",
-                            style: TextStyle(fontWeight: FontWeight.normal, letterSpacing: 1),
-                          ),
-                          SizedBox(width: 8),
-                          Icon(Icons.send_rounded, size: 18),
-                        ],
-                      ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Center(
-                child: Text(
-                  "YOUR INFORMATION IS STRICTLY CONFIDENTIAL.",
-                  style: TextStyle(
+                const SizedBox(height: 4),
+                Text(
+                  "Complete the details below to begin planning your journey to ${widget.destination['name'] ?? widget.destination['title']}.",
+                  style: GoogleFonts.montserrat(
                     fontSize: 12.0,
-                    color: AppColors.greyText,
-                    fontWeight: FontWeight.normal,
-                    letterSpacing: 0.5,
+                    color: Colors.grey.shade500,
+                    fontWeight: FontWeight.w300,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 20),
+                
+                _buildTextField(
+                  controller: _nameController,
+                  label: "Full Name",
+                  hint: "Enter your full name",
+                  icon: Icons.person_outline,
+                  validator: (v) => v!.isEmpty ? "Required" : null,
+                ),
+                const SizedBox(height: 16),
+                
+                _buildTextField(
+                  controller: _phoneController,
+                  label: "Phone Number",
+                  hint: "10-digit mobile number",
+                  icon: Icons.phone_outlined,
+                  keyboardType: TextInputType.phone,
+                  validator: (v) => v!.isEmpty ? "Required" : null,
+                ),
+                const SizedBox(height: 16),
+                
+                _buildTextField(
+                  controller: _emailController,
+                  label: "Email Address",
+                  hint: "you@example.com",
+                  icon: Icons.email_outlined,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (v) => v!.isEmpty || !v.contains('@') ? "Valid email required" : null,
+                ),
+                const SizedBox(height: 16),
+                
+                _buildDatePicker(
+                  label: "Arrival Date",
+                  hint: "Add date",
+                  date: _startDate,
+                  icon: Icons.calendar_today_outlined,
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+                    );
+                    if (date != null) setState(() => _startDate = date);
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildDatePicker(
+                  label: "Departure Date",
+                  hint: "Add date",
+                  date: _endDate,
+                  icon: Icons.calendar_today_outlined,
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: _startDate?.add(const Duration(days: 1)) ?? DateTime.now(),
+                      firstDate: _startDate?.add(const Duration(days: 1)) ?? DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+                    );
+                    if (date != null) setState(() => _endDate = date);
+                  },
+                ),
+                const SizedBox(height: 16),
+                
+                _buildCounterField(
+                  label: "Adults Count",
+                  icon: Icons.group_outlined,
+                  value: _adults,
+                  onChanged: (v) => setState(() => _adults = v),
+                ),
+                const SizedBox(height: 16),
+                _buildCounterField(
+                  label: "Kids (< 10 yrs)",
+                  icon: Icons.child_care_outlined,
+                  value: _children,
+                  onChanged: (v) => setState(() => _children = v),
+                ),
+                const SizedBox(height: 16),
+                
+                _buildTextField(
+                  controller: _messageController,
+                  label: "Special Requests or Preferences... (Optional)",
+                  hint: "Any specific needs or occasions...",
+                  icon: Icons.message_outlined,
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 24),
+                
+                Center(
+                  child: SizedBox(
+                    width: 160,
+                    height: 40,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0F172A),
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.grey.shade300,
+                        disabledForegroundColor: Colors.grey.shade500,
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                        elevation: 0,
+                      ),
+                      onPressed: _isSubmitting ? null : _submitEnquiry,
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              height: 16,
+                              width: 16,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "SUBMIT INQUIRY",
+                                  style: GoogleFonts.montserrat(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 11.5,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                const Icon(Icons.send_rounded, size: 12),
+                              ],
+                            ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: Text(
+                    "YOUR INFORMATION IS STRICTLY CONFIDENTIAL.",
+                    style: GoogleFonts.montserrat(
+                      fontSize: 9.0,
+                      color: Colors.grey.shade500,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
-    ),
-  );
-}
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    IconData? icon,
-    int maxLines = 1,
-    TextInputType? keyboardType,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
-      validator: validator,
-      decoration: InputDecoration(
-        hintText: label,
-        hintStyle: TextStyle(color: AppColors.greyText, fontSize: 12.0),
-        prefixIcon: icon != null ? Icon(icon, size: 20, color: AppColors.greyText) : null,
-        filled: true,
-        fillColor: AppColors.lightGrey,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.borderGrey!),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.borderGrey!),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primaryYellow),
         ),
       ),
     );
   }
 
-  Widget _buildDatePicker({required String label, required IconData icon, required VoidCallback onTap}) {
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    IconData? icon,
+    int maxLines = 1,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFEEF4FA),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        crossAxisAlignment: maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        children: [
+          if (icon != null) ...[
+            Padding(
+              padding: EdgeInsets.only(top: maxLines > 1 ? 2.0 : 0.0),
+              child: Icon(icon, size: 20, color: Colors.grey.shade600),
+            ),
+            const SizedBox(width: 12),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label.toUpperCase(),
+                  style: GoogleFonts.montserrat(
+                    fontSize: 10.0,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                TextFormField(
+                  controller: controller,
+                  maxLines: maxLines,
+                  keyboardType: keyboardType,
+                  validator: validator,
+                  style: GoogleFonts.montserrat(
+                    color: const Color(0xFF0F172A),
+                    fontSize: 13.0,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: hint,
+                    hintStyle: GoogleFonts.montserrat(
+                      color: const Color(0xFF94A3B8),
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w300,
+                    ),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 2),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDatePicker({
+    required String label,
+    required String hint,
+    required DateTime? date,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    final bool isSelected = date != null;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.lightGrey,
+          color: const Color(0xFFEEF4FA),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.borderGrey!),
         ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: AppColors.greyText),
-            const SizedBox(width: 10),
+            Icon(icon, size: 20, color: Colors.grey.shade600),
+            const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: label.contains('/') ? AppColors.primaryBlack : AppColors.greyText, 
-                  fontSize: 12.0, // Slightly smaller
-                ),
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label.toUpperCase(),
+                    style: GoogleFonts.montserrat(
+                      fontSize: 10.0,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isSelected ? DateFormat('MM/dd/yyyy').format(date!) : hint,
+                    style: GoogleFonts.montserrat(
+                      color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF94A3B8),
+                      fontSize: 13.0,
+                      fontWeight: isSelected ? FontWeight.w400 : FontWeight.w300,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
           ],
@@ -345,37 +407,77 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
     );
   }
 
-  Widget _buildCounterField({required String label, required IconData icon, required int value, required Function(int) onChanged}) {
+  Widget _buildCounterField({
+    required String label,
+    required IconData icon,
+    required int value,
+    required Function(int) onChanged,
+  }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.lightGrey,
+        color: const Color(0xFFEEF4FA),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderGrey!),
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppColors.greyText),
-          const SizedBox(width: 6),
+          Icon(icon, size: 20, color: Colors.grey.shade600),
+          const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              label, 
-              style: TextStyle(color: AppColors.greyText, fontSize: 12.0),
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label.toUpperCase(),
+                  style: GoogleFonts.montserrat(
+                    color: Colors.black87,
+                    fontSize: 10.0,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value.toString(),
+                  style: GoogleFonts.montserrat(
+                    fontWeight: FontWeight.w400,
+                    fontSize: 13.0,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 4),
           GestureDetector(
-            onTap: () { if (value > 0) onChanged(value - 1); },
-            child: Icon(Icons.remove_circle_outline, size: 18, color: AppColors.greyText),
+            onTap: () {
+              if (value > 0) onChanged(value - 1);
+            },
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Icon(Icons.remove, size: 14, color: Colors.black87),
+            ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text(value.toString(), style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 12.0)),
-          ),
+          const SizedBox(width: 8),
           GestureDetector(
-            onTap: () { onChanged(value + 1); },
-            child: const Icon(Icons.add_circle_outline, size: 18, color: AppColors.primaryYellow),
+            onTap: () {
+              onChanged(value + 1);
+            },
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Icon(Icons.add, size: 14, color: Colors.white),
+            ),
           ),
         ],
       ),

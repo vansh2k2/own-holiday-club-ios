@@ -124,9 +124,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': 'AIzaSyDarNwOH5Gfi1KseDZ82fkh2b0wn66uudg',
         },
-        body: jsonEncode({
-          'input': query,
-        }),
+        body: jsonEncode({'input': query}),
       );
 
       if (response.statusCode == 200) {
@@ -205,7 +203,10 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
           _isMobileOtpSent = true;
           _isMobileVerified = false;
         });
-        Get.snackbar("OTP Sent", body['message'] ?? "Verification OTP sent to your mobile.");
+        Get.snackbar(
+          "OTP Sent",
+          body['message'] ?? "Verification OTP sent to your mobile.",
+        );
       } else {
         Get.snackbar("Error", body['message'] ?? "Failed to send mobile OTP.");
       }
@@ -231,9 +232,15 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
         setState(() {
           _isMobileVerified = true;
         });
-        Get.snackbar("Success", body['message'] ?? "Phone number verified successfully!");
+        Get.snackbar(
+          "Success",
+          body['message'] ?? "Phone number verified successfully!",
+        );
       } else {
-        Get.snackbar("Error", body['message'] ?? "Invalid or expired OTP code.");
+        Get.snackbar(
+          "Error",
+          body['message'] ?? "Invalid or expired OTP code.",
+        );
       }
     } catch (e) {
       Get.snackbar("Error", "OTP verification failed. Please try again.");
@@ -258,7 +265,10 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
           _isEmailVerified = false;
           _isEmailSkipped = false;
         });
-        Get.snackbar("OTP Sent", body['message'] ?? "Verification OTP sent to your email.");
+        Get.snackbar(
+          "OTP Sent",
+          body['message'] ?? "Verification OTP sent to your email.",
+        );
       } else {
         Get.snackbar("Error", body['message'] ?? "Failed to send email OTP.");
       }
@@ -285,9 +295,15 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
           _isEmailVerified = true;
           _isEmailSkipped = false;
         });
-        Get.snackbar("Success", body['message'] ?? "Email address verified successfully!");
+        Get.snackbar(
+          "Success",
+          body['message'] ?? "Email address verified successfully!",
+        );
       } else {
-        Get.snackbar("Error", body['message'] ?? "Invalid or expired OTP code.");
+        Get.snackbar(
+          "Error",
+          body['message'] ?? "Invalid or expired OTP code.",
+        );
       }
     } catch (e) {
       Get.snackbar("Error", "OTP verification failed. Please try again.");
@@ -330,6 +346,24 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
   }
 
   Future<void> _submitEnquiry() async {
+    if (_nameController.text.trim().length < 2) {
+      Get.snackbar("Error", "Please enter your full name.");
+      return;
+    }
+    final mobile = _phoneController.text.trim();
+    if (mobile.length != 10) {
+      Get.snackbar("Error", "Please enter a valid 10-digit mobile number.");
+      return;
+    }
+    final email = _emailController.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      Get.snackbar("Error", "Please enter a valid email address.");
+      return;
+    }
+    if (!_isEmailVerified && !_isEmailSkipped) {
+      Get.snackbar("Error", "Please verify your email or click Skip.");
+      return;
+    }
     if (_locationController.text.trim().isEmpty) {
       Get.snackbar("Error", "Please enter a specific location.");
       return;
@@ -338,7 +372,8 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
       Get.snackbar("Error", "Please select check-in and check-out dates.");
       return;
     }
-    if (_checkOutDate!.isBefore(_checkInDate!) || _checkOutDate!.isAtSameMomentAs(_checkInDate!)) {
+    if (_checkOutDate!.isBefore(_checkInDate!) ||
+        _checkOutDate!.isAtSameMomentAs(_checkInDate!)) {
       Get.snackbar("Error", "Check-out date must be after check-in date.");
       return;
     }
@@ -362,7 +397,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
         "message": _messageController.text.trim(),
         "source": "Mobile App Side Drawer",
         "contextType": "callback-request",
-        "contextName": "Mobile Side Drawer"
+        "contextName": "Mobile Side Drawer",
       };
 
       final response = await _serviceRepo.submitGeneralEnquiry(data);
@@ -372,8 +407,9 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
         _showSuccessDialog();
       } else {
         Get.snackbar(
-          "Error", 
-          body['message'] ?? "Failed to submit enquiry. Please try again later.",
+          "Error",
+          body['message'] ??
+              "Failed to submit enquiry. Please try again later.",
           backgroundColor: AppColors.brownAccent,
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
@@ -381,7 +417,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
       }
     } catch (e) {
       Get.snackbar(
-        "Error", 
+        "Error",
         "Something went wrong. Please check your connection.",
         backgroundColor: AppColors.brownAccent,
         colorText: Colors.white,
@@ -401,33 +437,48 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.check_circle_rounded, color: Color(0xFF047857), size: 70),
+            const Icon(
+              Icons.check_circle_rounded,
+              color: Color(0xFF047857),
+              size: 70,
+            ),
             const SizedBox(height: 20),
             Text(
               "Submission Successful",
-              style: GoogleFonts.montserrat(fontSize: 16.0, fontWeight: FontWeight.bold),
+              style: GoogleFonts.montserrat(
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 10),
             Text(
               "Thank you for your interest. We will contact you shortly.",
               textAlign: TextAlign.center,
-              style: GoogleFonts.montserrat(color: AppColors.greyText, fontSize: 13),
+              style: GoogleFonts.montserrat(
+                color: AppColors.greyText,
+                fontSize: 13,
+              ),
             ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFC8102E),
+                  backgroundColor: const Color(0xFF000000),
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 onPressed: () {
                   Get.back(); // Close dialog
                   Get.back(); // Close form sheet
                 },
-                child: Text("CLOSE", style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
+                child: Text(
+                  "CLOSE",
+                  style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ],
@@ -438,10 +489,6 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredLocations = _destinations.where((d) => 
-      (d['region'] ?? '').toString().toLowerCase() == _locationType.toLowerCase()
-    ).toList();
-
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -450,7 +497,9 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
       child: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: Form(
             key: _formKey,
             child: Column(
@@ -469,7 +518,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 // Close button / title header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -482,12 +531,12 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                           style: GoogleFonts.poppins(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFFC8102E),
+                            color: const Color(0xFF000000),
                             letterSpacing: 1.5,
                           ),
                         ),
                         Text(
-                          _step == 1 ? "SEND YOUR QUERY" : "HOLIDAY PREFERENCES",
+                          "SEND YOUR QUERY",
                           style: GoogleFonts.poppins(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
@@ -497,527 +546,589 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, color: Colors.grey, size: 24),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.grey,
+                        size: 24,
+                      ),
                       onPressed: () => Get.back(),
                     ),
                   ],
                 ),
-                
-                // Red Accent line
+
+                // Accent line
                 Container(
                   width: 50,
                   height: 3,
                   margin: const EdgeInsets.only(top: 4, bottom: 20),
-                  color: const Color(0xFFC8102E),
+                  color: const Color(0xFF000000),
                 ),
 
-                // Step progress indicators
+                // Full Name
+                _buildLabel("FULL NAME"),
+                TextFormField(
+                  controller: _nameController,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF0D1321),
+                  ),
+                  decoration: _inputDecoration(
+                    "Enter full name",
+                    Icons.person_outline_rounded,
+                  ),
+                  validator: (v) => v!.isEmpty ? "Required" : null,
+                ),
+                const SizedBox(height: 18),
+
+                // Mobile Number
+                _buildLabel("MOBILE NUMBER"),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _stepIndicator(1, "Verify Info", active: _step == 1, done: _step > 1),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                        enabled: !_isMobileVerified,
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF0D1321),
+                        ),
+                        decoration: _inputDecoration(
+                          "10-digit mobile number",
+                          Icons.phone_android_rounded,
+                        ),
+                        onChanged: (val) {
+                          if (_isMobileOtpSent) {
+                            setState(() {
+                              _isMobileOtpSent = false;
+                              _mobileOtpController.clear();
+                            });
+                          }
+                        },
+                      ),
+                    ),
                     const SizedBox(width: 10),
-                    Expanded(child: Container(height: 1, color: Colors.grey[200])),
-                    const SizedBox(width: 10),
-                    _stepIndicator(2, "Preferences", active: _step == 2, done: false),
+                    _isMobileVerified
+                        ? Container(
+                            height: 40,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFECFDF5),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFF059669),
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              "✓ VERIFIED",
+                              style: GoogleFonts.poppins(
+                                color: const Color(0xFF047857),
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        : SizedBox(
+                            height: 40,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF000000),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
+                              ),
+                              onPressed: _isSendingMobileOtp
+                                  ? null
+                                  : _sendMobileOtp,
+                              child: _isSendingMobileOtp
+                                  ? const SizedBox(
+                                      width: 14,
+                                      height: 14,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text(
+                                      _isMobileOtpSent ? "RESEND" : "GET OTP",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                            ),
+                          ),
                   ],
                 ),
-                const SizedBox(height: 24),
 
-                if (_step == 1) ...[
-                  // --- STEP 1: VERIFY CONTACT INFO ---
-                  
-                  // Full Name
-                  _buildLabel("FULL NAME"),
-                  TextFormField(
-                    controller: _nameController,
-                    style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF0D1321)),
-                    decoration: _inputDecoration("Enter full name", Icons.person_outline_rounded),
-                    validator: (v) => v!.isEmpty ? "Required" : null,
-                  ),
-                  const SizedBox(height: 18),
-
-                  // Mobile Number
-                  _buildLabel("MOBILE NUMBER"),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                          enabled: !_isMobileVerified,
-                          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF0D1321)),
-                          decoration: _inputDecoration("10-digit mobile number", Icons.phone_android_rounded),
-                          onChanged: (val) {
-                            if (_isMobileOtpSent) {
-                              setState(() {
-                                _isMobileOtpSent = false;
-                                _mobileOtpController.clear();
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      _isMobileVerified
-                          ? Container(
-                              height: 40,
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFECFDF5),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: const Color(0xFF059669)),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                "✓ VERIFIED",
-                                style: GoogleFonts.poppins(color: const Color(0xFF047857), fontSize: 10, fontWeight: FontWeight.bold),
-                              ),
-                            )
-                          : SizedBox(
-                              height: 40,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0D1321),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                                ),
-                                onPressed: _isSendingMobileOtp ? null : _sendMobileOtp,
-                                child: _isSendingMobileOtp
-                                    ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                    : Text(_isMobileOtpSent ? "RESEND" : "GET OTP", style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.bold)),
-                              ),
-                            ),
-                    ],
-                  ),
-                  
-                  // Mobile OTP verification box
-                  if (_isMobileOtpSent && !_isMobileVerified) ...[
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8F9FA),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFEDEFF2)),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _mobileOtpController,
-                              keyboardType: TextInputType.number,
-                              maxLength: 6,
-                              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 3),
-                              decoration: InputDecoration(
-                                hintText: "Enter 6-digit OTP",
-                                hintStyle: GoogleFonts.poppins(fontSize: 12, letterSpacing: 0, color: Colors.grey),
-                                counterText: "",
-                                border: InputBorder.none,
-                                isDense: true,
-                              ),
-                            ),
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF059669),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                            ),
-                            onPressed: _isVerifyingMobileOtp ? null : _verifyMobileOtp,
-                            child: _isVerifyingMobileOtp
-                                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                : Text("VERIFY", style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.bold)),
-                          ),
-                        ],
-                      ),
+                // Mobile OTP verification box
+                if (_isMobileOtpSent && !_isMobileVerified) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F9FA),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFEDEFF2)),
                     ),
-                  ],
-                  const SizedBox(height: 18),
-
-                  // Email Address
-                  _buildLabel("EMAIL ADDRESS"),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          enabled: !_isEmailVerified,
-                          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF0D1321)),
-                          decoration: _inputDecoration("email@example.com", Icons.mail_outline_rounded),
-                          onChanged: (val) {
-                            if (_isEmailOtpSent || _isEmailSkipped) {
-                              setState(() {
-                                _isEmailOtpSent = false;
-                                _isEmailSkipped = false;
-                                _emailOtpController.clear();
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      (_isEmailVerified || _isEmailSkipped)
-                          ? Container(
-                              height: 40,
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
-                              decoration: BoxDecoration(
-                                color: _isEmailVerified ? const Color(0xFFECFDF5) : const Color(0xFFF1F3F5),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: _isEmailVerified ? const Color(0xFF059669) : const Color(0xFFCED4DA)),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                _isEmailVerified ? "✓ VERIFIED" : "SKIPPED",
-                                style: GoogleFonts.poppins(
-                                  color: _isEmailVerified ? const Color(0xFF047857) : const Color(0xFF495057),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            )
-                          : Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SizedBox(
-                                  height: 34,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF0D1321),
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                                    ),
-                                    onPressed: _isSendingEmailOtp ? null : _sendEmailOtp,
-                                    child: _isSendingEmailOtp
-                                        ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                        : Text(_isEmailOtpSent ? "RESEND" : "GET OTP", style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.bold)),
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                TextButton(
-                                  onPressed: _skipEmailOtp,
-                                  style: TextButton.styleFrom(
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: const Size(50, 18),
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  ),
-                                  child: Text(
-                                    "Skip",
-                                    style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey[600], decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ],
-                            ),
-                    ],
-                  ),
-                  
-                  // Email OTP verification box
-                  if (_isEmailOtpSent && !_isEmailVerified) ...[
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8F9FA),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFEDEFF2)),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _emailOtpController,
-                              keyboardType: TextInputType.number,
-                              maxLength: 6,
-                              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 3),
-                              decoration: InputDecoration(
-                                hintText: "Enter 6-digit OTP",
-                                hintStyle: GoogleFonts.poppins(fontSize: 12, letterSpacing: 0, color: Colors.grey),
-                                counterText: "",
-                                border: InputBorder.none,
-                                isDense: true,
-                              ),
-                            ),
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF059669),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                            ),
-                            onPressed: _isVerifyingEmailOtp ? null : _verifyEmailOtp,
-                            child: _isVerifyingEmailOtp
-                                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                : Text("VERIFY", style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.bold)),
-                          ),
-                          const SizedBox(width: 6),
-                          TextButton(
-                            onPressed: _skipEmailOtp,
-                            child: Text("SKIP", style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey[700])),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 30),
-
-                  // Next Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFC8102E),
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: Colors.grey[200],
-                        disabledForegroundColor: Colors.grey[400],
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        elevation: 0,
-                      ),
-                      onPressed: (_isMobileVerified && (_isEmailVerified || _isEmailSkipped))
-                          ? _handleNextStep
-                          : null,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("PREFERENCES", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1)),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.chevron_right_rounded, size: 20),
-                        ],
-                      ),
-                    ),
-                  ),
-                ] else ...[
-                  // --- STEP 2: HOLIDAY PREFERENCES ---
-                  
-                  const SizedBox(height: 18),
-                  _buildLocationAutocompleteField(),
-                  const SizedBox(height: 18),
-
-                  // Check-in & Check-out Dates
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel("CHECK-IN"),
-                            _buildDatePickerButton(
-                              label: _checkInDate == null ? "mm/dd/yyyy" : DateFormat('MM/dd/yyyy').format(_checkInDate!),
-                              onTap: () async {
-                                final date = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime.now(),
-                                  lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-                                );
-                                if (date != null) {
-                                  setState(() {
-                                    _checkInDate = date;
-                                    if (_checkOutDate != null && _checkOutDate!.isBefore(_checkInDate!)) {
-                                      _checkOutDate = null;
-                                    }
-                                  });
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel("CHECK-OUT"),
-                            _buildDatePickerButton(
-                              label: _checkOutDate == null ? "mm/dd/yyyy" : DateFormat('MM/dd/yyyy').format(_checkOutDate!),
-                              onTap: () async {
-                                final date = await showDatePicker(
-                                  context: context,
-                                  initialDate: _checkInDate?.add(const Duration(days: 1)) ?? DateTime.now(),
-                                  firstDate: _checkInDate?.add(const Duration(days: 1)) ?? DateTime.now(),
-                                  lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-                                );
-                                if (date != null) {
-                                  setState(() {
-                                    _checkOutDate = date;
-                                  });
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-
-                  // Adults & Kids dropdown
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel("ADULTS"),
-                            DropdownButtonFormField<int>(
-                              value: _adults,
-                              isExpanded: true,
-                              dropdownColor: Colors.white,
-                              style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF0D1321)),
-                              decoration: _inputDecoration(null, Icons.people_outline_rounded),
-                              items: List.generate(10, (i) => i + 1).map((n) {
-                                return DropdownMenuItem<int>(
-                                  value: n,
-                                  child: Text("$n Adult${n > 1 ? 's' : ''}"),
-                                );
-                              }).toList(),
-                              onChanged: (val) => setState(() => _adults = val ?? 1),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel("KIDS (BELOW 10 YEARS)"),
-                            DropdownButtonFormField<int>(
-                              value: _kids,
-                              isExpanded: true,
-                              dropdownColor: Colors.white,
-                              style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF0D1321)),
-                              decoration: _inputDecoration(null, Icons.child_care_rounded),
-                              items: List.generate(7, (i) => i).map((n) {
-                                return DropdownMenuItem<int>(
-                                  value: n,
-                                  child: Text("$n Kid${n != 1 ? 's' : ''}"),
-                                );
-                              }).toList(),
-                              onChanged: (val) => setState(() => _kids = val ?? 0),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-
-                  // Travel Type
-                  _buildLabel("TRAVEL TYPE"),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: ['Holiday'].map((cat) {
-                        final isSelected = _travelType == cat;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 6.0),
-                          child: InkWell(
-                            onTap: () {
-                              setState(() {
-                                _travelType = cat;
-                                _selectedBudget = _budgetOptions[_travelType]![0]['value']!;
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: isSelected ? const Color(0xFF1591DC) : Colors.white,
-                                border: Border.all(color: isSelected ? const Color(0xFF1591DC) : const Color(0xFFCED4DA)),
-                                borderRadius: BorderRadius.circular(6),
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _mobileOtpController,
+                            keyboardType: TextInputType.number,
+                            maxLength: 6,
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 3,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: "Enter 6-digit OTP",
+                              hintStyle: GoogleFonts.poppins(
+                                fontSize: 12,
+                                letterSpacing: 0,
+                                color: Colors.grey,
                               ),
-                              child: Text(
-                                cat.toUpperCase(),
+                              counterText: "",
+                              border: InputBorder.none,
+                              isDense: true,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF059669),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          onPressed: _isVerifyingMobileOtp
+                              ? null
+                              : _verifyMobileOtp,
+                          child: _isVerifyingMobileOtp
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  "VERIFY",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 18),
+
+                // Email Address
+                _buildLabel("EMAIL ADDRESS"),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        enabled: !_isEmailVerified,
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF0D1321),
+                        ),
+                        decoration: _inputDecoration(
+                          "email@example.com",
+                          Icons.mail_outline_rounded,
+                        ),
+                        onChanged: (val) {
+                          if (_isEmailOtpSent || _isEmailSkipped) {
+                            setState(() {
+                              _isEmailOtpSent = false;
+                              _isEmailSkipped = false;
+                              _emailOtpController.clear();
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    (_isEmailVerified || _isEmailSkipped)
+                        ? Container(
+                            height: 40,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: _isEmailVerified
+                                  ? const Color(0xFFECFDF5)
+                                  : const Color(0xFFF1F3F5),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: _isEmailVerified
+                                    ? const Color(0xFF059669)
+                                    : const Color(0xFFCED4DA),
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              _isEmailVerified ? "✓ VERIFIED" : "SKIPPED",
+                              style: GoogleFonts.poppins(
+                                color: _isEmailVerified
+                                    ? const Color(0xFF047857)
+                                    : const Color(0xFF495057),
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        : Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                height: 34,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF000000),
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                    ),
+                                  ),
+                                  onPressed: _isSendingEmailOtp
+                                      ? null
+                                      : _sendEmailOtp,
+                                  child: _isSendingEmailOtp
+                                      ? const SizedBox(
+                                          width: 14,
+                                          height: 14,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : Text(
+                                          _isEmailOtpSent
+                                              ? "RESEND"
+                                              : "GET OTP",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              TextButton(
+                                onPressed: _skipEmailOtp,
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: const Size(50, 18),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: Text(
+                                  "Skip",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 10,
+                                    color: Colors.grey[600],
+                                    decoration: TextDecoration.underline,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                  ],
+                ),
+
+                // Email OTP verification box
+                if (_isEmailOtpSent && !_isEmailVerified) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F9FA),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFEDEFF2)),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _emailOtpController,
+                            keyboardType: TextInputType.number,
+                            maxLength: 6,
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 3,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: "Enter 6-digit OTP",
+                              hintStyle: GoogleFonts.poppins(
+                                fontSize: 12,
+                                letterSpacing: 0,
+                                color: Colors.grey,
+                              ),
+                              counterText: "",
+                              border: InputBorder.none,
+                              isDense: true,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF059669),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          onPressed: _isVerifyingEmailOtp
+                              ? null
+                              : _verifyEmailOtp,
+                          child: _isVerifyingEmailOtp
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  "VERIFY",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                        const SizedBox(width: 6),
+                        TextButton(
+                          onPressed: _skipEmailOtp,
+                          child: Text(
+                            "SKIP",
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 18),
+
+                _buildLocationAutocompleteField(),
+                const SizedBox(height: 18),
+
+                // Check-in Date
+                _buildLabel("CHECK-IN"),
+                _buildDatePickerButton(
+                  label: _checkInDate == null
+                      ? "mm/dd/yyyy"
+                      : DateFormat('MM/dd/yyyy').format(_checkInDate!),
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(
+                        const Duration(days: 365 * 2),
+                      ),
+                    );
+                    if (date != null) {
+                      setState(() {
+                        _checkInDate = date;
+                        if (_checkOutDate != null &&
+                            _checkOutDate!.isBefore(_checkInDate!)) {
+                          _checkOutDate = null;
+                        }
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 18),
+
+                // Check-out Date
+                _buildLabel("CHECK-OUT"),
+                _buildDatePickerButton(
+                  label: _checkOutDate == null
+                      ? "mm/dd/yyyy"
+                      : DateFormat('MM/dd/yyyy').format(_checkOutDate!),
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate:
+                          _checkInDate?.add(const Duration(days: 1)) ??
+                          DateTime.now(),
+                      firstDate:
+                          _checkInDate?.add(const Duration(days: 1)) ??
+                          DateTime.now(),
+                      lastDate: DateTime.now().add(
+                        const Duration(days: 365 * 2),
+                      ),
+                    );
+                    if (date != null) {
+                      setState(() {
+                        _checkOutDate = date;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 18),
+
+                // Adults
+                _buildLabel("ADULTS"),
+                DropdownButtonFormField<int>(
+                  value: _adults,
+                  isExpanded: true,
+                  dropdownColor: Colors.white,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0D1321),
+                  ),
+                  decoration: _inputDecoration(
+                    null,
+                    Icons.people_outline_rounded,
+                  ),
+                  items: List.generate(10, (i) => i + 1).map((n) {
+                    return DropdownMenuItem<int>(
+                      value: n,
+                      child: Text("$n Adult${n > 1 ? 's' : ''}"),
+                    );
+                  }).toList(),
+                  onChanged: (val) => setState(() => _adults = val ?? 1),
+                ),
+                const SizedBox(height: 18),
+
+                // Kids
+                _buildLabel("KIDS (BELOW 10 YEARS)"),
+                DropdownButtonFormField<int>(
+                  value: _kids,
+                  isExpanded: true,
+                  dropdownColor: Colors.white,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0D1321),
+                  ),
+                  decoration: _inputDecoration(null, Icons.child_care_rounded),
+                  items: List.generate(7, (i) => i).map((n) {
+                    return DropdownMenuItem<int>(
+                      value: n,
+                      child: Text("$n Kid${n != 1 ? 's' : ''}"),
+                    );
+                  }).toList(),
+                  onChanged: (val) => setState(() => _kids = val ?? 0),
+                ),
+                const SizedBox(height: 18),
+
+                // Budget Dropdown Options
+                _buildLabel("SELECT YOUR BUDGET"),
+                DropdownButtonFormField<String>(
+                  value: _selectedBudget,
+                  dropdownColor: Colors.white,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0D1321),
+                  ),
+                  decoration: _inputDecoration(null, Icons.payments_outlined),
+                  items: _budgetOptions[_travelType]!
+                      .map<DropdownMenuItem<String>>((opt) {
+                        return DropdownMenuItem<String>(
+                          value: opt['value'],
+                          child: Text(opt['label']!),
+                        );
+                      })
+                      .toList(),
+                  onChanged: (val) =>
+                      setState(() => _selectedBudget = val ?? ''),
+                ),
+                const SizedBox(height: 18),
+
+                // Special Demands/Message
+                _buildLabel("SPECIAL DEMANDS/MESSAGE"),
+                TextFormField(
+                  controller: _messageController,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF0D1321),
+                  ),
+                  decoration: _inputDecoration(
+                    "Any special demands? Let us know!",
+                    Icons.message_outlined,
+                  ),
+                ),
+                const SizedBox(height: 30),
+
+                // Confirm button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF000000),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      elevation: 0,
+                    ),
+                    onPressed: _isSubmitting ? null : _submitEnquiry,
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "CONFIRM REQUEST",
                                 style: GoogleFonts.poppins(
-                                  fontSize: 10,
                                   fontWeight: FontWeight.bold,
-                                  color: isSelected ? Colors.white : const Color(0xFF495057),
+                                  fontSize: 12,
                                   letterSpacing: 0.5,
                                 ),
                               ),
-                            ),
+                              const SizedBox(width: 6),
+
+                              const Icon(Icons.send_rounded, size: 14),
+                            ],
                           ),
-                        );
-                      }).toList(),
-                    ),
                   ),
-                  const SizedBox(height: 10),
-
-                  // Budget Dropdown Options
-                  _buildLabel("SELECT YOUR BUDGET"),
-                  DropdownButtonFormField<String>(
-                    value: _selectedBudget,
-                    dropdownColor: Colors.white,
-                    style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF0D1321)),
-                    decoration: _inputDecoration(null, Icons.payments_outlined),
-                    items: _budgetOptions[_travelType]!.map<DropdownMenuItem<String>>((opt) {
-                      return DropdownMenuItem<String>(
-                        value: opt['value'],
-                        child: Text(opt['label']!),
-                      );
-                    }).toList(),
-                    onChanged: (val) => setState(() => _selectedBudget = val ?? ''),
-                  ),
-                  const SizedBox(height: 18),
-
-                  // Special Demands/Message
-                  _buildLabel("SPECIAL DEMANDS/MESSAGE"),
-                  TextFormField(
-                    controller: _messageController,
-                    style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF0D1321)),
-                    decoration: _inputDecoration("Any special demands? Let us know!", Icons.message_outlined),
-                  ),
-                  const SizedBox(height: 30),
-
-                  // Back & Confirm buttons
-                  Row(
-                    children: [
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFF495057),
-                          elevation: 0,
-                          side: const BorderSide(color: Color(0xFFCED4DA)),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                        ),
-                        onPressed: () => setState(() => _step = 1),
-                        icon: const Icon(Icons.chevron_left_rounded, size: 20),
-                        label: Text("BACK", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 13)),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFC8102E),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            elevation: 0,
-                          ),
-                          onPressed: _isSubmitting ? null : _submitEnquiry,
-                          child: _isSubmitting
-                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text("CONFIRM REQUEST", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
-                                    const SizedBox(width: 6),
-                                    const Icon(Icons.send_rounded, size: 14),
-                                  ],
-                                ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ],
             ),
           ),
@@ -1026,111 +1137,66 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
     );
   }
 
-  Widget _stepIndicator(int stepNum, String title, {required bool active, required bool done}) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 26,
-          height: 26,
-          decoration: BoxDecoration(
-            color: done 
-                ? const Color(0xFF047857) 
-                : (active ? const Color(0xFF0D1321) : const Color(0xFFE9ECEF)),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: done 
-                  ? const Color(0xFF047857) 
-                  : (active ? const Color(0xFF0D1321) : const Color(0xFFCED4DA)),
-              width: 1,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: done 
-              ? const Icon(Icons.check_rounded, size: 14, color: Colors.white) 
-              : Text(
-                  stepNum.toString(), 
-                  style: GoogleFonts.poppins(
-                    color: active ? Colors.white : const Color(0xFF6C757D), 
-                    fontSize: 12, 
-                    fontWeight: FontWeight.bold
-                  )
-                ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          title.toUpperCase(),
-          style: GoogleFonts.poppins(
-            color: active ? const Color(0xFF0D1321) : const Color(0xFF6C757D),
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.6,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6.0, left: 2.0),
+
       child: Text(
         text,
+
         style: GoogleFonts.poppins(
           fontSize: 9,
+
           fontWeight: FontWeight.bold,
+
           color: Colors.grey[700],
+
           letterSpacing: 1.0,
         ),
       ),
     );
   }
 
-  Widget _toggleButton(String text, {required bool isSelected, required VoidCallback onTap}) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        height: 40,
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF0D1321) : Colors.white,
-          border: Border.all(color: isSelected ? const Color(0xFF0D1321) : const Color(0xFFCED4DA)),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          text,
-          style: GoogleFonts.poppins(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            color: isSelected ? Colors.white : const Color(0xFF495057),
-            letterSpacing: 0.8,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDatePickerButton({required String label, required VoidCallback onTap}) {
+  Widget _buildDatePickerButton({
+    required String label,
+    required VoidCallback onTap,
+  }) {
     final hasDate = label != "mm/dd/yyyy";
+
     return InkWell(
       onTap: onTap,
+
       child: Container(
         height: 40,
+
         padding: const EdgeInsets.symmetric(horizontal: 10),
+
         decoration: BoxDecoration(
           color: Colors.white,
+
           borderRadius: BorderRadius.circular(10),
+
           border: Border.all(color: const Color(0xFFCED4DA)),
         ),
+
         child: Row(
           children: [
-            const Icon(Icons.calendar_month_outlined, size: 18, color: Colors.grey),
+            const Icon(
+              Icons.calendar_month_outlined,
+              size: 18,
+              color: Colors.grey,
+            ),
+
             const SizedBox(width: 8),
+
             Text(
               label,
+
               style: GoogleFonts.poppins(
                 fontSize: 11.5,
+
                 fontWeight: hasDate ? FontWeight.bold : FontWeight.normal,
+
                 color: hasDate ? const Color(0xFF0D1321) : Colors.grey,
               ),
             ),
@@ -1143,77 +1209,138 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
   Widget _buildLocationAutocompleteField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+
       children: [
         _buildLabel("SPECIFIC LOCATION"),
+
         TextFormField(
           controller: _locationController,
-          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF0D1321)),
+
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF0D1321),
+          ),
+
           decoration: InputDecoration(
             hintText: "Search precise location...",
+
             hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 12.5),
-            prefixIcon: const Icon(Icons.location_on_outlined, size: 20, color: Colors.grey),
+
+            prefixIcon: const Icon(
+              Icons.location_on_outlined,
+              size: 20,
+              color: Colors.grey,
+            ),
+
             suffixIcon: _isLoadingSuggestions
                 ? const SizedBox(
                     width: 20,
+
                     height: 20,
+
                     child: Padding(
                       padding: EdgeInsets.all(12.0),
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFC8102E)),
+
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Color(0xFF000000),
+                      ),
                     ),
                   )
                 : null,
+
             filled: true,
+
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 10,
+              horizontal: 12,
+            ),
+
             isDense: true,
+
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
+
               borderSide: const BorderSide(color: Color(0xFFCED4DA)),
             ),
+
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
+
               borderSide: const BorderSide(color: Color(0xFFCED4DA)),
             ),
+
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: AppColors.primaryYellow, width: 1.5),
+
+              borderSide: const BorderSide(
+                color: Color(0xFF000000),
+                width: 1.5,
+              ),
             ),
           ),
+
           onChanged: _onLocationChanged,
+
           validator: (v) => v!.isEmpty ? "Required" : null,
         ),
+
         if (_locationSuggestions.isNotEmpty) ...[
           const SizedBox(height: 4),
+
           Container(
             constraints: const BoxConstraints(maxHeight: 200),
+
             decoration: BoxDecoration(
               color: Colors.white,
+
               borderRadius: BorderRadius.circular(10),
+
               border: Border.all(color: const Color(0xFFCED4DA)),
+
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
+
                   blurRadius: 5,
+
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
+
             child: ListView.separated(
               shrinkWrap: true,
+
               padding: EdgeInsets.zero,
+
               itemCount: _locationSuggestions.length,
-              separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFEDEFF2)),
+
+              separatorBuilder: (context, index) =>
+                  const Divider(height: 1, color: Color(0xFFEDEFF2)),
+
               itemBuilder: (context, index) {
                 final suggestion = _locationSuggestions[index];
+
                 return ListTile(
                   dense: true,
+
                   title: Text(
                     suggestion,
-                    style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF0D1321)),
+
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: const Color(0xFF0D1321),
+                    ),
                   ),
+
                   onTap: () {
                     setState(() {
                       _locationController.text = suggestion;
+
                       _locationSuggestions = [];
                     });
                   },
@@ -1229,23 +1356,35 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
   InputDecoration _inputDecoration(String? hint, IconData icon) {
     return InputDecoration(
       hintText: hint,
+
       hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 11.5),
+
       prefixIcon: Icon(icon, size: 18, color: Colors.grey),
+
       filled: true,
+
       fillColor: Colors.white,
+
       contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+
       isDense: true,
+
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
+
         borderSide: const BorderSide(color: Color(0xFFCED4DA)),
       ),
+
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
+
         borderSide: const BorderSide(color: Color(0xFFCED4DA)),
       ),
+
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.primaryYellow, width: 1.5),
+
+        borderSide: const BorderSide(color: Color(0xFF000000), width: 1.5),
       ),
     );
   }

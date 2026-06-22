@@ -1043,7 +1043,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
           _phoneCtrl.clear();
         });
         Get.snackbar('Success', 'OTP sent to mobile number.',
-            backgroundColor: AppColors.primaryYellow, colorText: Colors.white);
+            backgroundColor: Colors.black, colorText: Colors.white);
       } else {
         final data = jsonDecode(response.body);
         Get.snackbar('Error', data['message'] ?? 'Failed to send OTP.',
@@ -1075,7 +1075,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
           _phoneCtrl.text = _tempMobile!;
         });
         Get.snackbar('Success', 'Mobile number verified successfully!',
-            backgroundColor: AppColors.primaryYellow, colorText: Colors.white);
+            backgroundColor: Colors.black, colorText: Colors.white);
       } else {
         Get.snackbar('Error', 'Invalid OTP code.',
             backgroundColor: AppColors.brownAccent, colorText: Colors.white);
@@ -1105,7 +1105,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
           _emailCtrl.clear();
         });
         Get.snackbar('Success', 'OTP sent to email.',
-            backgroundColor: AppColors.primaryYellow, colorText: Colors.white);
+            backgroundColor: Colors.black, colorText: Colors.white);
       } else {
         final data = jsonDecode(response.body);
         Get.snackbar('Error', data['message'] ?? 'Failed to send OTP.',
@@ -1137,7 +1137,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
           _emailCtrl.text = _tempEmail!;
         });
         Get.snackbar('Success', 'Email verified successfully!',
-            backgroundColor: AppColors.primaryYellow, colorText: Colors.white);
+            backgroundColor: Colors.black, colorText: Colors.white);
       } else {
         Get.snackbar('Error', 'Invalid OTP code.',
             backgroundColor: AppColors.brownAccent, colorText: Colors.white);
@@ -1157,7 +1157,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
       _isEmailSkipped = true;
     });
     Get.snackbar('Notice', 'Email OTP verification skipped.',
-        backgroundColor: AppColors.primaryYellow, colorText: Colors.white);
+        backgroundColor: Colors.black, colorText: Colors.white);
   }
 
   @override
@@ -1178,22 +1178,22 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
               Center(
                 child: Container(
                   width: 40, height: 4,
-                  decoration: BoxDecoration(color: AppColors.borderGrey, borderRadius: BorderRadius.circular(2)),
+                  decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               Text(
                 'Service Inquiry',
-                style: GoogleFonts.montserrat(fontSize: 15.0, fontWeight: FontWeight.bold, color: AppColors.primaryBlack),
+                style: GoogleFonts.montserrat(fontSize: 16.0, fontWeight: FontWeight.w600, color: Colors.black),
               ),
-              const SizedBox(height: 3),
+              const SizedBox(height: 4),
               Text(
                 'Complete the details below to inquire about ${widget.service['title']}.',
-                style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.greyText),
+                style: GoogleFonts.montserrat(fontSize: 12.0, color: Colors.grey.shade500, fontWeight: FontWeight.w300),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
               _buildField(_nameCtrl, 'Full Name', 'Enter your full name', Icons.person_outline),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
               _buildField(
                 _phoneCtrl,
                 'Phone Number',
@@ -1215,8 +1215,8 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                           'EDIT NUMBER',
                           style: GoogleFonts.montserrat(
                             fontSize: 9.5,
-                            color: AppColors.primaryYellow,
-                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500,
                             decoration: TextDecoration.underline,
                           ),
                         ),
@@ -1225,7 +1225,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                 suffixIcon: Padding(
                   padding: const EdgeInsets.only(right: 4),
                   child: _isMobileVerified
-                      ? const Icon(Icons.check_circle_rounded, color: AppColors.primaryYellow, size: 20)
+                      ? const Icon(Icons.check_circle_rounded, color: Colors.black, size: 20)
                       : _buildInlineButton(
                           label: _isMobileOtpSent ? 'VERIFY' : 'SEND OTP',
                           onTap: _isSendingMobileOtp || _isVerifyingMobileOtp
@@ -1235,7 +1235,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                         ),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
               _buildField(
                 _emailCtrl,
                 'Email Address',
@@ -1258,11 +1258,10 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                             child: Text(
                               'VERIFY INSTEAD',
                               style: GoogleFonts.montserrat(
-                                fontSize: 9.5,
-                                color: AppColors.primaryYellow,
-                                fontWeight: FontWeight.bold,
-                                decoration: TextDecoration.underline,
-                              ),
+                                  fontSize: 9.5,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                  decoration: TextDecoration.underline),
                             ),
                           )
                         : InkWell(
@@ -1270,15 +1269,14 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                             child: Text(
                               'SKIP VERIFICATION',
                               style: GoogleFonts.montserrat(
-                                fontSize: 9.5,
-                                color: AppColors.greyText,
-                                fontWeight: FontWeight.bold,
-                                decoration: TextDecoration.underline,
-                              ),
+                                  fontSize: 9.5,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                  decoration: TextDecoration.underline),
                             ),
                           )),
                 suffixIcon: _isEmailVerified
-                    ? const Icon(Icons.check_circle_rounded, color: AppColors.primaryYellow, size: 20)
+                    ? const Icon(Icons.check_circle_rounded, color: Colors.black, size: 20)
                     : (_isEmailSkipped
                         ? null
                         : Padding(
@@ -1292,75 +1290,56 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                             ),
                           )),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(child: _buildDateField('Check-In Date', 'mm/dd/yyyy', _checkIn, (d) => setState(() => _checkIn = d))),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildDateField('Check-Out Date', 'mm/dd/yyyy', _checkOut, (d) => setState(() => _checkOut = d), isOptional: true)),
-                ],
+              const SizedBox(height: 16),
+              _buildDateField('Check-In Date', 'mm/dd/yyyy', _checkIn, (d) => setState(() => _checkIn = d)),
+              const SizedBox(height: 16),
+              _buildDateField('Check-Out Date', 'mm/dd/yyyy', _checkOut, (d) => setState(() => _checkOut = d), isOptional: true),
+              const SizedBox(height: 16),
+              _buildCounter('No of Guests', _adults, (v) => setState(() => _adults = v)),
+              const SizedBox(height: 16),
+              _buildLocationAutocompleteField(),
+              const SizedBox(height: 16),
+              _buildDropdown(
+                'Select Service',
+                DropdownButton<String>(
+                  value: _selectedService,
+                  isExpanded: true,
+                  hint: Text('Select a service...', style: GoogleFonts.montserrat(fontSize: 12.0, color: Colors.grey.shade400, fontWeight: FontWeight.w300), overflow: TextOverflow.ellipsis),
+                  icon: Icon(Icons.arrow_drop_down, color: Colors.grey.shade500),
+                  items: _serviceOptions.map((svc) {
+                    return DropdownMenuItem<String>(value: svc, child: Text(svc, style: GoogleFonts.montserrat(fontSize: 13.0, color: Colors.black, fontWeight: FontWeight.w400), overflow: TextOverflow.ellipsis));
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() {
+                        _selectedService = val;
+                        _selectedCategory = null;
+                        _budget = '';
+                      });
+                    }
+                  },
+                ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(child: _buildCounter('No of Guests', _adults, (v) => setState(() => _adults = v))),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildLocationAutocompleteField()),
-                ],
+              const SizedBox(height: 16),
+              _buildDropdown(
+                'Budget',
+                DropdownButton<String>(
+                  value: _budget.isEmpty ? null : _budget,
+                  isExpanded: true,
+                  hint: Text('Select a budget...', style: GoogleFonts.montserrat(fontSize: 12.0, color: Colors.grey.shade400, fontWeight: FontWeight.w300), overflow: TextOverflow.ellipsis),
+                  icon: Icon(Icons.arrow_drop_down, color: Colors.grey.shade500),
+                  items: _selectedService != null ? (_budgetOptions[_selectedService!] ?? []).map((opt) {
+                    return DropdownMenuItem<String>(
+                      value: opt['value'],
+                      child: Text(opt['label']!, style: GoogleFonts.montserrat(fontSize: 13.0, color: Colors.black, fontWeight: FontWeight.w400), overflow: TextOverflow.ellipsis),
+                    );
+                  }).toList() : [],
+                  onChanged: _selectedService == null ? null : (val) {
+                    if (val != null) setState(() => _budget = val);
+                  },
+                ),
               ),
-              const SizedBox(height: 8),
-              // Select Service + Budget (side by side)
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildDropdown(
-                      'Select Service',
-                      DropdownButton<String>(
-                        value: _selectedService,
-                        isExpanded: true,
-                        hint: Text('Select a service...', style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.greyText.withValues(alpha: 0.6)), overflow: TextOverflow.ellipsis),
-                        icon: const Icon(Icons.arrow_drop_down, color: AppColors.greyText),
-                        items: _serviceOptions.map((svc) {
-                          return DropdownMenuItem<String>(value: svc, child: Text(svc, style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.primaryBlack), overflow: TextOverflow.ellipsis));
-                        }).toList(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            setState(() {
-                              _selectedService = val;
-                              _selectedCategory = null;
-                              _budget = '';
-                            });
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildDropdown(
-                      'Budget',
-                      DropdownButton<String>(
-                        value: _budget.isEmpty ? null : _budget,
-                        isExpanded: true,
-                        hint: Text('Select a budget...', style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.greyText.withValues(alpha: 0.6)), overflow: TextOverflow.ellipsis),
-                        icon: const Icon(Icons.arrow_drop_down, color: AppColors.greyText),
-                        items: _selectedService != null ? (_budgetOptions[_selectedService!] ?? []).map((opt) {
-                          return DropdownMenuItem<String>(
-                            value: opt['value'],
-                            child: Text(opt['label']!, style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.primaryBlack), overflow: TextOverflow.ellipsis),
-                          );
-                        }).toList() : [],
-                        onChanged: _selectedService == null ? null : (val) {
-                          if (val != null) setState(() => _budget = val);
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 8),
-              // Service Category full-width dropdown
+              const SizedBox(height: 16),
               _buildDropdown(
                 'Service Category',
                 DropdownButton<String>(
@@ -1368,15 +1347,15 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                   isExpanded: true,
                   hint: Text(
                     _selectedService == null ? 'Select a service first...' : 'Select a category...',
-                    style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.greyText.withValues(alpha: 0.6)),
+                    style: GoogleFonts.montserrat(fontSize: 12.0, color: Colors.grey.shade400, fontWeight: FontWeight.w300),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  icon: const Icon(Icons.arrow_drop_down, color: AppColors.greyText),
+                  icon: Icon(Icons.arrow_drop_down, color: Colors.grey.shade500),
                   items: _currentCategories.map((cat) {
                     final n = cat['title']?.toString() ?? cat['name']?.toString() ?? '';
                     return DropdownMenuItem<String>(
                       value: n,
-                      child: Text(n, style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.primaryBlack), overflow: TextOverflow.ellipsis),
+                      child: Text(n, style: GoogleFonts.montserrat(fontSize: 13.0, color: Colors.black, fontWeight: FontWeight.w400), overflow: TextOverflow.ellipsis),
                     );
                   }).toList(),
                   onChanged: _selectedService == null
@@ -1386,38 +1365,42 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                         },
                 ),
               ),
-
-              const SizedBox(height: 8),
-              _buildField(_msgCtrl, 'Special Requests', 'Any specific needs or occasions...', Icons.message_outlined, maxLines: 2, isOptional: true),
               const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryYellow,
-                    foregroundColor: AppColors.primaryBlack,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 0,
+              _buildField(_msgCtrl, 'Special Requests', 'Any specific needs or occasions...', Icons.message_outlined, maxLines: 2, isOptional: true),
+              const SizedBox(height: 24),
+              Center(
+                child: SizedBox(
+                  width: 160,
+                  height: 40,
+                  child: ElevatedButton(
+                    onPressed: _isSubmitting ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F172A),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.grey.shade300,
+                      disabledForegroundColor: Colors.grey.shade500,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      elevation: 0,
+                    ),
+                    child: _isSubmitting 
+                      ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('SUBMIT INQUIRY', style: GoogleFonts.montserrat(fontWeight: FontWeight.w500, fontSize: 11.5, letterSpacing: 0.5)),
+                            const SizedBox(width: 6),
+                            const Icon(Icons.send_rounded, size: 12),
+                          ],
+                        ),
                   ),
-                  child: _isSubmitting 
-                    ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryBlack))
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('SUBMIT INQUIRY', style: GoogleFonts.montserrat(fontWeight: FontWeight.bold, fontSize: 13.0, letterSpacing: 0.5)),
-                          const SizedBox(width: 6),
-                          const Icon(Icons.send_rounded, size: 14),
-                        ],
-                      ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
               Center(
                 child: Text(
                   'YOUR INFORMATION IS STRICTLY CONFIDENTIAL.',
-                  style: GoogleFonts.montserrat(fontSize: 9.0, color: AppColors.greyText, fontWeight: FontWeight.w500, letterSpacing: 0.8),
+                  style: GoogleFonts.montserrat(fontSize: 9.0, color: Colors.grey.shade500, fontWeight: FontWeight.w500, letterSpacing: 0.8),
                 ),
               ),
             ],
@@ -1442,159 +1425,63 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              isOptional ? '${label.toUpperCase()} (OPTIONAL)' : label.toUpperCase(),
-              style: GoogleFonts.montserrat(
-                fontSize: 9.0,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF4A4A4A),
-                letterSpacing: 0.8,
-              ),
-            ),
-            if (headerTrailing != null) headerTrailing,
-          ],
-        ),
-        const SizedBox(height: 4),
-        TextFormField(
-          controller: ctrl,
-          keyboardType: keyboard,
-          maxLines: maxLines,
-          readOnly: readOnly,
-          style: GoogleFonts.montserrat(fontSize: 12.0, fontWeight: FontWeight.normal, color: AppColors.primaryBlack),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.greyText.withValues(alpha: 0.6)),
-            prefixIcon: Icon(icon, size: 14, color: AppColors.greyText),
-            suffixIcon: suffixIcon,
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.lightGrey, width: 1.0),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.lightGrey, width: 1.0),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.primaryYellow, width: 1.5),
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        if (headerTrailing != null) ...[
+          Align(
+            alignment: Alignment.centerRight,
+            child: headerTrailing,
           ),
-          validator: isOptional ? null : (v) => v!.isEmpty ? 'Required' : null,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDateField(String label, String hint, DateTime? date, Function(DateTime) onSelect, {bool isOptional = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          isOptional ? '${label.toUpperCase()} (OPTIONAL)' : label.toUpperCase(),
-          style: GoogleFonts.montserrat(
-            fontSize: 9.0,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF4A4A4A),
-            letterSpacing: 0.8,
-          ),
-        ),
-        const SizedBox(height: 4),
-        InkWell(
-          onTap: () async {
-            final d = await showDatePicker(
-              context: context,
-              initialDate: DateTime.now(),
-              firstDate: DateTime.now(),
-              lastDate: DateTime.now().add(const Duration(days: 365)),
-            );
-            if (d != null) onSelect(d);
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: AppColors.lightGrey, width: 1.0),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.calendar_today_outlined, size: 14, color: AppColors.greyText),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    date == null ? hint : DateFormat('MM/dd/yyyy').format(date),
-                    style: GoogleFonts.montserrat(
-                        fontSize: date == null ? 11.5 : 12.0,
-                        color: date == null ? AppColors.greyText.withValues(alpha: 0.6) : AppColors.primaryBlack,
-                        fontWeight: FontWeight.normal),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCounter(String label, int val, Function(int) onChange, {bool isOptional = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          isOptional ? '${label.toUpperCase()} (OPTIONAL)' : label.toUpperCase(),
-          style: GoogleFonts.montserrat(
-            fontSize: 9.0,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF4A4A4A),
-            letterSpacing: 0.8,
-          ),
-        ),
-        const SizedBox(height: 4),
+          const SizedBox(height: 4),
+        ],
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5.5),
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: AppColors.lightGrey, width: 1.0),
-            borderRadius: BorderRadius.circular(8),
+            color: const Color(0xFFEEF4FA),
+            borderRadius: BorderRadius.circular(12),
           ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
             children: [
-              Icon(
-                (label.contains('Adult') || label.contains('Guest'))
-                    ? Icons.person_outline
-                    : Icons.child_care_outlined,
-                size: 14,
-                color: AppColors.greyText,
-              ),
-              Text(val.toString(), style: GoogleFonts.montserrat(fontSize: 12.0, fontWeight: FontWeight.normal, color: AppColors.primaryBlack)),
-              Row(
-                children: [
-                  InkWell(
-                    onTap: () => val > 0 ? onChange(val - 1) : null,
-                    child: const Padding(
-                      padding: EdgeInsets.all(4),
-                      child: Icon(Icons.remove, size: 14, color: AppColors.primaryBlack),
+              Icon(icon, size: 20, color: Colors.grey.shade600),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      (isOptional ? '${label} (Optional)' : label).toUpperCase(),
+                      style: GoogleFonts.montserrat(
+                        fontSize: 10.0,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  InkWell(
-                    onTap: () => onChange(val + 1),
-                    child: const Padding(
-                      padding: EdgeInsets.all(4),
-                      child: Icon(Icons.add, size: 14, color: AppColors.primaryBlack),
+                    const SizedBox(height: 4),
+                    TextFormField(
+                      controller: ctrl,
+                      keyboardType: keyboard,
+                      maxLines: maxLines,
+                      readOnly: readOnly,
+                      style: GoogleFonts.montserrat(fontSize: 13.0, fontWeight: FontWeight.w400, color: const Color(0xFF0F172A)),
+                      decoration: InputDecoration(
+                        hintText: hint,
+                        hintStyle: GoogleFonts.montserrat(fontSize: 12.0, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w300),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 2),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                      ),
+                      validator: isOptional ? null : (v) => v!.isEmpty ? 'Required' : null,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              if (suffixIcon != null) ...[
+                const SizedBox(width: 8),
+                suffixIcon,
+              ],
             ],
           ),
         ),
@@ -1602,30 +1489,169 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
     );
   }
 
+  Widget _buildDateField(String label, String hint, DateTime? date, Function(DateTime) onSelect, {bool isOptional = false}) {
+    final bool isSelected = date != null;
+    return GestureDetector(
+      onTap: () async {
+        final d = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime.now(),
+          lastDate: DateTime.now().add(const Duration(days: 365)),
+        );
+        if (d != null) onSelect(d);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFEEF4FA),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: [
+            const Icon(Icons.calendar_today_outlined, size: 20, color: Color(0xFF64748B)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    (isOptional ? '${label} (Optional)' : label).toUpperCase(),
+                    style: GoogleFonts.montserrat(
+                      fontSize: 10.0,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isSelected ? DateFormat('MM/dd/yyyy').format(date) : hint,
+                    style: GoogleFonts.montserrat(
+                      fontSize: 13.0,
+                      color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF94A3B8),
+                      fontWeight: isSelected ? FontWeight.w400 : FontWeight.w300,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCounter(String label, int val, Function(int) onChange, {bool isOptional = false}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFEEF4FA),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.person_outline,
+            size: 20,
+            color: Color(0xFF64748B),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  (isOptional ? '${label} (Optional)' : label).toUpperCase(),
+                  style: GoogleFonts.montserrat(
+                    fontSize: 10.0,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  val.toString(),
+                  style: GoogleFonts.montserrat(
+                    fontSize: 13.0,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: () {
+              if (val > 0) onChange(val - 1);
+            },
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Icon(Icons.remove, size: 14, color: Colors.black87),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () {
+              onChange(val + 1);
+            },
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Icon(Icons.add, size: 14, color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildDropdown(String label, Widget dropdown) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label.toUpperCase(),
-          style: GoogleFonts.montserrat(
-            fontSize: 9.0,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF4A4A4A),
-            letterSpacing: 0.8,
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFEEF4FA),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          const Icon(Icons.arrow_drop_down_circle_outlined, size: 20, color: Color(0xFF64748B)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label.toUpperCase(),
+                  style: GoogleFonts.montserrat(
+                    fontSize: 10.0,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                DropdownButtonHideUnderline(child: dropdown),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0.5),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: AppColors.lightGrey, width: 1.0),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: DropdownButtonHideUnderline(child: dropdown),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1644,9 +1670,10 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
           borderRadius: BorderRadius.circular(8),
           child: Container(
             height: 32,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: bgColor ?? AppColors.primaryYellow,
+              color: bgColor ?? Colors.white,
+              border: Border.all(color: Colors.black, width: 1.0),
               borderRadius: BorderRadius.circular(8),
             ),
             alignment: Alignment.center,
@@ -1656,15 +1683,15 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                     width: 12,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.primaryBlack,
+                      color: Colors.black,
                     ),
                   )
                 : Text(
                     label,
                     style: GoogleFonts.montserrat(
                       fontSize: 9.5,
-                      fontWeight: FontWeight.bold,
-                      color: textColor ?? AppColors.primaryBlack,
+                      fontWeight: FontWeight.w700,
+                      color: textColor ?? Colors.black,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -1678,51 +1705,51 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'LOCATION',
-          style: GoogleFonts.montserrat(
-            fontSize: 9.0,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF4A4A4A),
-            letterSpacing: 0.8,
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFEEF4FA),
+            borderRadius: BorderRadius.circular(12),
           ),
-        ),
-        const SizedBox(height: 4),
-        TextFormField(
-          controller: _locationCtrl,
-          style: GoogleFonts.montserrat(fontSize: 13.0, fontWeight: FontWeight.normal, color: AppColors.primaryBlack),
-          decoration: InputDecoration(
-            hintText: 'Search location...',
-            hintStyle: GoogleFonts.montserrat(fontSize: 13.0, color: AppColors.greyText),
-            prefixIcon: const Icon(Icons.location_on_outlined, size: 16, color: AppColors.greyText),
-            suffixIcon: _isLoadingSuggestions
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryYellow),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            children: [
+              const Icon(Icons.location_on_outlined, size: 20, color: Color(0xFF64748B)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'LOCATION',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 10.0,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                  )
-                : null,
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.lightGrey, width: 1.0),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.lightGrey, width: 1.0),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.primaryYellow, width: 1.5),
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    const SizedBox(height: 4),
+                    TextFormField(
+                      controller: _locationCtrl,
+                      style: GoogleFonts.montserrat(fontSize: 13.0, fontWeight: FontWeight.w400, color: const Color(0xFF0F172A)),
+                      decoration: InputDecoration(
+                        hintText: 'Search location...',
+                        hintStyle: GoogleFonts.montserrat(fontSize: 12.0, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w300),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 2),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                      ),
+                      onChanged: _onLocationChanged,
+                      validator: (v) => v!.isEmpty ? 'Required' : null,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          onChanged: _onLocationChanged,
-          validator: (v) => v!.isEmpty ? 'Required' : null,
         ),
         if (_locationSuggestions.isNotEmpty) ...[
           const SizedBox(height: 4),
@@ -1730,8 +1757,8 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
             constraints: const BoxConstraints(maxHeight: 200),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.lightGrey, width: 1.0),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFE2E8F0), width: 0.8),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
@@ -1752,7 +1779,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                   title: Text(
                     suggestion,
-                    style: GoogleFonts.montserrat(fontSize: 11, color: AppColors.primaryBlack),
+                    style: GoogleFonts.montserrat(fontSize: 11, color: Colors.black),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1826,7 +1853,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
       final success = await controller.submitServiceEnquiry(payload);
       if (success) {
         Get.back();
-        Get.snackbar('Success', 'Service inquiry submitted successfully!', backgroundColor: AppColors.primaryYellow, colorText: Colors.white);
+        Get.snackbar('Success', 'Service inquiry submitted successfully!', backgroundColor: Colors.black, colorText: Colors.white);
       } else {
         Get.snackbar('Error', 'Submission failed. Please try again.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
       }

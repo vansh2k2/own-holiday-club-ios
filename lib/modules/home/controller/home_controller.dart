@@ -20,6 +20,31 @@ class HomeController extends GetxController {
   final services = <Map<String, dynamic>>[].obs;
   final destinations = <Map<String, dynamic>>[].obs;
   final featuredExperiences = <Map<String, dynamic>>[].obs;
+  
+  // Dummy stories list for the new Trending Stories section
+  final stories = <Map<String, dynamic>>[
+    {
+      'views': '722K',
+      'title': 'Ultimate 5 Day Goa Itinerary',
+      'author': 'Apoorva Rao',
+      'imageUrl': 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=600&auto=format&fit=crop', // Goa beach dummy
+      'authorImageUrl': 'https://randomuser.me/api/portraits/women/44.jpg',
+    },
+    {
+      'views': '789K',
+      'title': '#dudhsagar water falls trail...',
+      'author': 'urs@Raju',
+      'imageUrl': 'https://images.unsplash.com/photo-1623824576307-8e6bb3b90cc0?q=80&w=600&auto=format&fit=crop', // Waterfall dummy
+      'authorImageUrl': 'https://randomuser.me/api/portraits/men/32.jpg',
+    },
+    {
+      'views': '1M',
+      'title': 'Perfect 5 days Goa Itinerary #...',
+      'author': 'Wandering M...',
+      'imageUrl': 'https://images.unsplash.com/photo-1614082242765-7c98ca0f3df3?q=80&w=600&auto=format&fit=crop', // Couple dummy
+      'authorImageUrl': 'https://randomuser.me/api/portraits/women/68.jpg',
+    },
+  ].obs;
 
   final featuredPageController = PageController(viewportFraction: 0.88);
   var currentFeaturedPage = 0.obs;

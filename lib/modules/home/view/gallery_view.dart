@@ -7,210 +7,233 @@ import '../controller/home_controller.dart';
 import 'package:own_holiday_app/utils/app_colors.dart';
 import 'package:own_holiday_app/widgets/skeleton.dart';
 
-class GalleryView extends GetView<HomeController> {
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+
+class GalleryItem {
+  final String url;
+  final String title;
+  GalleryItem(this.url, this.title);
+}
+
+class GalleryView extends StatelessWidget {
   const GalleryView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.isRegistered<HomeController>() 
+        ? Get.find<HomeController>() 
+        : Get.put(HomeController());
+
     return Scaffold(
-      backgroundColor: AppColors.primaryWhite,
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(),
-          Obx(() {
-            if (controller.isLoading.value && controller.allServicesWithGallery.isEmpty) {
-              return SliverToBoxAdapter(
+      backgroundColor: AppColors.primaryWhite, // Changed back to white
+      appBar: AppBar(
+        backgroundColor: AppColors.primaryWhite,
+        elevation: 0,
+        centerTitle: true,
+        leadingWidth: 80,
+        leading: TextButton.icon(
+          onPressed: () {
+            if (Get.previousRoute.isEmpty) {
+              Get.offAllNamed('/dashboard');
+            } else {
+              Get.back();
+            }
+          },
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primaryBlack, size: 16),
+          label: const Text('Back', style: TextStyle(color: AppColors.primaryBlack, fontSize: 14)),
+          style: TextButton.styleFrom(padding: EdgeInsets.zero),
+        ),
+      ),
+      body: Obx(() {
+        if (controller.isLoading.value && controller.allServicesWithGallery.isEmpty) {
+          // Skeleton loading
+          return Column(
+            children: [
+              const SizedBox(height: 16),
+              const Skeleton(height: 30, width: 250),
+              const SizedBox(height: 8),
+              const Skeleton(height: 16, width: 200),
+              const SizedBox(height: 24),
+              Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: List.generate(3, (index) => _buildSkeletonGroup()),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: GridView.custom(
+                    gridDelegate: SliverQuiltedGridDelegate(
+                      crossAxisCount: 4,
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 8,
+                      repeatPattern: QuiltedGridRepeatPattern.inverted,
+                      pattern: const [
+                        QuiltedGridTile(1, 1),
+                        QuiltedGridTile(1, 2),
+                        QuiltedGridTile(1, 1),
+                        QuiltedGridTile(1, 1),
+                        QuiltedGridTile(1, 1),
+                        QuiltedGridTile(1, 1),
+                        QuiltedGridTile(1, 1),
+                      ],
+                    ),
+                    childrenDelegate: SliverChildBuilderDelegate(
+                      (context, index) => const Skeleton(borderRadius: 8.0),
+                      childCount: 28, // Increased to fill the entire page with skeleton layout
+                    ),
                   ),
                 ),
-              );
-            }
-
-            if (controller.allServicesWithGallery.isEmpty) {
-              return const SliverFillRemaining(
-                child: Center(
-                  child: Text('No gallery images available.'),
-                ),
-              );
-            }
-
-            return SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final service = controller.allServicesWithGallery[index];
-                    final gallery = List<String>.from(service['gallery'] ?? []);
-                    
-                    if (gallery.isEmpty) return const SizedBox.shrink();
-
-                    return FadeInUp(
-                      delay: Duration(milliseconds: index * 100),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildSectionTitle(service['serviceTitle'] ?? 'Luxury Experience'),
-                          const SizedBox(height: 12),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: gallery.length,
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 12,
-                              crossAxisSpacing: 12,
-                              childAspectRatio: 1.2,
-                            ),
-                            itemBuilder: (context, i) => _buildGalleryImage(gallery[i]),
-                          ),
-                          const SizedBox(height: 32),
-                        ],
-                      ),
-                    );
-                  },
-                  childCount: controller.allServicesWithGallery.length,
-                ),
               ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAppBar() {
-    return SliverAppBar(
-      expandedHeight: 180,
-      floating: false,
-      pinned: true,
-      backgroundColor: AppColors.primaryWhite,
-      elevation: 0,
-      leading: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CircleAvatar(
-          backgroundColor: Colors.white.withOpacity(0.9),
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primaryBlack, size: 18),
-            onPressed: () => Get.back(),
-          ),
-        ),
-      ),
-      flexibleSpace: FlexibleSpaceBar(
-        centerTitle: true,
-        title: Text(
-          'LUXURY GALLERY',
-          style: GoogleFonts.outfit(
-            fontWeight: FontWeight.normal,
-            fontSize: 9.0,
-            color: AppColors.primaryWhite,
-            letterSpacing: 1.5,
-            shadows: [
-              Shadow(color: AppColors.primaryBlack.withOpacity(0.5), blurRadius: 10, offset: const Offset(0, 2)),
             ],
-          ),
-        ),
-        background: Stack(
-          fit: StackFit.expand,
+          );
+        }
+
+        if (controller.allServicesWithGallery.isEmpty) {
+          return const Center(
+            child: Text('No gallery images available.', style: TextStyle(color: AppColors.primaryBlack)),
+          );
+        }
+
+        // Flatten all images into GalleryItem objects
+        final List<GalleryItem> allImages = controller.allServicesWithGallery
+            .expand((s) {
+              final title = s['serviceTitle'] ?? 'Event';
+              final gallery = List<String>.from(s['gallery'] ?? []);
+              return gallery.map((url) => GalleryItem(url, title));
+            })
+            .toList();
+
+        return Column(
           children: [
-            Image.asset(
-              'assets/images/santorini_experience.png',
-              fit: BoxFit.cover,
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 40,
+                  height: 2,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.transparent, AppColors.primaryYellow],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'FULL GALLERY',
+                  style: GoogleFonts.outfit(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 2,
+                    color: AppColors.primaryBlack,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  width: 40,
+                  height: 2,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppColors.primaryYellow, Colors.transparent],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.primaryBlack.withOpacity(0.2),
-                    AppColors.primaryBlack.withOpacity(0.5),
-                  ],
+            const SizedBox(height: 8),
+            Text(
+              'A glimpse into our luxurious experiences',
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: GridView.custom(
+                  gridDelegate: SliverQuiltedGridDelegate(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    repeatPattern: QuiltedGridRepeatPattern.inverted,
+                    pattern: const [
+                      QuiltedGridTile(1, 1),
+                      QuiltedGridTile(1, 2),
+                      QuiltedGridTile(1, 1),
+                      QuiltedGridTile(1, 1),
+                      QuiltedGridTile(1, 1),
+                      QuiltedGridTile(1, 1),
+                      QuiltedGridTile(1, 1),
+                    ],
+                  ),
+                  childrenDelegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return FadeInUp(
+                        delay: Duration(milliseconds: (index % 10) * 50),
+                        child: _buildGalleryImage(allImages[index]),
+                      );
+                    },
+                    childCount: allImages.length,
+                  ),
                 ),
               ),
             ),
           ],
-        ),
-      ),
+        );
+      }),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Row(
-      children: [
-        Container(
-          width: 4,
-          height: 20,
-          decoration: BoxDecoration(
-            color: AppColors.primaryYellow,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          title.toUpperCase(),
-          style: GoogleFonts.outfit(
-            fontSize: 9.0,
-            fontWeight: FontWeight.normal,
-            color: AppColors.primaryBlack,
-            letterSpacing: 1,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGalleryImage(String url) {
+  Widget _buildGalleryImage(GalleryItem item) {
     return GestureDetector(
       onTap: () {
-        // Full screen preview if needed
+        // Full screen preview logic can be added here
       },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryBlack.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            CachedNetworkImage(
+              imageUrl: item.url,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => const Skeleton(borderRadius: 8),
+              errorWidget: (context, url, error) => Container(
+                color: AppColors.lightGrey,
+                child: const Icon(Icons.broken_image_outlined, color: AppColors.greyText),
+              ),
+            ),
+            // Gradient Overlay and Title
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(8, 20, 8, 8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.8),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+                child: Text(
+                  item.title,
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: CachedNetworkImage(
-            imageUrl: url,
-            fit: BoxFit.cover,
-            placeholder: (context, url) => const Skeleton(),
-            errorWidget: (context, url, error) => Container(
-              color: AppColors.lightGrey,
-              child: const Icon(Icons.broken_image_outlined, color: AppColors.greyText),
-            ),
-          ),
-        ),
       ),
-    );
-  }
-
-  Widget _buildSkeletonGroup() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Skeleton(height: 24, width: 150),
-        const SizedBox(height: 12),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 1.2,
-          physics: const NeverScrollableScrollPhysics(),
-          children: List.generate(4, (index) => const Skeleton(borderRadius: 16.0)),
-        ),
-        const SizedBox(height: 32),
-      ],
     );
   }
 }

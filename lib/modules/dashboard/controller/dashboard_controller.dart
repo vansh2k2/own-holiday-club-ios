@@ -11,7 +11,7 @@ class DashboardController extends GetxController {
   var currentIndex = 0.obs;
 
   final pages = [
-    const HomeView(),
+    HomeView(),
     const Center(child: Text('Membership Content')), 
     const AccountView(),
   ];

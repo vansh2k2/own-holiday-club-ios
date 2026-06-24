@@ -14,7 +14,9 @@ import 'package:own_holiday_app/widgets/general_enquiry_form.dart';
 import 'package:own_holiday_app/widgets/membership_bottom_sheet.dart';
 
 class HomeView extends GetView<HomeController> {
-  const HomeView({super.key});
+  HomeView({super.key});
+
+  final ScrollController _servicesScrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -242,203 +244,24 @@ class HomeView extends GetView<HomeController> {
 
               const SizedBox(height: 16),
 
-              // ─── Top Destinations Horizontal Scroll ───────────
-              Container(
-                width: double.infinity,
-                color: const Color(0xFFF5F7FA),
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Top Destinations',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primaryBlack,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () => Get.toNamed(Routes.DESTINATIONS_REEL),
-                            child: const Text(
-                              'View All',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primaryYellow,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      height: 265,
-                      child: Obx(() {
-                        if (controller.isLoading.value) {
-                          return ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            itemCount: 4,
-                            itemBuilder: (context, i) => Container(
-                              width: 160,
-                              margin: const EdgeInsets.only(right: 14, bottom: 4),
-                              child: Skeleton(borderRadius: 20.0),
-                            ),
-                          );
-                        }
-                        return ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          itemCount: (controller.destinations.length >= 5 ? 6 : controller.destinations.length + 1),
-                          itemBuilder: (context, i) {
-                            final bool isExploreMore = (controller.destinations.length >= 5 && i == 5) || 
-                                                    (controller.destinations.length < 5 && i == controller.destinations.length);
-                            
-                            if (isExploreMore) {
-                              return GestureDetector(
-                                onTap: () => Get.toNamed(Routes.DESTINATIONS_REEL),
-                                child: Container(
-                                  width: 160,
-                                  margin: const EdgeInsets.only(right: 14, bottom: 4),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primaryWhite,
-                                    border: Border.all(color: Colors.grey.shade300, width: 0.5),
-                                  ),
-                                  child: const Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.arrow_forward_ios_rounded, color: AppColors.primaryYellow, size: 30),
-                                      SizedBox(height: 10),
-                                      Text(
-                                        'Explore All',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 14,
-                                          color: AppColors.primaryBlack,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }
-                            final dest = controller.destinations[i];
-                            return FadeInRight(
-                              delay: Duration(milliseconds: i * 80),
-                              child: GestureDetector(
-                                onTap: () => controller.goToDestinationDetails(dest),
-                                child: Container(
-                                  width: 160,
-                                  height: 255,
-                                  margin: const EdgeInsets.only(right: 14, bottom: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.zero,
-                                    border: Border.all(color: Colors.grey.shade300, width: 0.5),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.04),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      _buildDynamicImage(
-                                        dest['image'] ?? '',
-                                        height: 150,
-                                        width: 160,
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    dest['name'] ?? dest['title'] ?? '',
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: const TextStyle(
-                                                      fontWeight: FontWeight.w600,
-                                                      fontSize: 13,
-                                                      color: AppColors.primaryBlack,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  dest['category']?.toString().toUpperCase() ?? '',
-                                                  style: GoogleFonts.montserrat(
-                                                    fontSize: 8,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: AppColors.primaryYellow,
-                                                    letterSpacing: 0.5,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              dest['tagline'] ?? dest['shortDescription'] ?? '',
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                color: AppColors.greyText,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w500,
-                                                height: 1.2,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 18),
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                              decoration: BoxDecoration(
-                                                color: AppColors.primaryYellow,
-                                                borderRadius: BorderRadius.zero,
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Text(
-                                                    'BOOK NOW',
-                                                    style: GoogleFonts.montserrat(
-                                                      fontSize: 9,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: AppColors.primaryBlack,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  const Icon(Icons.arrow_forward_ios_rounded, size: 9, color: AppColors.primaryBlack),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      }),
-                    ),
-                  ],
-                ),
-            ),
+              Obx(() {
+                final destList = controller.destinations.toList();
+                final isLoading = controller.isLoading.value;
+                return TopDestinationsSection(
+                  destinations: destList.map((d) => Destination(
+                    name: d['name'] ?? d['title'] ?? '',
+                    image: d['image'] ?? '',
+                    rawData: d,
+                  )).toList(),
+                  isLoading: isLoading && destList.isEmpty,
+                  onViewAll: () => Get.toNamed(Routes.DESTINATIONS_REEL),
+                  onDestinationTap: (dest) {
+                    if (dest.rawData != null) {
+                      controller.goToDestinationDetails(dest.rawData!);
+                    }
+                  },
+                );
+              }),
 
             const SizedBox(height: 16),
 
@@ -483,77 +306,160 @@ class HomeView extends GetView<HomeController> {
                   ],
                 ),
               ),
-              SizedBox(
-                height: 188,
-                child: Obx(() {
-                  final svcs = controller.services;
-                  if (controller.isLoading.value && svcs.isEmpty) {
-                    return ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: 5,
-                      itemBuilder: (_, i) => Container(
-                        width: 120,
-                        margin: const EdgeInsets.only(right: 12),
-                        child: const Skeleton(borderRadius: 12.0),
-                      ),
-                    );
-                  }
-                  final totalCount = svcs.length + 1; // +1 for Explore All card
-                  return ListView.builder(
-                    scrollDirection: Axis.horizontal,
+              Obx(() {
+                final svcs = controller.services;
+                if (controller.isLoading.value && svcs.isEmpty) {
+                  return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: totalCount,
-                    itemBuilder: (context, i) {
-                      if (i == svcs.length) {
-                        // Explore All Services card wrapped to match height/padding perfectly
-                        return GestureDetector(
-                          onTap: () => Get.toNamed(Routes.SERVICES_REEL),
-                          child: Container(
-                            width: 136,
-                            margin: const EdgeInsets.only(right: 12),
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppColors.borderGrey, width: 2),
-                            ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: AppColors.lightGrey,
-                                borderRadius: BorderRadius.circular(11),
-                                border: Border.all(color: AppColors.borderGrey, width: 1),
-                              ),
-                              child: const Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.grid_view_rounded, color: AppColors.primaryYellow, size: 30),
-                                  SizedBox(height: 10),
-                                  Text(
-                                    'Explore All\nServices',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.primaryBlack,
-                                      height: 1.3,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 1.1,
+                      ),
+                      itemCount: 4,
+                      itemBuilder: (_, i) => const Skeleton(borderRadius: 16.0),
+                    ),
+                  );
+                }
+
+                if (svcs.length <= 4) {
+                  // No gap on the right, no arrows, vertical grid
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 1.1,
+                      ),
+                      itemCount: svcs.length,
+                      itemBuilder: (context, i) {
+                        final svc = svcs[i];
+                        return _AnimatedVisibleCard(
+                          index: i,
+                          child: GestureDetector(
+                            onTap: () => Get.toNamed(Routes.SERVICE_DETAILS, arguments: svc),
+                            child: _BlinklitServiceCard(service: svc, index: i),
                           ),
                         );
-                      }
-                      final svc = svcs[i];
-                      return GestureDetector(
-                        onTap: () => Get.toNamed(Routes.SERVICE_DETAILS, arguments: svc),
-                        child: _BlinklitServiceCard(service: svc, index: i),
-                      );
-                    },
+                      },
+                    ),
                   );
-                }),
-              ),
+                } else {
+                  // More than 4 cards: horizontal scroll, arrows, partial card view
+                  return Column(
+                    children: [
+                      SizedBox(
+                        height: 300,
+                        child: GridView.builder(
+                          controller: _servicesScrollController,
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          physics: const BouncingScrollPhysics(),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 1.0, 
+                          ),
+                          itemCount: svcs.length,
+                          itemBuilder: (context, i) {
+                            final svc = svcs[i];
+                            return _AnimatedVisibleCard(
+                              index: i,
+                              child: GestureDetector(
+                                onTap: () => Get.toNamed(Routes.SERVICE_DETAILS, arguments: svc),
+                                child: _BlinklitServiceCard(service: svc, index: i),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // ── Next & Previous Arrows ──
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                final offset = _servicesScrollController.offset;
+                                final newOffset = offset - 150.0;
+                                _servicesScrollController.animateTo(
+                                  newOffset < 0 ? 0 : newOffset,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.grey.shade300),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: AppColors.primaryBlack),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            InkWell(
+                              onTap: () {
+                                final offset = _servicesScrollController.offset;
+                                final maxScroll = _servicesScrollController.position.maxScrollExtent;
+                                final newOffset = offset + 150.0;
+                                _servicesScrollController.animateTo(
+                                  newOffset > maxScroll ? maxScroll : newOffset,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryYellow,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }
+              }),
+
+              const SizedBox(height: 28),
+              
+              // ─── Trending Stories ──────────────────────────────
+              Obx(() => _TrendingStoriesSection(stories: controller.stories.toList())),
 
               const SizedBox(height: 28),
 
@@ -569,30 +475,12 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ),
               ),
-              SizedBox(
-                height: 340,
-                child: Obx(() {
-                  if (controller.isLoading.value && controller.featuredExperiences.isEmpty) {
-                    return ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.only(left: 20, right: 8),
-                      itemCount: 2,
-                      itemBuilder: (_, i) => Container(
-                        width: screenWidth * 0.88,
-                        margin: const EdgeInsets.only(right: 12),
-                        child: Skeleton(borderRadius: 12.0),
-                      ),
-                    );
-                  }
-                  return ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.only(left: 20, right: 8),
-                    itemCount: controller.featuredExperiences.length,
-                    itemBuilder: (_, i) =>
-                        _ExperienceCard(exp: controller.featuredExperiences[i], width: screenWidth * 0.88),
-                  );
-                }),
-              ),
+              Obx(() {
+                return _FeaturedExperiencesLayout(
+                  experiences: controller.featuredExperiences,
+                  isLoading: controller.isLoading.value,
+                );
+              }),
 
               const SizedBox(height: 110),
                   ],
@@ -1445,68 +1333,86 @@ class _BlinklitServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Curated Harmonious Bold/Dark Accent Colors matching Blinkit's Featured this week borders
-    const borderColor = Color(0xFFD4AF37); // Luxury Gold
+    final String title = service['title'] ?? '';
+    final String firstLetter = title.isNotEmpty ? title[0].toUpperCase() : 'S';
 
     return Container(
-      width: 136,
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(4), // thoda sa card se space/padding
       decoration: BoxDecoration(
-        color: Colors.transparent,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor, width: 2), // outer bold dynamic border
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.15),
+            offset: Offset(0, 4),
+            blurRadius: 8,
+          ),
+        ],
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(11),
-          boxShadow: const [
-            BoxShadow(
-              color: Color.fromRGBO(50, 50, 93, 0.25),
-              offset: Offset(0, 2),
-              blurRadius: 5,
-              spreadRadius: -1,
-            ),
-            BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.3),
-              offset: Offset(0, 1),
-              blurRadius: 3,
-              spreadRadius: -1,
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            // Full-width image fills top of card
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
-                child: _buildDynamicImage(
-                  service['image'] ?? '',
-                  height: double.infinity,
-                  width: double.infinity,
+            // Background Image
+            _buildDynamicImage(
+              service['image'] ?? '',
+              height: double.infinity,
+              width: double.infinity,
+            ),
+            // Dark Gradient Overlay for text readability
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.0),
+                      Colors.black.withOpacity(0.4),
+                      Colors.black.withOpacity(0.9),
+                    ],
+                    stops: const [0.0, 0.4, 0.7, 1.0],
+                  ),
                 ),
               ),
             ),
-            // Title label below image
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(11)),
+            // Top Left Logo Placeholder
+            Positioned(
+              top: 12,
+              left: 12,
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    firstLetter,
+                    style: const TextStyle(
+                      color: AppColors.primaryYellow,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
               ),
+            ),
+            // Bottom Left Text
+            Positioned(
+              bottom: 12,
+              left: 12,
+              right: 12,
               child: Text(
-                service['title'] ?? '',
+                title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryBlack,
-                  height: 1.3,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  height: 1.2,
                 ),
               ),
             ),
@@ -1516,3 +1422,760 @@ class _BlinklitServiceCard extends StatelessWidget {
     );
   }
 }
+
+// ── Animated Visible Card (Scroll Triggered) ──────────────────────────────
+class _AnimatedVisibleCard extends StatefulWidget {
+  final Widget child;
+  final int index;
+  const _AnimatedVisibleCard({required this.child, required this.index});
+
+  @override
+  State<_AnimatedVisibleCard> createState() => _AnimatedVisibleCardState();
+}
+
+class _AnimatedVisibleCardState extends State<_AnimatedVisibleCard> {
+  bool _isVisible = false;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(milliseconds: 150), (timer) {
+      _checkVisibility();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkVisibility());
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _checkVisibility() {
+    if (_isVisible || !mounted) return;
+    final renderObject = context.findRenderObject();
+    if (renderObject is RenderBox && renderObject.hasSize) {
+      final position = renderObject.localToGlobal(Offset.zero);
+      final screenHeight = MediaQuery.of(context).size.height;
+      // Trigger only when it comes well into the screen (100px above bottom edge)
+      if (position.dy < screenHeight - 100) { 
+        setState(() {
+          _isVisible = true;
+        });
+        _timer?.cancel();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isVisible) {
+      return Opacity(opacity: 0.0, child: widget.child);
+    }
+    
+    Widget animated;
+    switch (widget.index % 4) {
+      case 0:
+        animated = SlideInLeft(duration: const Duration(milliseconds: 700), child: widget.child);
+        break;
+      case 1:
+        animated = SlideInRight(duration: const Duration(milliseconds: 700), child: widget.child);
+        break;
+      case 2:
+        animated = SlideInUp(duration: const Duration(milliseconds: 700), child: widget.child);
+        break;
+      case 3:
+      default:
+        animated = ZoomIn(duration: const Duration(milliseconds: 700), child: widget.child);
+        break;
+    }
+    return animated;
+  }
+}
+
+// ── Custom Masonry Layout for Featured Experiences ──────────────────────────
+class _FeaturedExperiencesLayout extends StatelessWidget {
+  final List<dynamic> experiences;
+  final bool isLoading;
+
+  const _FeaturedExperiencesLayout({
+    required this.experiences,
+    required this.isLoading,
+  });
+
+  Widget _buildItem(int index, {double? width, double? height, bool isCircle = false}) {
+    if (isLoading || index >= experiences.length) {
+      if (isCircle) {
+        return Container(
+          width: width, height: height,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey.shade200,
+            border: Border.all(color: Colors.white, width: 4),
+          ),
+          child: const Skeleton(borderRadius: 100),
+        );
+      }
+      return Skeleton(width: width, height: height, borderRadius: 8.0);
+    }
+
+    final exp = experiences[index];
+    final title = exp['title'] ?? exp['serviceTitle'] ?? '';
+    final imageUrl = exp['image'] ?? exp['imageUrl'] ?? '';
+
+    Widget imageWidget = CachedNetworkImage(
+      imageUrl: imageUrl,
+      fit: BoxFit.cover,
+      width: width,
+      height: height,
+      placeholder: (context, url) => Skeleton(width: width, height: height, borderRadius: isCircle ? 100 : 8.0),
+      errorWidget: (context, url, error) => Container(color: Colors.grey.shade300, width: width, height: height),
+    );
+
+    if (isCircle) {
+      return Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 4),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4)),
+          ],
+        ),
+        child: ClipOval(child: imageWidget),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            SizedBox(width: width, height: height, child: imageWidget),
+            Positioned(
+              bottom: 0, left: 0, right: 0,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(8, 24, 8, 8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [Colors.black.withOpacity(0.8), Colors.transparent],
+                  ),
+                ),
+                child: Text(
+                  title,
+                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500),
+                  maxLines: 1, overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          // Top Row (2 images)
+          Row(
+            children: [
+              Expanded(child: SizedBox(height: 110, child: _buildItem(0))),
+              const SizedBox(width: 8),
+              Expanded(child: SizedBox(height: 110, child: _buildItem(1))),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Bottom Area
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Left tall image (takes roughly 40% width)
+                Expanded(
+                  flex: 40,
+                  child: _buildItem(2, height: double.infinity),
+                ),
+                const SizedBox(width: 8),
+                // Right grid area (takes roughly 60% width)
+                Expanded(
+                  flex: 60,
+                  child: AspectRatio(
+                    aspectRatio: 1.0, // Ensures the right container is a perfect square, making the 4 images squares too
+                    child: Stack(
+                      children: [
+                        Column(
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Expanded(child: _buildItem(3)),
+                                  const SizedBox(width: 8),
+                                  Expanded(child: _buildItem(4)),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Expanded(child: _buildItem(5)),
+                                  const SizedBox(width: 8),
+                                  Expanded(child: _buildItem(6)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        // Center overlapping circle
+                        Center(
+                          child: _buildItem(7, width: 80, height: 80, isCircle: true),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          // View Full Gallery Button
+          Container(
+            width: double.infinity,
+            height: 46,
+            decoration: BoxDecoration(
+              color: AppColors.primaryYellow,
+              borderRadius: BorderRadius.circular(23),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(23),
+                onTap: () => Get.toNamed('/gallery'),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'View Full Gallery',
+                        style: TextStyle(
+                          color: AppColors.primaryBlack,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.arrow_forward_rounded, color: AppColors.primaryBlack, size: 18),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Trending Stories Section ────────────────────────────────────────────────
+class _TrendingStoriesSection extends StatelessWidget {
+  final List<dynamic> stories;
+  
+  const _TrendingStoriesSection({required this.stories});
+
+  @override
+  Widget build(BuildContext context) {
+    if (stories.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FadeInUp(
+          duration: const Duration(milliseconds: 600),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Trending Shorts',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryBlack,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Container(
+                  height: 3,
+                  width: 50,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryYellow,
+                    borderRadius: BorderRadius.circular(1.5),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        FadeInUp(
+          delay: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 600),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            child: Row(
+              children: [
+                const Text(
+                  'Powered By ',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Icon(Icons.play_circle_fill, color: Colors.red.shade600, size: 14),
+                const SizedBox(width: 2),
+                const Text(
+                  'Shorts',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primaryBlack,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 260,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            itemCount: stories.length,
+            itemBuilder: (context, index) {
+              final story = stories[index];
+              return FadeInRight(
+                delay: Duration(milliseconds: 300 + (index * 100)),
+                duration: const Duration(milliseconds: 600),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                    Container(
+                      width: 135,
+                      height: 220,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            CachedNetworkImage(
+                              imageUrl: story['imageUrl'] ?? '',
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => const Skeleton(),
+                              errorWidget: (context, url, error) => Container(color: Colors.grey.shade300),
+                            ),
+                            // Dark gradient at bottom
+                            Positioned(
+                              bottom: 0, left: 0, right: 0,
+                              height: 80,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.bottomCenter,
+                                    end: Alignment.topCenter,
+                                    colors: [Colors.black.withOpacity(0.8), Colors.transparent],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Views chip
+                            Positioned(
+                              top: 8, left: 8,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.remove_red_eye_outlined, color: Colors.white, size: 12),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      story['views'] ?? '',
+                                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            // Title
+                            Positioned(
+                              bottom: 12, left: 10, right: 10,
+                              child: Text(
+                                story['title'] ?? '',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Author info
+                    SizedBox(
+                      width: 135,
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 9,
+                            backgroundImage: CachedNetworkImageProvider(story['authorImageUrl'] ?? ''),
+                            backgroundColor: Colors.grey.shade300,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              story['author'] ?? '',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Destination Model ─────────────────────────────────────────────────────────
+class Destination {
+  final String name;
+  final String image;
+  final Map<String, dynamic>? rawData;
+  const Destination({required this.name, required this.image, this.rawData});
+}
+
+// ─── Top Destinations Section Widget ──────────────────────────────────────────
+class TopDestinationsSection extends StatelessWidget {
+  final List<Destination> destinations;
+  final bool isLoading;
+  final VoidCallback? onViewAll;
+  final void Function(Destination dest)? onDestinationTap;
+
+  const TopDestinationsSection({
+    super.key,
+    required this.destinations,
+    this.isLoading = false,
+    this.onViewAll,
+    this.onDestinationTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: const Color(0xFFFFF9F0),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Decorated Title ──
+          _buildTitle(),
+          const SizedBox(height: 6),
+
+          // ── Subtitle ──
+          Text(
+            'Discover the most unique destinations curated just for you!',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: 11,
+              color: Colors.grey.shade600,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // ── Cards Row ──
+          SizedBox(
+            height: 168,
+            child: isLoading ? _buildSkeletonRow() : _buildCardsRow(),
+          ),
+
+          // ── View All ──
+          _buildViewAll(),
+        ],
+      ),
+    );
+  }
+
+  // ── Title Row ──────────────────────────────────────────────────────────────
+  Widget _buildTitle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(width: 18, height: 1.5, color: AppColors.primaryYellow),
+        const SizedBox(width: 6),
+        const Icon(Icons.auto_awesome, size: 11, color: AppColors.primaryYellow),
+        const SizedBox(width: 8),
+        Text(
+          'TOP DESTINATIONS',
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.3,
+            color: AppColors.primaryBlack,
+          ),
+        ),
+        const SizedBox(width: 8),
+        const Icon(Icons.auto_awesome, size: 11, color: AppColors.primaryYellow),
+        const SizedBox(width: 6),
+        Container(width: 18, height: 1.5, color: AppColors.primaryYellow),
+      ],
+    );
+  }
+
+  // ── Skeleton Loading Row ───────────────────────────────────────────────────
+  Widget _buildSkeletonRow() {
+    return Row(
+      children: List.generate(3, (i) {
+        return Expanded(
+          child: Container(
+            margin: EdgeInsets.only(right: i < 2 ? 10 : 0),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(13),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  // ── Cards Horizontal List ──────────────────────────────────────────────────
+  Widget _buildCardsRow() {
+    final int maxVisible = destinations.length > 5 ? 5 : destinations.length;
+    final bool showExplore = true;
+
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      itemCount: maxVisible + (showExplore ? 1 : 0),
+      itemBuilder: (context, i) {
+        if (i == maxVisible) return _buildExploreCard();
+        final dest = destinations[i];
+        return FadeInRight(
+          delay: Duration(milliseconds: i * 80),
+          child: _buildDestCard(dest, i),
+        );
+      },
+    );
+  }
+
+  // ── Single Destination Card ────────────────────────────────────────────────
+  Widget _buildDestCard(Destination dest, int index) {
+    return GestureDetector(
+      onTap: () => onDestinationTap?.call(dest),
+      child: Container(
+        width: 118,
+        margin: const EdgeInsets.only(right: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(13),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.18),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(13),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // ── Image ──
+              _buildImage(dest.image),
+
+              // ── Dark Gradient Overlay ──
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.75),
+                    ],
+                    stops: const [0.45, 1.0],
+                  ),
+                ),
+              ),
+
+              // ── Destination Name ──
+              Positioned(
+                bottom: 10,
+                left: 10,
+                right: 6,
+                child: Text(
+                  dest.name,
+                  maxLines: 2,
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    height: 1.25,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── Image Builder ──────────────────────────────────────
+  Widget _buildImage(String url) {
+    if (url.startsWith('http')) {
+      return CachedNetworkImage(
+        imageUrl: url,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => Container(color: Colors.grey.shade200),
+        errorWidget: (_, __, ___) => _imageFallback(),
+      );
+    }
+    if (url.isNotEmpty) {
+      return Image.asset(url, fit: BoxFit.cover);
+    }
+    return _imageFallback();
+  }
+
+  Widget _imageFallback() {
+    return Container(
+      color: Colors.grey.shade300,
+      child: const Icon(Icons.image_not_supported, color: Colors.white54, size: 32),
+    );
+  }
+
+  // ── Explore All Card ───────────────────────────────────────────────────────
+  Widget _buildExploreCard() {
+    return GestureDetector(
+      onTap: onViewAll,
+      child: Container(
+        width: 90,
+        margin: const EdgeInsets.only(right: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: Colors.grey.shade300, width: 1.5),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: AppColors.primaryYellow,
+              size: 26,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Explore\nAll',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+                color: AppColors.primaryBlack,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── View All Row ───────────────────────────────────────────────────────────
+  Widget _buildViewAll() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 0),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: GestureDetector(
+          onTap: onViewAll,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'View All',
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF1565C0), // AppColors.viewAllBlue mapping
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(
+                Icons.arrow_circle_right_outlined,
+                size: 18,
+                color: Color(0xFF1565C0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+

@@ -20,31 +20,12 @@ class HomeController extends GetxController {
   final services = <Map<String, dynamic>>[].obs;
   final destinations = <Map<String, dynamic>>[].obs;
   final featuredExperiences = <Map<String, dynamic>>[].obs;
+  final appGalleryImages = <Map<String, dynamic>>[].obs;
   
-  // Dummy stories list for the new Trending Stories section
-  final stories = <Map<String, dynamic>>[
-    {
-      'views': '722K',
-      'title': 'Ultimate 5 Day Goa Itinerary',
-      'author': 'Apoorva Rao',
-      'imageUrl': 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=600&auto=format&fit=crop', // Goa beach dummy
-      'authorImageUrl': 'https://randomuser.me/api/portraits/women/44.jpg',
-    },
-    {
-      'views': '789K',
-      'title': '#dudhsagar water falls trail...',
-      'author': 'urs@Raju',
-      'imageUrl': 'https://images.unsplash.com/photo-1623824576307-8e6bb3b90cc0?q=80&w=600&auto=format&fit=crop', // Waterfall dummy
-      'authorImageUrl': 'https://randomuser.me/api/portraits/men/32.jpg',
-    },
-    {
-      'views': '1M',
-      'title': 'Perfect 5 days Goa Itinerary #...',
-      'author': 'Wandering M...',
-      'imageUrl': 'https://images.unsplash.com/photo-1614082242765-7c98ca0f3df3?q=80&w=600&auto=format&fit=crop', // Couple dummy
-      'authorImageUrl': 'https://randomuser.me/api/portraits/women/68.jpg',
-    },
-  ].obs;
+  final trendingShorts = <Map<String, dynamic>>[].obs;
+  var isShortsLoading = true.obs;
+  
+
 
   final featuredPageController = PageController(viewportFraction: 0.88);
   var currentFeaturedPage = 0.obs;
@@ -64,6 +45,8 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     fetchHomeData();
+    fetchAppGallery();
+    fetchTrendingShorts();
     _startHeroAutoPlay();
   }
 
@@ -137,7 +120,7 @@ class HomeController extends GetxController {
           allPortfolioImages.value = mixedImages;
           
           // Map categories with their galleries for featured experiences
-          featuredExperiences.value = fetchedServices.where((svc) => svc['gallery'] != null && (svc['gallery'] as List).isNotEmpty).toList();
+          // featuredExperiences.value = fetchedServices.where((svc) => svc['gallery'] != null && (svc['gallery'] as List).isNotEmpty).toList();
         }
       }
 
@@ -179,6 +162,89 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       print('Error fetching Hero Slides: $e');
+    }
+  }
+
+  Future<void> fetchAppGallery() async {
+    try {
+      print('--- 🚀 [API REQUEST] GET APP GALLERY ---');
+      print('🔗 URL: https://api.ownholidayclub.com/api/app-gallery');
+      var response = await serviceRepo.getAppGallery();
+      print('✅ APP GALLERY STATUS CODE: ${response.statusCode}');
+      print('📦 APP GALLERY RESPONSE BODY: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        var body = jsonDecode(response.body);
+        if (body['success'] == true && body['data'] != null) {
+          var data = body['data'];
+          List<Map<String, dynamic>> tempGalleryImages = [];
+          
+          if (data['featuredImages'] != null && (data['featuredImages'] as List).isNotEmpty) {
+            var fImgs = List<Map<String, dynamic>>.from(data['featuredImages'].map((item) => {
+              'title': item['text'] ?? '',
+              'image': item['image'] != null ? item['image']['url'] ?? '' : '',
+            }));
+            if (fImgs.length > 8) {
+              featuredExperiences.value = fImgs.sublist(0, 8);
+              tempGalleryImages.addAll(fImgs.sublist(8).map((item) => {
+                'title': item['title'],
+                'url': item['image'],
+              }));
+            } else {
+              featuredExperiences.value = fImgs;
+            }
+          } else {
+            // Fallback to old logic if no featured images are found in the App Gallery API
+            featuredExperiences.value = allServicesWithGallery.where((svc) => svc['gallery'] != null && (svc['gallery'] as List).isNotEmpty).toList();
+          }
+
+          if (data['fullGalleryImages'] != null && (data['fullGalleryImages'] as List).isNotEmpty) {
+            var gImgs = List<Map<String, dynamic>>.from(data['fullGalleryImages'].map((item) => {
+              'title': item['text'] ?? '',
+              'url': item['image'] != null ? item['image']['url'] ?? '' : '',
+            }));
+            tempGalleryImages.addAll(gImgs);
+          } else if (tempGalleryImages.isEmpty) {
+            // Fallback to old logic if no gallery images are found
+            var fallbackGallery = allServicesWithGallery.expand((s) {
+              final title = s['serviceTitle'] ?? 'Event';
+              final gallery = List<String>.from(s['gallery'] ?? []);
+              return gallery.map((url) => {'title': title, 'url': url});
+            }).toList();
+            tempGalleryImages.addAll(fallbackGallery);
+          }
+          appGalleryImages.value = tempGalleryImages;
+          print('✅ Processed ${featuredExperiences.length} featured images and ${appGalleryImages.length} gallery images');
+        } else {
+          print('❌ API Returned Success=False or Data=null');
+        }
+      } else {
+        print('❌ API Failed with Status Code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ Error fetching App Gallery: $e');
+    }
+  }
+
+  Future<void> fetchTrendingShorts() async {
+    isShortsLoading.value = true;
+    try {
+      print('--- 🚀 [API REQUEST] GET TRENDING SHORTS ---');
+      print('🔗 URL: https://api.ownholidayclub.com/api/app-video-gallery');
+      var response = await serviceRepo.getAppVideoGallery();
+      print('✅ STATUS CODE: ${response.statusCode}');
+      print('📦 RESPONSE BODY: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        var body = jsonDecode(response.body);
+        if (body['success'] == true && body['data'] != null && body['data']['videos'] != null) {
+          trendingShorts.value = List<Map<String, dynamic>>.from(body['data']['videos']);
+        }
+      }
+    } catch (e) {
+      print('Error fetching trending shorts: $e');
+    } finally {
+      isShortsLoading.value = false;
     }
   }
 

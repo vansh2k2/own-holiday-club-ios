@@ -29,6 +29,7 @@ import 'package:own_holiday_app/modules/home/view/faq_view.dart';
 import 'package:own_holiday_app/modules/home/view/destination_details_view.dart';
 import 'package:own_holiday_app/modules/home/view/service_details_view.dart';
 import 'package:own_holiday_app/modules/home/view/services_reel_view.dart';
+import 'package:own_holiday_app/modules/home/view/shorts_reel_view.dart';
 import 'package:own_holiday_app/modules/account/view/privacy_policy_view.dart';
 import 'package:own_holiday_app/modules/account/view/about_us_view.dart';
 
@@ -137,6 +138,10 @@ class AppPages {
     GetPage(
       name: _Paths.SERVICES_REEL,
       page: () => const ServicesReelView(),
+    ),
+    GetPage(
+      name: _Paths.SHORTS_REEL,
+      page: () => const ShortsReelView(),
     ),
     GetPage(
       name: _Paths.PRIVACY_POLICY,

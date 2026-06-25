@@ -63,6 +63,14 @@ class ServiceRepo {
     return await apiClient.getData("https://api.ownholidayclub.com/api/cms/pages");
   }
 
+  Future<http.Response> getAppGallery() async {
+    return await apiClient.getData("https://api.ownholidayclub.com/api/app-gallery");
+  }
+
+  Future<http.Response> getAppVideoGallery() async {
+    return await apiClient.getData("https://api.ownholidayclub.com/api/app-video-gallery");
+  }
+
   Future<http.Response> getHeroSlides() async {
     return await apiClient.getData(ApiConstants.heroSlides);
   }

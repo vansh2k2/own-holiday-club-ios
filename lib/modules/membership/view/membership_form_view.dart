@@ -27,7 +27,7 @@ class MembershipFormView extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryYellow,
                 foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 elevation: 0,
               ),
@@ -112,12 +112,8 @@ class MembershipFormView extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(color: const Color(0xFF1565C0), borderRadius: BorderRadius.circular(6)),
-                                    child: const Icon(Icons.account_balance_wallet, size: 10, color: Colors.white),
-                                  ),
-                                  const SizedBox(width: 6),
+                                  
+                                  
                                   Expanded(
                                     child: Text(
                                       'TOTAL PAYABLE',
@@ -320,7 +316,7 @@ class MembershipFormView extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 SizedBox(
-                  height: 44,
+                  height: 38,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryYellow,
@@ -376,7 +372,7 @@ class MembershipFormView extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 SizedBox(
-                  height: 44,
+                  height: 38,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryYellow,
@@ -665,7 +661,7 @@ class MembershipFormView extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: const Color(0xFFCED4DA)),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(5),
                       ),
                       child: Row(
                         children: [
@@ -676,7 +672,7 @@ class MembershipFormView extends StatelessWidget {
                               alignment: Alignment.center,
                               decoration: const BoxDecoration(
                                 color: Color(0xFFF1F3F5),
-                                borderRadius: BorderRadius.horizontal(left: Radius.circular(7)),
+                                borderRadius: BorderRadius.horizontal(left: Radius.circular(4)),
                                 border: Border(right: BorderSide(color: Color(0xFFCED4DA))),
                               ),
                               child: Row(
@@ -834,12 +830,12 @@ class MembershipFormView extends StatelessWidget {
         Obx(() => GestureDetector(
           onTap: () => _showCountryPicker(rxValue, controller),
           child: Container(
-            height: 44,
+            height: 38,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(color: const Color(0xFFCED4DA)),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(5),
             ),
             child: Row(
               children: [
@@ -851,7 +847,7 @@ class MembershipFormView extends StatelessWidget {
                   child: Text(
                     rxValue.value ?? 'Select Country',
                     style: GoogleFonts.poppins(
-                      fontSize: 12,
+                      fontSize: 13,
                       fontWeight: rxValue.value != null ? FontWeight.bold : FontWeight.normal,
                       color: rxValue.value != null ? const Color(0xFF0D1321) : Colors.grey,
                     ),
@@ -915,15 +911,15 @@ class MembershipFormView extends StatelessWidget {
                           prefixIcon: const Icon(Icons.search, color: AppColors.greyText, size: 18),
                           contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(5),
                             borderSide: const BorderSide(color: AppColors.lightGrey),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(5),
                             borderSide: const BorderSide(color: AppColors.lightGrey),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(5),
                             borderSide: const BorderSide(color: AppColors.primaryYellow),
                           ),
                         ),
@@ -998,7 +994,7 @@ class MembershipFormView extends StatelessWidget {
           onTap: onTap,
           autofillHints: autofillHints,
           style: GoogleFonts.poppins(
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF0D1321),
           ),
@@ -1007,7 +1003,7 @@ class MembershipFormView extends StatelessWidget {
             hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 11.5),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+            contentPadding: const EdgeInsets.symmetric(vertical: 9, horizontal: 8),
             isDense: true,
             prefixIcon: prefixIcon != null
                 ? Padding(
@@ -1027,15 +1023,15 @@ class MembershipFormView extends StatelessWidget {
                   )
                 : null,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(5),
               borderSide: const BorderSide(color: Color(0xFFCED4DA)),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(5),
               borderSide: const BorderSide(color: Color(0xFFCED4DA)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(5),
               borderSide: const BorderSide(color: Color(0xFF000000), width: 1.5),
             ),
           ),
@@ -1098,7 +1094,7 @@ class MembershipFormView extends StatelessWidget {
           isExpanded: true,
           dropdownColor: Colors.white,
           style: GoogleFonts.poppins(
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF0D1321),
           ),
@@ -1107,7 +1103,7 @@ class MembershipFormView extends StatelessWidget {
             hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 11.5),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(vertical: 9.0, horizontal: 12),
+            contentPadding: const EdgeInsets.symmetric(vertical: 7, horizontal: 8),
             isDense: true,
             prefixIcon: prefixIcon != null
                 ? Padding(
@@ -1120,15 +1116,15 @@ class MembershipFormView extends StatelessWidget {
               minHeight: 0,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(5),
               borderSide: BorderSide(color: isHighlight ? AppColors.primaryYellow : const Color(0xFFCED4DA)),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(5),
               borderSide: BorderSide(color: isHighlight ? AppColors.primaryYellow : const Color(0xFFCED4DA)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(5),
               borderSide: const BorderSide(color: Color(0xFF000000), width: 1.5),
             ),
           ),
@@ -1158,7 +1154,7 @@ class MembershipFormView extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(color: const Color(0xFFCED4DA)),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(5),
           ),
           child: Row(
             children: [
@@ -1169,7 +1165,7 @@ class MembershipFormView extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: const BoxDecoration(
                     color: Color(0xFFF1F3F5),
-                    borderRadius: BorderRadius.horizontal(left: Radius.circular(7)),
+                    borderRadius: BorderRadius.horizontal(left: Radius.circular(4)),
                     border: Border(right: BorderSide(color: Color(0xFFCED4DA))),
                   ),
                   child: Row(

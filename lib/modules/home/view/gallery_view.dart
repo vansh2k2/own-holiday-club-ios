@@ -45,7 +45,7 @@ class GalleryView extends StatelessWidget {
         ),
       ),
       body: Obx(() {
-        if (controller.isLoading.value && controller.allServicesWithGallery.isEmpty) {
+        if (controller.isLoading.value && controller.appGalleryImages.isEmpty) {
           // Skeleton loading
           return Column(
             children: [
@@ -84,19 +84,15 @@ class GalleryView extends StatelessWidget {
           );
         }
 
-        if (controller.allServicesWithGallery.isEmpty) {
+        if (controller.appGalleryImages.isEmpty) {
           return const Center(
             child: Text('No gallery images available.', style: TextStyle(color: AppColors.primaryBlack)),
           );
         }
 
-        // Flatten all images into GalleryItem objects
-        final List<GalleryItem> allImages = controller.allServicesWithGallery
-            .expand((s) {
-              final title = s['serviceTitle'] ?? 'Event';
-              final gallery = List<String>.from(s['gallery'] ?? []);
-              return gallery.map((url) => GalleryItem(url, title));
-            })
+        // Map App Gallery images into GalleryItem objects
+        final List<GalleryItem> allImages = controller.appGalleryImages
+            .map((img) => GalleryItem(img['url'] ?? '', img['title'] ?? ''))
             .toList();
 
         return Column(
@@ -148,12 +144,12 @@ class GalleryView extends StatelessWidget {
             const SizedBox(height: 24),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: GridView.custom(
                   gridDelegate: SliverQuiltedGridDelegate(
                     crossAxisCount: 4,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 4,
+                    crossAxisSpacing: 4,
                     repeatPattern: QuiltedGridRepeatPattern.inverted,
                     pattern: const [
                       QuiltedGridTile(1, 1),
@@ -189,7 +185,7 @@ class GalleryView extends StatelessWidget {
         // Full screen preview logic can be added here
       },
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
         child: Stack(
           fit: StackFit.expand,
           children: [

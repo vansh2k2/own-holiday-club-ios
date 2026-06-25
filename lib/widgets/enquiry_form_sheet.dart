@@ -234,7 +234,7 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
                         disabledBackgroundColor: Colors.grey.shade300,
                         disabledForegroundColor: Colors.grey.shade500,
                         padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                         elevation: 0,
                       ),
                       onPressed: _isSubmitting ? null : _submitEnquiry,
@@ -282,6 +282,47 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
     );
   }
 
+  Widget _buildLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5.0, left: 2.0),
+      child: Text(
+        text.toUpperCase(),
+        style: GoogleFonts.poppins(
+          fontSize: 10.0,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+          letterSpacing: 1.0,
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String? hint, IconData icon) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 11.5),
+      prefixIcon: Icon(icon, size: 18, color: Colors.grey),
+      prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 0),
+      constraints: const BoxConstraints(maxHeight: 44),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+      isDense: true,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5),
+        borderSide: const BorderSide(color: Color(0xFFCED4DA)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5),
+        borderSide: const BorderSide(color: Color(0xFFCED4DA)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5),
+        borderSide: const BorderSide(color: Color(0xFF000000), width: 1.5),
+      ),
+    );
+  }
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -291,66 +332,23 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
     TextInputType? keyboardType,
     String? Function(String?)? validator,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFEEF4FA),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        crossAxisAlignment: maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
-        children: [
-          if (icon != null) ...[
-            Padding(
-              padding: EdgeInsets.only(top: maxLines > 1 ? 2.0 : 0.0),
-              child: Icon(icon, size: 20, color: Colors.grey.shade600),
-            ),
-            const SizedBox(width: 12),
-          ],
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label.toUpperCase(),
-                  style: GoogleFonts.montserrat(
-                    fontSize: 10.0,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                TextFormField(
-                  controller: controller,
-                  maxLines: maxLines,
-                  keyboardType: keyboardType,
-                  validator: validator,
-                  style: GoogleFonts.montserrat(
-                    color: const Color(0xFF0F172A),
-                    fontSize: 13.0,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: hint,
-                    hintStyle: GoogleFonts.montserrat(
-                      color: const Color(0xFF94A3B8),
-                      fontSize: 12.0,
-                      fontWeight: FontWeight.w300,
-                    ),
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 2),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                  ),
-                ),
-              ],
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label),
+        TextFormField(
+          controller: controller,
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+          validator: validator,
+          style: GoogleFonts.poppins(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF0D1321),
           ),
-        ],
-      ),
+          decoration: _inputDecoration(hint, icon ?? Icons.text_fields),
+        ),
+      ],
     );
   }
 
@@ -362,48 +360,37 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
     required VoidCallback onTap,
   }) {
     final bool isSelected = date != null;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFEEF4FA),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Row(
-          children: [
-            Icon(icon, size: 20, color: Colors.grey.shade600),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    label.toUpperCase(),
-                    style: GoogleFonts.montserrat(
-                      fontSize: 10.0,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black87,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    isSelected ? DateFormat('MM/dd/yyyy').format(date!) : hint,
-                    style: GoogleFonts.montserrat(
-                      color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF94A3B8),
-                      fontSize: 13.0,
-                      fontWeight: isSelected ? FontWeight.w400 : FontWeight.w300,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label),
+        InkWell(
+          onTap: onTap,
+          child: Container(
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(5),
+              border: Border.all(color: const Color(0xFFCED4DA)),
             ),
-          ],
+            child: Row(
+              children: [
+                Icon(icon, size: 18, color: Colors.grey),
+                const SizedBox(width: 14),
+                Text(
+                  isSelected ? DateFormat('MM/dd/yyyy').format(date!) : hint,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13.5,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? const Color(0xFF0D1321) : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -413,74 +400,67 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
     required int value,
     required Function(int) onChanged,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFEEF4FA),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: Colors.grey.shade600),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label.toUpperCase(),
-                  style: GoogleFonts.montserrat(
-                    color: Colors.black87,
-                    fontSize: 10.0,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label),
+        Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(5),
+            border: Border.all(color: const Color(0xFFCED4DA)),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            children: [
+              Icon(icon, size: 18, color: Colors.grey),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
                   value.toString(),
-                  style: GoogleFonts.montserrat(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 13.0,
-                    color: const Color(0xFF0F172A),
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.5,
+                    color: const Color(0xFF0D1321),
                   ),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 4),
-          GestureDetector(
-            onTap: () {
-              if (value > 0) onChanged(value - 1);
-            },
-            child: Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
               ),
-              child: const Icon(Icons.remove, size: 14, color: Colors.black87),
-            ),
-          ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () {
-              onChanged(value + 1);
-            },
-            child: Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(4),
+              const SizedBox(width: 4),
+              GestureDetector(
+                onTap: () {
+                  if (value > 0) onChanged(value - 1);
+                },
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: const Icon(Icons.remove, size: 14, color: Colors.black87),
+                ),
               ),
-              child: const Icon(Icons.add, size: 14, color: Colors.white),
-            ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () {
+                  onChanged(value + 1);
+                },
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryYellow,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: const Icon(Icons.add, size: 14, color: Colors.black),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

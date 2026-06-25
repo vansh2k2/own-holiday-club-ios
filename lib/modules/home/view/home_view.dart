@@ -12,6 +12,7 @@ import 'package:own_holiday_app/modules/account/controller/account_controller.da
 import 'package:own_holiday_app/widgets/skeleton.dart';
 import 'package:own_holiday_app/widgets/general_enquiry_form.dart';
 import 'package:own_holiday_app/widgets/membership_bottom_sheet.dart';
+import 'package:video_player/video_player.dart';
 
 class HomeView extends GetView<HomeController> {
   HomeView({super.key});
@@ -26,19 +27,16 @@ class HomeView extends GetView<HomeController> {
 
     return Scaffold(
       backgroundColor: AppColors.primaryWhite,
-      // ── Right-side Drawer ─────────────────────────────────
       endDrawer: _buildRightDrawer(context),
       body: Builder(builder: (scaffoldCtx) {
         return Column(
           children: [
-            // ─── Sticky Top Bar ──────────────────────────────
             Container(
               color: AppColors.primaryWhite,
               padding: EdgeInsets.fromLTRB(16, topPad + 8, 16, 0),
               child: Row(
                 children: [
                   const SizedBox(width: 12),
-                  // Own Holiday Logo
                   Transform.scale(
                     scale: 1.45,
                     child: Image.asset(
@@ -66,7 +64,6 @@ class HomeView extends GetView<HomeController> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Profile Icon → opens right drawer
                   GestureDetector(
                     onTap: () => Scaffold.of(scaffoldCtx).openEndDrawer(),
                     child: Obx(() {
@@ -108,40 +105,36 @@ class HomeView extends GetView<HomeController> {
               ),
             ),
             
-            // ─── Scrollable Content ──────────────────────────
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
-                // ─── Hero + Services Overlap Section ──────────────
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    // 1. Background Hero Carousel (Height 440)
                     Obx(() {
                       final slides = controller.heroSlides;
                       if (slides.isEmpty) {
                         return const SizedBox(
                           height: 440,
                           width: double.infinity,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: AppColors.primaryYellow,
-                            ),
+                          child: Skeleton(
+                            width: double.infinity,
+                            height: 440,
+                            borderRadius: 0,
                           ),
                         );
                       }
                       return _HeroCarousel(slides: slides.toList());
                     }),
 
-                    // 2. Foreground Content (Starts with overlap)
                     Column(
                       children: [
                         const SizedBox(height: 360),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: FadeInUp(
                             duration: const Duration(milliseconds: 600),
                             child: ClipRRect(
@@ -171,62 +164,65 @@ class HomeView extends GetView<HomeController> {
                                       ),
                                     ],
                                   ),
-                                  padding: const EdgeInsets.all(20),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        'Club Spotlight',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.primaryBlack,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      // 4 Static Quick-Access Cards in Blinkit spotlight style (Compact size, Richer colors)
-                                      GridView.count(
-                                        crossAxisCount: 2,
-                                        shrinkWrap: true,
-                                        physics: const NeverScrollableScrollPhysics(),
-                                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                                        crossAxisSpacing: 16,
-                                        mainAxisSpacing: 16,
-                                        childAspectRatio: 1.22, // decreased height for smaller, sleek cards
+                                      Row(
                                         children: [
-                                          _QuickAccessCard(
-                                            title: 'OHC\nPrivilege',
-                                            imagePath: 'assets/images/ohc_privilege.png',
-                                            bgColor: const Color(0xFFFFF3CD), // Soft light pastel gold
-                                            textColor: const Color(0xFF5C4300), // Dark gold/bronze
-                                            onTap: () => MembershipBottomSheet.show(context),
+                                          const Text(
+                                            'Club Spotlight ✨',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.primaryBlack,
+                                            ),
                                           ),
-                                          _QuickAccessCard(
-                                            title: 'Book\nHoliday',
-                                            imagePath: 'assets/images/book_holiday_3d.png',
-                                            bgColor: const Color(0xFFD4EDDA), // Soft light pastel green
-                                            textColor: const Color(0xFF0F472A), // Dark emerald green
-                                            onTap: () {
-                                              Get.bottomSheet(
-                                                const GeneralEnquiryForm(),
-                                                isScrollControlled: true,
-                                                backgroundColor: Colors.transparent,
-                                              );
-                                            },
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _QuickAccessCard(
+                                              title: 'Book\nHoliday',
+                                              imagePath: 'assets/images/book_holiday_3d.png',
+                                              bgColor: const Color(0xFFF0FDF4),
+                                              borderColor: const Color(0xFFD1FAE5),
+                                              textColor: const Color(0xFF065F46),
+                                              onTap: () {
+                                                Get.bottomSheet(
+                                                  const GeneralEnquiryForm(),
+                                                  isScrollControlled: true,
+                                                  backgroundColor: Colors.transparent,
+                                                );
+                                              },
+                                            ),
                                           ),
-                                          _QuickAccessCard(
-                                            title: 'Plan Wedding/\nEvent',
-                                            imagePath: 'assets/images/plan_event.png',
-                                            bgColor: const Color(0xFFD1ECF1), // Soft light pastel blue
-                                            textColor: const Color(0xFF072A52), // Dark royal blue
-                                            onTap: () => Get.toNamed(Routes.SERVICES_REEL),
+                                          const SizedBox(width: 4.5),
+                                          Expanded(
+                                            child: _QuickAccessCard(
+                                              title: 'Plan\nEvent',
+                                              imagePath: 'assets/images/plan_event.png',
+                                              bgColor: const Color(0xFFEFF6FF),
+                                              borderColor: const Color(0xFFDBEAFE),
+                                              textColor: const Color(0xFF1E40AF),
+                                              onTap: () => Get.toNamed(Routes.SERVICES_REEL),
+                                            ),
                                           ),
-                                          _QuickAccessCard(
-                                            title: 'OHC\nMembership',
-                                            imagePath: 'assets/images/membership_3d.png',
-                                            bgColor: const Color(0xFFF3E5F5), // Soft light pastel lavender
-                                            textColor: const Color(0xFF4A148C), // Dark indigo purple
-                                            onTap: () => Get.toNamed(Routes.MEMBERSHIP_INFO),
+                                          const SizedBox(width: 4.5),
+                                          Expanded(
+                                            child: _QuickAccessCard(
+                                              title: 'OHC\nMembership',
+                                              imagePath: 'assets/images/membership_3d.png',
+                                              bgColor: const Color(0xFFFAF5FF),
+                                              borderColor: const Color(0xFFF3E8FF),
+                                              textColor: const Color(0xFF6B21A8),
+                                              imageScale: 1.3,
+                                              imageBoxWidth: 32,
+                                              imageLeftPadding: -11,
+                                              onTap: () => Get.toNamed(Routes.MEMBERSHIP_INFO),
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -265,7 +261,6 @@ class HomeView extends GetView<HomeController> {
 
             const SizedBox(height: 16),
 
-              // ─── Banner Carousel ──────────────────────────────
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: _BannerCarousel(
@@ -278,7 +273,6 @@ class HomeView extends GetView<HomeController> {
 
               const SizedBox(height: 28),
 
-              // ─── Our Services Horizontal Scroll (Blinkit-style) ─
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                 child: Row(
@@ -328,7 +322,6 @@ class HomeView extends GetView<HomeController> {
                 }
 
                 if (svcs.length <= 4) {
-                  // No gap on the right, no arrows, vertical grid
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: GridView.builder(
@@ -355,7 +348,6 @@ class HomeView extends GetView<HomeController> {
                     ),
                   );
                 } else {
-                  // More than 4 cards: horizontal scroll, arrows, partial card view
                   return Column(
                     children: [
                       SizedBox(
@@ -369,7 +361,7 @@ class HomeView extends GetView<HomeController> {
                             crossAxisCount: 2,
                             crossAxisSpacing: 12,
                             mainAxisSpacing: 12,
-                            childAspectRatio: 1.0, 
+                            childAspectRatio: 1.0,
                           ),
                           itemCount: svcs.length,
                           itemBuilder: (context, i) {
@@ -385,7 +377,6 @@ class HomeView extends GetView<HomeController> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      // ── Next & Previous Arrows ──
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Row(
@@ -458,12 +449,13 @@ class HomeView extends GetView<HomeController> {
 
               const SizedBox(height: 28),
               
-              // ─── Trending Stories ──────────────────────────────
-              Obx(() => _TrendingStoriesSection(stories: controller.stories.toList())),
+              Obx(() => _TrendingStoriesSection(
+                stories: controller.trendingShorts.toList(),
+                isLoading: controller.isShortsLoading.value,
+              )),
 
               const SizedBox(height: 28),
 
-              // ─── Featured Experiences ─────────────────────────
               const Padding(
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 14),
                 child: Text(
@@ -477,8 +469,8 @@ class HomeView extends GetView<HomeController> {
               ),
               Obx(() {
                 return _FeaturedExperiencesLayout(
-                  experiences: controller.featuredExperiences,
-                  isLoading: controller.isLoading.value,
+                  experiences: controller.appGalleryImages,
+                  isLoading: controller.isLoading.value || controller.appGalleryImages.isEmpty,
                 );
               }),
 
@@ -493,7 +485,6 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  // ── Right-side Drawer ─────────────────────────────────────────────────────
   Widget _buildRightDrawer(BuildContext context) {
     final accountController = Get.find<AccountController>();
     return Drawer(
@@ -504,7 +495,6 @@ class HomeView extends GetView<HomeController> {
       backgroundColor: AppColors.primaryWhite,
       child: Column(
         children: [
-          // Header
           Obx(() => Container(
             width: double.infinity,
             padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + 20, 20, 20),
@@ -554,7 +544,6 @@ class HomeView extends GetView<HomeController> {
               ],
             ),
           )),
-          // Items
           Expanded(
             child: ListView(
               padding: const EdgeInsets.only(top: 10, bottom: 100),
@@ -608,7 +597,7 @@ class HomeView extends GetView<HomeController> {
                             padding: const EdgeInsets.symmetric(vertical: 11),
                           ),
                           onPressed: () {
-                            Get.back(); // Close drawer
+                            Get.back();
                             Get.toNamed(Routes.MEMBER_LOGIN);
                           },
                           child: const Text('MEMBER LOGIN',
@@ -628,7 +617,7 @@ class HomeView extends GetView<HomeController> {
                             padding: const EdgeInsets.symmetric(vertical: 11),
                           ),
                           onPressed: () {
-                            Get.back(); // Close drawer
+                            Get.back();
                             Get.toNamed(Routes.MEMBER_DETAILS);
                           },
                           child: const Text('MY PROFILE',
@@ -647,7 +636,7 @@ class HomeView extends GetView<HomeController> {
                             padding: const EdgeInsets.symmetric(vertical: 11),
                           ),
                           onPressed: () {
-                            Get.back(); // Close drawer
+                            Get.back();
                             Get.bottomSheet(
                               const GeneralEnquiryForm(),
                               isScrollControlled: true,
@@ -705,9 +694,9 @@ class _ExperienceCard extends StatefulWidget {
 }
 
 class _ExperienceCardState extends State<_ExperienceCard> {
-  final PageController _pageController = PageController();
+  late PageController _pageController;
   Timer? _timer;
-  int _currentPage = 0;
+  int _currentPage = 10000;
   List<String> _images = [];
 
   @override
@@ -715,8 +704,12 @@ class _ExperienceCardState extends State<_ExperienceCard> {
     super.initState();
     _images = List<String>.from(widget.exp['gallery'] ?? []);
     if (_images.isEmpty) {
-      _images = [widget.exp['image'] ?? '']; // Fallback
+      _images = [widget.exp['image'] ?? ''];
     }
+    if (_images.isNotEmpty) {
+      _currentPage = 10000 - (10000 % _images.length);
+    }
+    _pageController = PageController(initialPage: _currentPage);
     _startAutoPlay();
   }
 
@@ -727,10 +720,8 @@ class _ExperienceCardState extends State<_ExperienceCard> {
         timer.cancel();
         return;
       }
-      _currentPage = (_currentPage + 1) % _images.length;
       if (_pageController.hasClients) {
-        _pageController.animateToPage(
-          _currentPage,
+        _pageController.nextPage(
           duration: const Duration(milliseconds: 600),
           curve: Curves.easeInOut,
         );
@@ -769,11 +760,12 @@ class _ExperienceCardState extends State<_ExperienceCard> {
               width: double.infinity,
               child: PageView.builder(
                 controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(), // Only auto scroll
-                itemCount: _images.length,
+                physics: const NeverScrollableScrollPhysics(),
+                onPageChanged: (i) => _currentPage = i,
                 itemBuilder: (context, index) {
+                  if (_images.isEmpty) return const SizedBox();
                   return _buildDynamicImage(
-                    _images[index],
+                    _images[index % _images.length],
                     height: 340,
                     width: double.infinity,
                   );
@@ -794,9 +786,9 @@ class _ExperienceCardState extends State<_ExperienceCard> {
                   color: AppColors.primaryYellow,
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: Text(
+                child: const Text(
                   'PORTFOLIO',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.primaryBlack,
                     fontWeight: FontWeight.w600,
                     fontSize: 10,
@@ -890,13 +882,17 @@ class _HeroCarousel extends StatefulWidget {
 }
 
 class _HeroCarouselState extends State<_HeroCarousel> {
-  final PageController _pageCtrl = PageController();
-  int _currentPage = 0;
+  late PageController _pageCtrl;
+  int _currentPage = 10000;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
+    if (widget.slides.isNotEmpty) {
+      _currentPage = 10000 - (10000 % widget.slides.length);
+    }
+    _pageCtrl = PageController(initialPage: _currentPage);
     _startTimer();
   }
 
@@ -916,10 +912,8 @@ class _HeroCarouselState extends State<_HeroCarousel> {
         timer.cancel();
         return;
       }
-      final next = (_currentPage + 1) % widget.slides.length;
       if (_pageCtrl.hasClients) {
-        _pageCtrl.animateToPage(
-          next,
+        _pageCtrl.nextPage(
           duration: const Duration(milliseconds: 900),
           curve: Curves.easeInOutCubic,
         );
@@ -936,7 +930,8 @@ class _HeroCarouselState extends State<_HeroCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final currentSlide = widget.slides.isNotEmpty ? widget.slides[_currentPage] : <String, dynamic>{};
+    final realIndex = widget.slides.isNotEmpty ? _currentPage % widget.slides.length : 0;
+    final currentSlide = widget.slides.isNotEmpty ? widget.slides[realIndex] : <String, dynamic>{};
     final title1 = currentSlide['title1'] ?? '';
     final title2 = currentSlide['title2'] ?? '';
 
@@ -949,9 +944,9 @@ class _HeroCarouselState extends State<_HeroCarousel> {
           child: PageView.builder(
             controller: _pageCtrl,
             onPageChanged: (i) => setState(() => _currentPage = i),
-            itemCount: widget.slides.length,
             itemBuilder: (context, index) {
-              final slide = widget.slides[index];
+              if (widget.slides.isEmpty) return const SizedBox();
+              final slide = widget.slides[index % widget.slides.length];
               final imageUrl = slide['image'] ?? '';
               return imageUrl.startsWith('http')
                 ? CachedNetworkImage(
@@ -964,7 +959,6 @@ class _HeroCarouselState extends State<_HeroCarousel> {
             },
           ),
         ),
-        // Gradient overlay — added elegant overlay for text readability
         Positioned.fill(
           child: IgnorePointer(
             child: Container(
@@ -983,7 +977,6 @@ class _HeroCarouselState extends State<_HeroCarousel> {
             ),
           ),
         ),
-        // Hero text — identical layout to original, but dynamic and matching website styles
         Positioned(
           top: 190,
           left: 20,
@@ -993,9 +986,9 @@ class _HeroCarouselState extends State<_HeroCarousel> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 FadeInDown(
-                  key: ValueKey('sub_$_currentPage'),
+                  key: ValueKey('sub_$realIndex'),
                   child: Transform.translate(
-                    offset: const Offset(0, 20), // Shifting 'For' downwards
+                    offset: const Offset(0, 20),
                     child: Text(
                       _stripHtml(currentSlide['subtitle'] ?? 'Welcome to Luxury'),
                       textAlign: TextAlign.center,
@@ -1009,7 +1002,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                 ),
                 const SizedBox(height: 10),
                 FadeInLeft(
-                  key: ValueKey('title_$_currentPage'),
+                  key: ValueKey('title_$realIndex'),
                   delay: const Duration(milliseconds: 150),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -1047,7 +1040,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                 ),
                 const SizedBox(height: 12),
                 FadeInLeft(
-                  key: ValueKey('desc_$_currentPage'),
+                  key: ValueKey('desc_$realIndex'),
                   delay: const Duration(milliseconds: 250),
                   child: Text(
                     _stripHtml(currentSlide['description'] ?? ''),
@@ -1064,7 +1057,6 @@ class _HeroCarouselState extends State<_HeroCarousel> {
             ),
           ),
         ),
-        // Slide indicator dots
         if (widget.slides.length > 1)
           Positioned(
             bottom: 16,
@@ -1076,9 +1068,9 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                 duration: const Duration(milliseconds: 300),
                 margin: const EdgeInsets.symmetric(horizontal: 3),
                 height: 6,
-                width: _currentPage == i ? 20 : 6,
+                width: realIndex == i ? 20 : 6,
                 decoration: BoxDecoration(
-                  color: _currentPage == i ? AppColors.primaryYellow : Colors.white.withOpacity(0.5),
+                  color: realIndex == i ? AppColors.primaryYellow : Colors.white.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(3),
                 ),
               )),
@@ -1167,22 +1159,24 @@ class _BannerCarousel extends StatefulWidget {
 }
 
 class _BannerCarouselState extends State<_BannerCarousel> {
-  final PageController _pageCtrl = PageController(viewportFraction: 1.0);
-  int _currentPage = 0;
+  late PageController _pageCtrl;
+  int _currentPage = 10000;
 
   @override
   void initState() {
     super.initState();
+    if (widget.images.isNotEmpty) {
+      _currentPage = 10000 - (10000 % widget.images.length);
+    }
+    _pageCtrl = PageController(initialPage: _currentPage, viewportFraction: 1.0);
     _scheduleNext();
   }
 
   void _scheduleNext() {
     Future.delayed(const Duration(seconds: 4), () {
       if (!mounted || widget.images.length <= 1) return;
-      final next = (_currentPage + 1) % widget.images.length;
       if (_pageCtrl.hasClients) {
-        _pageCtrl.animateToPage(
-          next,
+        _pageCtrl.nextPage(
           duration: const Duration(milliseconds: 800),
           curve: Curves.easeInOut,
         );
@@ -1199,16 +1193,18 @@ class _BannerCarouselState extends State<_BannerCarousel> {
 
   @override
   Widget build(BuildContext context) {
+    final realIndex = widget.images.isNotEmpty ? _currentPage % widget.images.length : 0;
     return Column(
       children: [
         SizedBox(
-          height: 210, // Increased height
+          height: 210,
           width: double.infinity,
           child: PageView.builder(
             controller: _pageCtrl,
             onPageChanged: (i) => setState(() => _currentPage = i),
-            itemCount: widget.images.length,
             itemBuilder: (context, index) {
+              if (widget.images.isEmpty) return const SizedBox();
+              final imageIndex = index % widget.images.length;
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
                 child: GestureDetector(
@@ -1216,7 +1212,7 @@ class _BannerCarouselState extends State<_BannerCarousel> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: Image.asset(
-                      widget.images[index],
+                      widget.images[imageIndex],
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -1234,9 +1230,9 @@ class _BannerCarouselState extends State<_BannerCarousel> {
               duration: const Duration(milliseconds: 300),
               margin: const EdgeInsets.symmetric(horizontal: 3),
               height: 6,
-              width: _currentPage == i ? 18 : 6,
+              width: realIndex == i ? 18 : 6,
               decoration: BoxDecoration(
-                color: _currentPage == i ? AppColors.primaryYellow : Colors.grey.shade300,
+                color: realIndex == i ? AppColors.primaryYellow : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -1248,17 +1244,31 @@ class _BannerCarouselState extends State<_BannerCarousel> {
 }
 
 // ── Quick Access Card ─────────────────────────────────────────────────────────
+// ✅ ONLY CHANGE: image size 36→48, padding horizontal 3→2, SizedBox height 36→48
 class _QuickAccessCard extends StatelessWidget {
   final String title;
   final String imagePath;
   final Color bgColor;
+  final Color borderColor;
   final Color textColor;
+  final double? imageSize;
+  final double? titleFontSize;
+  final double? imageScale;
+  final double? imageBoxWidth;
+  final double? imageLeftPadding;
   final VoidCallback onTap;
+
   const _QuickAccessCard({
     required this.title,
     required this.imagePath,
     required this.bgColor,
+    this.imageSize, 
+    required this.borderColor,
     required this.textColor,
+    this.titleFontSize,
+    this.imageScale,
+    this.imageBoxWidth,
+    this.imageLeftPadding,
     required this.onTap,
   });
 
@@ -1267,58 +1277,62 @@ class _QuickAccessCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 0.5, vertical: 3), // ← horizontal 3→2
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: borderColor, width: 1.5),
           boxShadow: const [
             BoxShadow(
-              color: Color.fromRGBO(50, 50, 93, 0.25),
-              offset: Offset(0, 2),
-              blurRadius: 5,
-              spreadRadius: -1,
+              color: Color.fromRGBO(60, 64, 67, 0.3),
+              offset: Offset(0, 1),
+              blurRadius: 2,
+              spreadRadius: 0,
             ),
             BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.3),
+              color: Color.fromRGBO(60, 64, 67, 0.15),
               offset: Offset(0, 1),
               blurRadius: 3,
-              spreadRadius: -1,
+              spreadRadius: 1,
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Stack(
-            children: [
-              // Title text at Top-Left (shorter size)
-              Positioned(
-                top: 12,
-                left: 12,
-                right: 12,
+        child: Row(
+          children: [
+            const SizedBox(width: 8),
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.center,
                 child: Text(
                   title,
-                  style: TextStyle(
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  style: GoogleFonts.inter(
                     color: textColor,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    height: 1.2,
+                    fontSize: titleFontSize ?? 11.5,
+                    fontWeight: FontWeight.w700,
+                    height: 1.1,
                   ),
                 ),
               ),
-              // High-quality 3D render illustration positioned at the Bottom-Right Corner without any spacing/padding
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: SizedBox(
-                  width: 80,
-                  height: 80,
-                  child: Image.asset(
-                    imagePath,
-                    fit: BoxFit.contain,
+            ),
+            SizedBox(
+              height: 48, // ← 36→48
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: borderColor, width: 1.5),
                   ),
+                  child: Icon(Icons.arrow_forward_ios_rounded, size: 10, color: textColor),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1352,13 +1366,11 @@ class _BlinklitServiceCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Background Image
             _buildDynamicImage(
               service['image'] ?? '',
               height: double.infinity,
               width: double.infinity,
             ),
-            // Dark Gradient Overlay for text readability
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -1376,7 +1388,6 @@ class _BlinklitServiceCard extends StatelessWidget {
                 ),
               ),
             ),
-            // Top Left Logo Placeholder
             Positioned(
               top: 12,
               left: 12,
@@ -1399,7 +1410,6 @@ class _BlinklitServiceCard extends StatelessWidget {
                 ),
               ),
             ),
-            // Bottom Left Text
             Positioned(
               bottom: 12,
               left: 12,
@@ -1458,8 +1468,7 @@ class _AnimatedVisibleCardState extends State<_AnimatedVisibleCard> {
     if (renderObject is RenderBox && renderObject.hasSize) {
       final position = renderObject.localToGlobal(Offset.zero);
       final screenHeight = MediaQuery.of(context).size.height;
-      // Trigger only when it comes well into the screen (100px above bottom edge)
-      if (position.dy < screenHeight - 100) { 
+      if (position.dy < screenHeight - 100) {
         setState(() {
           _isVisible = true;
         });
@@ -1522,7 +1531,7 @@ class _FeaturedExperiencesLayout extends StatelessWidget {
 
     final exp = experiences[index];
     final title = exp['title'] ?? exp['serviceTitle'] ?? '';
-    final imageUrl = exp['image'] ?? exp['imageUrl'] ?? '';
+    final imageUrl = exp['url'] ?? exp['image'] ?? exp['imageUrl'] ?? '';
 
     Widget imageWidget = CachedNetworkImage(
       imageUrl: imageUrl,
@@ -1591,7 +1600,6 @@ class _FeaturedExperiencesLayout extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          // Top Row (2 images)
           Row(
             children: [
               Expanded(child: SizedBox(height: 110, child: _buildItem(0))),
@@ -1600,22 +1608,19 @@ class _FeaturedExperiencesLayout extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          // Bottom Area
           IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Left tall image (takes roughly 40% width)
                 Expanded(
                   flex: 40,
-                  child: _buildItem(2, height: double.infinity),
+                  child: _buildItem(2),
                 ),
                 const SizedBox(width: 8),
-                // Right grid area (takes roughly 60% width)
                 Expanded(
                   flex: 60,
                   child: AspectRatio(
-                    aspectRatio: 1.0, // Ensures the right container is a perfect square, making the 4 images squares too
+                    aspectRatio: 1.0,
                     child: Stack(
                       children: [
                         Column(
@@ -1641,7 +1646,6 @@ class _FeaturedExperiencesLayout extends StatelessWidget {
                             ),
                           ],
                         ),
-                        // Center overlapping circle
                         Center(
                           child: _buildItem(7, width: 80, height: 80, isCircle: true),
                         ),
@@ -1653,7 +1657,6 @@ class _FeaturedExperiencesLayout extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          // View Full Gallery Button
           Container(
             width: double.infinity,
             height: 46,
@@ -1695,12 +1698,13 @@ class _FeaturedExperiencesLayout extends StatelessWidget {
 // ── Trending Stories Section ────────────────────────────────────────────────
 class _TrendingStoriesSection extends StatelessWidget {
   final List<dynamic> stories;
+  final bool isLoading;
   
-  const _TrendingStoriesSection({required this.stories});
+  const _TrendingStoriesSection({required this.stories, required this.isLoading});
 
   @override
   Widget build(BuildContext context) {
-    if (stories.isEmpty) return const SizedBox.shrink();
+    if (!isLoading && stories.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1708,7 +1712,7 @@ class _TrendingStoriesSection extends StatelessWidget {
         FadeInUp(
           duration: const Duration(milliseconds: 600),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1733,164 +1737,37 @@ class _TrendingStoriesSection extends StatelessWidget {
             ),
           ),
         ),
-        FadeInUp(
-          delay: const Duration(milliseconds: 200),
-          duration: const Duration(milliseconds: 600),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-            child: Row(
-              children: [
-                const Text(
-                  'Powered By ',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Icon(Icons.play_circle_fill, color: Colors.red.shade600, size: 14),
-                const SizedBox(width: 2),
-                const Text(
-                  'Shorts',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primaryBlack,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
         SizedBox(
           height: 260,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 14),
-            itemCount: stories.length,
+            itemCount: isLoading ? 4 : stories.length,
             itemBuilder: (context, index) {
+              if (isLoading) {
+                return FadeInRight(
+                  delay: Duration(milliseconds: 300 + (index * 100)),
+                  duration: const Duration(milliseconds: 600),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Skeleton(width: 135, height: 260, borderRadius: 12),
+                  ),
+                );
+              }
+              
               final story = stories[index];
               return FadeInRight(
                 delay: Duration(milliseconds: 300 + (index * 100)),
                 duration: const Duration(milliseconds: 600),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                    Container(
-                      width: 135,
-                      height: 220,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: story['imageUrl'] ?? '',
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => const Skeleton(),
-                              errorWidget: (context, url, error) => Container(color: Colors.grey.shade300),
-                            ),
-                            // Dark gradient at bottom
-                            Positioned(
-                              bottom: 0, left: 0, right: 0,
-                              height: 80,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.bottomCenter,
-                                    end: Alignment.topCenter,
-                                    colors: [Colors.black.withOpacity(0.8), Colors.transparent],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // Views chip
-                            Positioned(
-                              top: 8, left: 8,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.3),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.remove_red_eye_outlined, color: Colors.white, size: 12),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      story['views'] ?? '',
-                                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            // Title
-                            Positioned(
-                              bottom: 12, left: 10, right: 10,
-                              child: Text(
-                                story['title'] ?? '',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.2,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Author info
-                    SizedBox(
-                      width: 135,
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 9,
-                            backgroundImage: CachedNetworkImageProvider(story['authorImageUrl'] ?? ''),
-                            backgroundColor: Colors.grey.shade300,
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              story['author'] ?? '',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade700,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  child: GestureDetector(
+                    onTap: () => Get.toNamed(Routes.SHORTS_REEL, arguments: index),
+                    child: _ShortCard(short: story),
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
           ),
         ),
       ],
@@ -1898,7 +1775,153 @@ class _TrendingStoriesSection extends StatelessWidget {
   }
 }
 
-// ─── Destination Model ─────────────────────────────────────────────────────────
+class _ShortCard extends StatefulWidget {
+  final Map<String, dynamic> short;
+  const _ShortCard({required this.short});
+
+  @override
+  State<_ShortCard> createState() => _ShortCardState();
+}
+
+class _ShortCardState extends State<_ShortCard> {
+  VideoPlayerController? _videoController;
+  bool _isVideoInitialized = false;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final String mediaUrl = widget.short['videoUrl'] ?? widget.short['image'] ?? widget.short['video'] ?? '';
+    if (mediaUrl.isNotEmpty) {
+      _videoController = VideoPlayerController.networkUrl(Uri.parse(mediaUrl))
+        ..initialize().then((_) {
+          if (mounted) {
+            setState(() {
+              _isVideoInitialized = true;
+              _videoController!.setLooping(true);
+              _videoController!.setVolume(0);
+              _videoController!.play();
+            });
+          }
+        }).catchError((e) {
+          if (mounted) {
+            setState(() {
+              _hasError = true;
+            });
+          }
+          print("Error initializing video player: $e");
+        });
+    } else {
+      _hasError = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 135,
+          height: 220,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.black,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (_videoController != null && _isVideoInitialized)
+                  FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      width: _videoController!.value.size.width,
+                      height: _videoController!.value.size.height,
+                      child: VideoPlayer(_videoController!),
+                    ),
+                  )
+                else if (_hasError)
+                  Container(
+                    color: Colors.grey.shade900,
+                    child: const Center(
+                      child: Icon(Icons.error_outline, color: Colors.white54, size: 30),
+                    ),
+                  )
+                else
+                  const Center(child: CircularProgressIndicator(color: AppColors.primaryYellow)),
+                Positioned(
+                  bottom: 0, left: 0, right: 0,
+                  height: 80,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [Colors.black.withOpacity(0.8), Colors.transparent],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 8, left: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.remove_red_eye_outlined, color: Colors.white, size: 12),
+                        const SizedBox(width: 4),
+                        Text(
+                          widget.short['views'] ?? '',
+                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 12, left: 10, right: 10,
+                  child: Text(
+                    widget.short['title'] ?? widget.short['uploaderName'] ?? '',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class Destination {
   final String name;
   final String image;
@@ -1930,11 +1953,8 @@ class TopDestinationsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Decorated Title ──
           _buildTitle(),
           const SizedBox(height: 6),
-
-          // ── Subtitle ──
           Text(
             'Discover the most unique destinations curated just for you!',
             textAlign: TextAlign.center,
@@ -1945,21 +1965,16 @@ class TopDestinationsSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-
-          // ── Cards Row ──
           SizedBox(
             height: 168,
             child: isLoading ? _buildSkeletonRow() : _buildCardsRow(),
           ),
-
-          // ── View All ──
           _buildViewAll(),
         ],
       ),
     );
   }
 
-  // ── Title Row ──────────────────────────────────────────────────────────────
   Widget _buildTitle() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -1985,7 +2000,6 @@ class TopDestinationsSection extends StatelessWidget {
     );
   }
 
-  // ── Skeleton Loading Row ───────────────────────────────────────────────────
   Widget _buildSkeletonRow() {
     return Row(
       children: List.generate(3, (i) {
@@ -2002,15 +2016,13 @@ class TopDestinationsSection extends StatelessWidget {
     );
   }
 
-  // ── Cards Horizontal List ──────────────────────────────────────────────────
   Widget _buildCardsRow() {
     final int maxVisible = destinations.length > 5 ? 5 : destinations.length;
-    final bool showExplore = true;
 
     return ListView.builder(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
-      itemCount: maxVisible + (showExplore ? 1 : 0),
+      itemCount: maxVisible + 1,
       itemBuilder: (context, i) {
         if (i == maxVisible) return _buildExploreCard();
         final dest = destinations[i];
@@ -2022,7 +2034,6 @@ class TopDestinationsSection extends StatelessWidget {
     );
   }
 
-  // ── Single Destination Card ────────────────────────────────────────────────
   Widget _buildDestCard(Destination dest, int index) {
     return GestureDetector(
       onTap: () => onDestinationTap?.call(dest),
@@ -2044,10 +2055,7 @@ class TopDestinationsSection extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // ── Image ──
               _buildImage(dest.image),
-
-              // ── Dark Gradient Overlay ──
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -2061,8 +2069,6 @@ class TopDestinationsSection extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // ── Destination Name ──
               Positioned(
                 bottom: 10,
                 left: 10,
@@ -2085,7 +2091,6 @@ class TopDestinationsSection extends StatelessWidget {
     );
   }
 
-  // ── Image Builder ──────────────────────────────────────
   Widget _buildImage(String url) {
     if (url.startsWith('http')) {
       return CachedNetworkImage(
@@ -2108,7 +2113,6 @@ class TopDestinationsSection extends StatelessWidget {
     );
   }
 
-  // ── Explore All Card ───────────────────────────────────────────────────────
   Widget _buildExploreCard() {
     return GestureDetector(
       onTap: onViewAll,
@@ -2144,7 +2148,6 @@ class TopDestinationsSection extends StatelessWidget {
     );
   }
 
-  // ── View All Row ───────────────────────────────────────────────────────────
   Widget _buildViewAll() {
     return Container(
       color: Colors.white,
@@ -2161,7 +2164,7 @@ class TopDestinationsSection extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1565C0), // AppColors.viewAllBlue mapping
+                  color: const Color(0xFF1565C0),
                 ),
               ),
               const SizedBox(width: 4),
@@ -2177,5 +2180,3 @@ class TopDestinationsSection extends StatelessWidget {
     );
   }
 }
-
-

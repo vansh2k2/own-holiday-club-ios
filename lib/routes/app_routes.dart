@@ -18,6 +18,7 @@ abstract class Routes {
   static const DESTINATION_DETAILS = _Paths.DESTINATION_DETAILS;
   static const SERVICE_DETAILS = _Paths.SERVICE_DETAILS;
   static const SERVICES_REEL = _Paths.SERVICES_REEL;
+  static const SHORTS_REEL = _Paths.SHORTS_REEL;
   static const PRIVACY_POLICY = _Paths.PRIVACY_POLICY;
   static const ABOUT_US = _Paths.ABOUT_US;
 }
@@ -40,6 +41,7 @@ abstract class _Paths {
   static const DESTINATION_DETAILS = '/destination-details';
   static const SERVICE_DETAILS = '/service-details';
   static const SERVICES_REEL = '/services-reel';
+  static const SHORTS_REEL = '/shorts-reel';
   static const PRIVACY_POLICY = '/privacy-policy';
   static const ABOUT_US = '/about-us';
 }

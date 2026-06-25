@@ -109,7 +109,9 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/icon/ohc_appicon.png"
+  image_path: "assets/images/icon/ohc_icon.png"
+  image_path_ios: "assets/images/icon/ohc_icon_ios.png"
+  remove_alpha_ios: true
   min_sdk_android: 21
   adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/images/icon/ohc_appicon.png"
+  adaptive_icon_foreground: "assets/images/icon/ohc_icon.png"

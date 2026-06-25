@@ -362,7 +362,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                   backgroundColor: const Color(0xFF000000),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(5),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
@@ -460,7 +460,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                 TextFormField(
                   controller: _nameController,
                   style: GoogleFonts.poppins(
-                    fontSize: 12,
+                    fontSize: 13.5,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF0D1321),
                   ),
@@ -483,7 +483,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                         keyboardType: TextInputType.phone,
                         enabled: !_isMobileVerified,
                         style: GoogleFonts.poppins(
-                          fontSize: 12,
+                          fontSize: 13.5,
                           fontWeight: FontWeight.bold,
                           color: const Color(0xFF0D1321),
                         ),
@@ -504,11 +504,11 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                     const SizedBox(width: 10),
                     _isMobileVerified
                         ? Container(
-                            height: 48,
+                            height: 38,
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             decoration: BoxDecoration(
                               color: const Color(0xFFECFDF5),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(5),
                               border: Border.all(
                                 color: const Color(0xFF059669),
                               ),
@@ -524,13 +524,13 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                             ),
                           )
                         : SizedBox(
-                            height: 48,
+                            height: 38,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryYellow,
                                 foregroundColor: Colors.black,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(5),
                                 ),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 10,
@@ -550,7 +550,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                                       ),
                                     )
                                   : Text(
-                                      _isMobileOtpSent ? "RESEND" : "GET OTP",
+                                      _isMobileOtpSent ? "RESEND" : "SEND OTP",
                                       style: GoogleFonts.poppins(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
@@ -566,10 +566,10 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                 if (_isMobileOtpSent && !_isMobileVerified) ...[
                   const SizedBox(height: 10),
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF8F9FA),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(5),
                       border: Border.all(color: const Color(0xFFEDEFF2)),
                     ),
                     child: Row(
@@ -587,7 +587,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                             decoration: InputDecoration(
                               hintText: "Enter 6-digit OTP",
                               hintStyle: GoogleFonts.poppins(
-                                fontSize: 12,
+                                fontSize: 13,
                                 letterSpacing: 0,
                                 color: Colors.grey,
                               ),
@@ -602,7 +602,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                             backgroundColor: const Color(0xFF059669),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(5),
                             ),
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                           ),
@@ -638,7 +638,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   style: GoogleFonts.poppins(
-                    fontSize: 12,
+                    fontSize: 13.5,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF0D1321),
                   ),
@@ -729,59 +729,24 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                 Row(
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLabel("ADULTS"),
-                          DropdownButtonFormField<int>(
-                            value: _adults,
-                            isExpanded: true,
-                            dropdownColor: Colors.white,
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF0D1321),
-                            ),
-                            decoration: _inputDecoration(
-                              null,
-                              Icons.people_outline_rounded,
-                            ),
-                            items: List.generate(10, (i) => i + 1).map((n) {
-                              return DropdownMenuItem<int>(
-                                value: n,
-                                child: Text("$n Adult${n > 1 ? 's' : ''}"),
-                              );
-                            }).toList(),
-                            onChanged: (val) => setState(() => _adults = val ?? 1),
-                          ),
-                        ],
+                      child: _buildCounterField(
+                        label: "ADULTS",
+                        icon: Icons.people_outline_rounded,
+                        value: _adults,
+                        onChanged: (v) {
+                          if (v > 0) setState(() => _adults = v);
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLabel("KIDS (BELOW 10 YEARS)"),
-                          DropdownButtonFormField<int>(
-                            value: _kids,
-                            isExpanded: true,
-                            dropdownColor: Colors.white,
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF0D1321),
-                            ),
-                            decoration: _inputDecoration(null, Icons.child_care_rounded),
-                            items: List.generate(7, (i) => i).map((n) {
-                              return DropdownMenuItem<int>(
-                                value: n,
-                                child: Text("$n Kid${n != 1 ? 's' : ''}"),
-                              );
-                            }).toList(),
-                            onChanged: (val) => setState(() => _kids = val ?? 0),
-                          ),
-                        ],
+                      child: _buildCounterField(
+                        label: "KIDS (BELOW 10 YEARS)",
+                        icon: Icons.child_care_rounded,
+                        value: _kids,
+                        onChanged: (v) {
+                          if (v >= 0) setState(() => _kids = v);
+                        },
                       ),
                     ),
                   ],
@@ -794,7 +759,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                   value: _selectedBudget,
                   dropdownColor: Colors.white,
                   style: GoogleFonts.poppins(
-                    fontSize: 12,
+                    fontSize: 13.5,
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF0D1321),
                   ),
@@ -817,7 +782,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                 TextFormField(
                   controller: _messageController,
                   style: GoogleFonts.poppins(
-                    fontSize: 12,
+                    fontSize: 13.5,
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFF0D1321),
                   ),
@@ -836,7 +801,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                       backgroundColor: AppColors.primaryYellow,
                       foregroundColor: AppColors.primaryBlack,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(5),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       elevation: 0,
@@ -901,14 +866,14 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
       onTap: onTap,
 
       child: Container(
-        height: 48,
+        height: 46,
 
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
 
         decoration: BoxDecoration(
           color: Colors.white,
 
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(5),
 
           border: Border.all(color: const Color(0xFFCED4DA)),
         ),
@@ -927,7 +892,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
               label,
 
               style: GoogleFonts.poppins(
-                fontSize: 11.5,
+                fontSize: 13.5,
 
                 fontWeight: hasDate ? FontWeight.bold : FontWeight.normal,
 
@@ -950,7 +915,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
         TextFormField(
           controller: _locationController,
           style: GoogleFonts.poppins(
-            fontSize: 12,
+            fontSize: 13.5,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF0D1321),
           ),
@@ -975,23 +940,25 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                     ),
                   )
                 : null,
+            prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 0),
+            constraints: const BoxConstraints(maxHeight: 44),
             filled: true,
             fillColor: Colors.white,
             contentPadding: const EdgeInsets.symmetric(
-              vertical: 12,
-              horizontal: 12,
+              vertical: 10,
+              horizontal: 10,
             ),
             isDense: true,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(5),
               borderSide: const BorderSide(color: Color(0xFFCED4DA)),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(5),
               borderSide: const BorderSide(color: Color(0xFFCED4DA)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(5),
               borderSide: const BorderSide(
                 color: Color(0xFF000000),
                 width: 1.5,
@@ -1013,7 +980,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
             decoration: BoxDecoration(
               color: Colors.white,
 
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(5),
 
               border: Border.all(color: const Color(0xFFCED4DA)),
 
@@ -1069,31 +1036,103 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
     );
   }
 
+  Widget _buildCounterField({
+    required String label,
+    required IconData icon,
+    required int value,
+    required Function(int) onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label),
+        Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(5),
+            border: Border.all(color: const Color(0xFFCED4DA)),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            children: [
+              Icon(icon, size: 18, color: Colors.grey),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  value.toString(),
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.5,
+                    color: const Color(0xFF0D1321),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              GestureDetector(
+                onTap: () {
+                  onChanged(value - 1);
+                },
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: const Icon(Icons.remove, size: 14, color: Colors.black87),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () {
+                  onChanged(value + 1);
+                },
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryYellow,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: const Icon(Icons.add, size: 14, color: Colors.black),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   InputDecoration _inputDecoration(String? hint, IconData icon) {
     return InputDecoration(
       hintText: hint,
       hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 11.5),
       prefixIcon: Icon(icon, size: 18, color: Colors.grey),
+      prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 0),
+      constraints: const BoxConstraints(maxHeight: 44),
       filled: true,
       fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
 
       isDense: true,
 
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(5),
 
         borderSide: const BorderSide(color: Color(0xFFCED4DA)),
       ),
 
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(5),
 
         borderSide: const BorderSide(color: Color(0xFFCED4DA)),
       ),
 
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(5),
 
         borderSide: const BorderSide(color: Color(0xFF000000), width: 1.5),
       ),

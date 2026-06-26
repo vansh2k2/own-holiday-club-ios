@@ -14,6 +14,7 @@ import 'package:own_holiday_app/widgets/skeleton.dart';
 import 'package:own_holiday_app/modules/home/controller/home_controller.dart';
 import 'package:own_holiday_app/modules/account/controller/account_controller.dart';
 import 'book_holiday_view.dart';
+import 'package:own_holiday_app/modules/dashboard/controller/dashboard_controller.dart';
 
 // ─────────────────────────────────────────────
 //  MAIN MEMBER DETAILS VIEW
@@ -475,9 +476,9 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
           _InfoRow('Mobile', u.mobile),
           _InfoRow('Email', u.email),
           _InfoRow('Gender', u.gender),
-          _InfoRow('Date of Birth', u.dob),
+          _InfoRow('Date of Birth', u.dob, isDate: true),
           _InfoRow('Marital Status', u.maritalStatus),
-          _InfoRow('Anniversary', u.anniversary),
+          _InfoRow('Anniversary', u.anniversary, isDate: true),
           _InfoRow('Occupation', u.occupation),
         ]),
         if (u.residenceAddress != null) ...[
@@ -531,6 +532,24 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
   // ── 2. MEMBERSHIP SECTION CONTENT ──
   Widget _buildMembershipContent(UserModel u) {
     final m = u.membership;
+    final dashCtrl = Get.isRegistered<DashboardController>() ? Get.find<DashboardController>() : null;
+    var tierFeatures = <String>[];
+    if (dashCtrl != null) {
+      try {
+        final t = dashCtrl.membershipTiers.firstWhere((t) => t.id == m?.tierId);
+        tierFeatures = t.features;
+      } catch (e) {}
+    }
+    
+    String nightsDisplay = m?.nightsPerYear ?? 'N/A';
+    if (tierFeatures.isNotEmpty) {
+      if (tierFeatures.length >= 2) {
+        nightsDisplay = '${tierFeatures[0]}\n${tierFeatures[1]}';
+      } else {
+        nightsDisplay = tierFeatures.first;
+      }
+    }
+
     return Column(
       children: [
         // Member Card in Light Gold theme
@@ -603,14 +622,14 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
         _buildInfoCard('Membership Details', Icons.card_membership_rounded, const Color(0xFFF59E0B), [
           _InfoRow('Plan Name', m?.name),
           _InfoRow('Status', m?.status),
-          _InfoRow('Valid Until', m?.validUntil),
-          _InfoRow('Purchased On', m?.purchasedAt),
+          _InfoRow('Valid Until', m?.validUntil, isDate: true),
+          _InfoRow('Purchased On', m?.purchasedAt, isDate: true),
           _InfoRow('Duration', m?.duration),
           _InfoRow('Period', m?.period),
           _InfoRow('Base Years', m?.baseDurationYears?.toString()),
           _InfoRow('Bonus Years', m?.bonusYears?.toString()),
           _InfoRow('Total Years', m?.totalDurationYears?.toString()),
-          _InfoRow('Nights / Year', m?.nightsPerYear),
+          _InfoRow('Nights / Year', nightsDisplay),
           _InfoRow('Price', m?.price != null ? '₹${m!.price}' : null),
         ]),
       ],
@@ -705,14 +724,21 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          p.paymentId ?? 'N/A',
+                          'Payment ID: ${p.paymentId ?? p.id ?? 'N/A'}',
                           style: GoogleFonts.montserrat(fontSize: 11.0, color: AppColors.greyText, fontWeight: FontWeight.w500)
                         ),
+                        if (p.orderId != null && p.orderId!.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            'Order ID: ${p.orderId!}',
+                            style: GoogleFonts.montserrat(fontSize: 11.0, color: AppColors.greyText, fontWeight: FontWeight.w500)
+                          ),
+                        ],
                       ],
                     ),
                   ),
                   Text(
-                    '₹${p.amount ?? '0'}',
+                    '₹${((double.tryParse(p.amount ?? '0') ?? 0) / 100).toStringAsFixed(0)}',
                     style: GoogleFonts.montserrat(fontSize: 15.0, fontWeight: FontWeight.bold, color: AppColors.primaryBlack),
                   ),
                 ],
@@ -942,24 +968,23 @@ class _CardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.all(7),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, color: color, size: 16),
-        ),
-        const SizedBox(width: 10),
         Text(
-          title, 
-          style: GoogleFonts.montserrat(
-            fontSize: 13.0, 
-            fontWeight: FontWeight.bold, 
-            color: AppColors.primaryBlack
-          )
+          title.toUpperCase(),
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF1565C0),
+            fontWeight: FontWeight.bold,
+            fontSize: 13.0,
+            letterSpacing: 0.5,
+          ),
+        ),
+        Container(
+          width: 30,
+          height: 2,
+          margin: const EdgeInsets.only(top: 2),
+          color: AppColors.primaryYellow,
         ),
       ],
     );
@@ -969,7 +994,8 @@ class _CardHeader extends StatelessWidget {
 class _InfoRow {
   final String label;
   final String? value;
-  const _InfoRow(this.label, this.value);
+  final bool isDate;
+  const _InfoRow(this.label, this.value, {this.isDate = false});
 }
 
 class _InfoRowWidget extends StatelessWidget {
@@ -979,7 +1005,7 @@ class _InfoRowWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (row.value == null || row.value!.isEmpty) return const SizedBox.shrink();
-    final displayValue = _fmtDate(row.value);
+    final displayValue = row.isDate ? _fmtDate(row.value) : row.value!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(

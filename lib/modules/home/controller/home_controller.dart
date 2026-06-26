@@ -23,6 +23,8 @@ class HomeController extends GetxController {
   final appGalleryImages = <Map<String, dynamic>>[].obs;
   
   final trendingShorts = <Map<String, dynamic>>[].obs;
+  final shortsHeading = 'Trending Shorts'.obs;
+  final shortsSubHeading = ''.obs;
   var isShortsLoading = true.obs;
   
 
@@ -237,8 +239,14 @@ class HomeController extends GetxController {
       
       if (response.statusCode == 200) {
         var body = jsonDecode(response.body);
-        if (body['success'] == true && body['data'] != null && body['data']['videos'] != null) {
-          trendingShorts.value = List<Map<String, dynamic>>.from(body['data']['videos']);
+        if (body['success'] == true && body['data'] != null) {
+          if (body['data']['videos'] != null) {
+            trendingShorts.value = List<Map<String, dynamic>>.from(body['data']['videos']);
+          }
+          if (body['data']['settings'] != null) {
+            shortsHeading.value = body['data']['settings']['heading'] ?? 'Trending Shorts';
+            shortsSubHeading.value = body['data']['settings']['subHeading'] ?? '';
+          }
         }
       }
     } catch (e) {

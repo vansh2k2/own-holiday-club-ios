@@ -452,6 +452,8 @@ class HomeView extends GetView<HomeController> {
               Obx(() => _TrendingStoriesSection(
                 stories: controller.trendingShorts.toList(),
                 isLoading: controller.isShortsLoading.value,
+                heading: controller.shortsHeading.value,
+                subHeading: controller.shortsSubHeading.value,
               )),
 
               const SizedBox(height: 28),
@@ -1699,8 +1701,15 @@ class _FeaturedExperiencesLayout extends StatelessWidget {
 class _TrendingStoriesSection extends StatelessWidget {
   final List<dynamic> stories;
   final bool isLoading;
+  final String heading;
+  final String subHeading;
   
-  const _TrendingStoriesSection({required this.stories, required this.isLoading});
+  const _TrendingStoriesSection({
+    required this.stories, 
+    required this.isLoading,
+    required this.heading,
+    required this.subHeading,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1716,9 +1725,9 @@ class _TrendingStoriesSection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Trending Shorts',
-                  style: TextStyle(
+                Text(
+                  heading.isNotEmpty ? heading : 'Trending Shorts',
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryBlack,
@@ -1733,6 +1742,17 @@ class _TrendingStoriesSection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(1.5),
                   ),
                 ),
+                if (subHeading.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    subHeading,
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: Colors.grey.shade600,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

@@ -20,11 +20,11 @@ class MembershipFormController extends GetxController {
   final MembershipRepo membershipRepo = Get.find();
   final AuthRepo authRepo = Get.find();
   late Razorpay _razorpay;
-  
+
   var currentStep = 1.obs;
   var isLoading = false.obs;
   Map<String, dynamic>? savedRazorpayOptions;
-  
+
   late MembershipTier selectedTier;
 
   // Controllers for Step 1
@@ -36,13 +36,41 @@ class MembershipFormController extends GetxController {
   final emailController = TextEditingController();
   final emailOtpController = TextEditingController();
   final anniversaryController = TextEditingController();
-  
+
   // Address Controllers
   final houseNoController = TextEditingController();
   final residenceAddressController = TextEditingController();
   final residenceCityController = TextEditingController();
   final pinController = TextEditingController();
+
+
+  // Family Details
+  final spouseNameController = TextEditingController();
+  final spouseDobController = TextEditingController();
+  final spouseMobileController = TextEditingController();
+  final spouseEmailController = TextEditingController();
   
+  var numberOfChildren = 0.obs;
+  var childrenNameControllers = <TextEditingController>[].obs;
+  var childrenGenderOptions = <RxnString>[].obs;
+  var childrenDobControllers = <TextEditingController>[].obs;
+
+  void updateChildrenCount(int count) {
+    numberOfChildren.value = count;
+    
+    // Adjust lengths
+    while (childrenNameControllers.length < count) {
+      childrenNameControllers.add(TextEditingController());
+      childrenGenderOptions.add(RxnString());
+      childrenDobControllers.add(TextEditingController());
+    }
+    while (childrenNameControllers.length > count) {
+      childrenNameControllers.removeLast().dispose();
+      childrenGenderOptions.removeLast();
+      childrenDobControllers.removeLast().dispose();
+    }
+  }
+
   // Office Controllers
   final officeAddressController = TextEditingController();
   final officeCityController = TextEditingController();
@@ -54,6 +82,7 @@ class MembershipFormController extends GetxController {
   var isMobileVerified = false.obs;
   var isEmailOtpSent = false.obs;
   var isEmailVerified = false.obs;
+  var isEmailSkipped = false.obs;
   String? _tempMobile;
   String? _tempEmail;
 
@@ -70,7 +99,7 @@ class MembershipFormController extends GetxController {
 
   // Countries list fetched from API
   var countriesList = <String>[].obs;
-  
+
   // Toggle office address block visibility
   var showOfficeAddress = false.obs;
 
@@ -116,6 +145,12 @@ class MembershipFormController extends GetxController {
     officeCityController.dispose();
     officePhoneController.dispose();
     officePinController.dispose();
+    spouseNameController.dispose();
+    spouseDobController.dispose();
+    spouseMobileController.dispose();
+    spouseEmailController.dispose();
+    for (var c in childrenNameControllers) { c.dispose(); }
+    for (var c in childrenDobControllers) { c.dispose(); }
     super.onClose();
   }
 
@@ -125,31 +160,45 @@ class MembershipFormController extends GetxController {
       if (!isMobileVerified.value) {
         debugPrint("Mobile number not verified, proceeding anyway.");
       }
+      // Email OTP verification is optional for mobile app
       if (!isEmailVerified.value) {
-        Get.snackbar('Verification Required', 'Please verify your email address first',
-            backgroundColor: AppColors.primaryYellow, colorText: Colors.white);
-        return;
+        debugPrint("Email address not verified, proceeding anyway.");
       }
 
       try {
         isLoading.value = true;
         final memberDetails = _buildMemberDetails();
         print("========== STEP 1 MEMBER DETAILS ==========");
-        print(const JsonEncoder.withIndent('  ').convert(memberDetails['personalDetails']));
+        print(
+          const JsonEncoder.withIndent(
+            '  ',
+          ).convert(memberDetails['personalDetails']),
+        );
         print("===========================================");
 
         // Save to GetStorage (Local Storage)
         final box = GetStorage();
-        await box.write('membership_step1_data', memberDetails['personalDetails']);
+        await box.write(
+          'membership_step1_data',
+          memberDetails['personalDetails'],
+        );
         print("Saved Step 1 details to local storage successfully!");
 
-        Get.snackbar('Success', 'Details saved successfully!',
-            backgroundColor: AppColors.primaryYellow, colorText: Colors.white);
+        Get.snackbar(
+          'Success',
+          'Details saved successfully!',
+          backgroundColor: AppColors.primaryYellow,
+          colorText: Colors.white,
+        );
         currentStep.value = 2;
       } catch (e) {
         print("Error saving step 1 locally: $e");
-        Get.snackbar('Error', 'Failed to save details locally: $e',
-            backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+        Get.snackbar(
+          'Error',
+          'Failed to save details locally: $e',
+          backgroundColor: AppColors.brownAccent,
+          colorText: Colors.white,
+        );
       } finally {
         isLoading.value = false;
       }
@@ -171,9 +220,7 @@ class MembershipFormController extends GetxController {
       );
       if (response.statusCode == 200) {
         final List data = jsonDecode(response.body);
-        final sorted = data
-            .map((c) => c['name']['common'] as String)
-            .toList()
+        final sorted = data.map((c) => c['name']['common'] as String).toList()
           ..sort((a, b) => a.compareTo(b));
         countriesList.value = sorted;
       }
@@ -214,11 +261,15 @@ class MembershipFormController extends GetxController {
     if (_tempMobile == null) return;
     try {
       isLoading.value = true;
-      final response = await authRepo.verifyMobileOtp(_tempMobile!, mobileController.text);
+      final response = await authRepo.verifyMobileOtp(
+        _tempMobile!,
+        mobileController.text,
+      );
       if (response.statusCode == 200) {
         isMobileVerified.value = true;
         isMobileOtpSent.value = false;
-        mobileController.text = _tempMobile!; // Restore mobile number after verification
+        mobileController.text =
+            _tempMobile!; // Restore mobile number after verification
         Get.snackbar('Success', 'Mobile verified');
       } else {
         Get.snackbar('Error', 'Invalid OTP');
@@ -260,7 +311,10 @@ class MembershipFormController extends GetxController {
     if (_tempEmail == null) return;
     try {
       isLoading.value = true;
-      final response = await authRepo.verifyEmailOtp(_tempEmail!, emailController.text);
+      final response = await authRepo.verifyEmailOtp(
+        _tempEmail!,
+        emailController.text,
+      );
       if (response.statusCode == 200) {
         isEmailVerified.value = true;
         isEmailOtpSent.value = false;
@@ -280,8 +334,14 @@ class MembershipFormController extends GetxController {
 
   Future<void> pickFile(String docType) async {
     if (docType == 'addressProof') {
-      if (selectedAddressProof.value == null || selectedAddressProof.value!.isEmpty) {
-        Get.snackbar('Validation Error', 'You have to select proof type first', backgroundColor: AppColors.primaryYellow, colorText: Colors.white);
+      if (selectedAddressProof.value == null ||
+          selectedAddressProof.value!.isEmpty) {
+        Get.snackbar(
+          'Validation Error',
+          'You have to select proof type first',
+          backgroundColor: AppColors.primaryYellow,
+          colorText: Colors.white,
+        );
         return;
       }
     }
@@ -296,7 +356,7 @@ class MembershipFormController extends GetxController {
       if (result != null && result.files.isNotEmpty) {
         PlatformFile file = result.files.first;
         String? base64String;
-        
+
         Uint8List fileBytes;
         if (file.bytes != null) {
           fileBytes = file.bytes!;
@@ -314,7 +374,9 @@ class MembershipFormController extends GetxController {
               targetWidth: 300,
             );
             final frame = await codec.getNextFrame();
-            final byteData = await frame.image.toByteData(format: ui.ImageByteFormat.png);
+            final byteData = await frame.image.toByteData(
+              format: ui.ImageByteFormat.png,
+            );
             if (byteData != null) {
               fileBytes = byteData.buffer.asUint8List();
             }
@@ -354,7 +416,9 @@ class MembershipFormController extends GetxController {
         'occupation': selectedOccupation.value,
         'gender': selectedGender.value,
         'maritalStatus': selectedMarried.value,
-        'anniversary': selectedMarried.value == 'Married' ? anniversaryController.text : '',
+        'anniversary': selectedMarried.value == 'Married'
+            ? anniversaryController.text
+            : '',
         'residenceAddress': {
           'houseNo': houseNoController.text,
           'addressLine': residenceAddressController.text,
@@ -363,41 +427,50 @@ class MembershipFormController extends GetxController {
           'country': selectedCountryRes.value,
           'pin': pinController.text,
         },
-        'officeAddress': showOfficeAddress.value 
-          ? {
-              'addressLine': officeAddressController.text,
-              'city': officeCityController.text,
-              'state': selectedStateOff.value,
-              'country': selectedCountryOff.value,
-              'phone': officePhoneController.text,
-              'pin': officePinController.text,
-            }
-          : {
-              'addressLine': '',
-              'city': '',
-              'state': '',
-              'country': '',
-              'phone': '',
-              'pin': '',
-            }
+        'officeAddress': showOfficeAddress.value
+            ? {
+                'addressLine': officeAddressController.text,
+                'city': officeCityController.text,
+                'state': selectedStateOff.value,
+                'country': selectedCountryOff.value,
+                'phone': officePhoneController.text,
+                'pin': officePinController.text,
+              }
+            : {
+                'addressLine': '',
+                'city': '',
+                'state': '',
+                'country': '',
+                'phone': '',
+                'pin': '',
+              },
       },
       'familyDetails': {
-        'spouse': {'name': '', 'dob': ''},
-        'children': []
+        'spouse': {
+          'name': spouseNameController.text, 
+          'dob': spouseDobController.text,
+          'mobile': spouseMobileController.text,
+          'email': spouseEmailController.text,
+        },
+        'children': List.generate(numberOfChildren.value, (index) => {
+          'name': childrenNameControllers[index].text,
+          'gender': childrenGenderOptions[index].value ?? '',
+          'dob': childrenDobControllers[index].text,
+        }),
       },
       'documents': {
         'profileImage': {
           'name': profileImageFile.value?.name ?? '',
-          'type': profileImageFile.value?.extension == 'pdf' 
-              ? 'application/pdf' 
+          'type': profileImageFile.value?.extension == 'pdf'
+              ? 'application/pdf'
               : 'image/${profileImageFile.value?.extension ?? "jpeg"}',
           'size': profileImageFile.value?.size ?? 0,
           'dataUrl': profileImageBase64.value,
         },
         'idProof': {
           'name': idProofFile.value?.name ?? '',
-          'type': idProofFile.value?.extension == 'pdf' 
-              ? 'application/pdf' 
+          'type': idProofFile.value?.extension == 'pdf'
+              ? 'application/pdf'
               : 'image/${idProofFile.value?.extension ?? "jpeg"}',
           'size': idProofFile.value?.size ?? 0,
           'dataUrl': idProofBase64.value,
@@ -405,38 +478,63 @@ class MembershipFormController extends GetxController {
         },
         'addressProof': {
           'name': addressProofFile.value?.name ?? '',
-          'type': addressProofFile.value?.extension == 'pdf' 
-              ? 'application/pdf' 
+          'type': addressProofFile.value?.extension == 'pdf'
+              ? 'application/pdf'
               : 'image/${addressProofFile.value?.extension ?? "jpeg"}',
           'size': addressProofFile.value?.size ?? 0,
           'dataUrl': addressProofBase64.value,
           'proofType': selectedAddressProof.value ?? 'PAN',
-        }
+        },
       },
-      'acceptedTerms': isConsentChecked.value
+      'acceptedTerms': isConsentChecked.value,
     };
   }
 
   Future<void> proceedToPayment() async {
     if (profileImageBase64.value.isEmpty) {
-      Get.snackbar('Validation Error', 'Please upload your Profile Image', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+      Get.snackbar(
+        'Validation Error',
+        'Please upload your Profile Image',
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
       return;
     }
     if (idProofBase64.value.isEmpty) {
-      Get.snackbar('Validation Error', 'Please upload your Aadhaar Card', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+      Get.snackbar(
+        'Validation Error',
+        'Please upload your Aadhaar Card',
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
       return;
     }
-    if (selectedAddressProof.value == null || selectedAddressProof.value!.isEmpty) {
-      Get.snackbar('Validation Error', 'Please select an Address Proof Type', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+    if (selectedAddressProof.value == null ||
+        selectedAddressProof.value!.isEmpty) {
+      Get.snackbar(
+        'Validation Error',
+        'Please select an Address Proof Type',
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
       return;
     }
     if (addressProofBase64.value.isEmpty) {
-      Get.snackbar('Validation Error', 'Please upload your Address Proof', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+      Get.snackbar(
+        'Validation Error',
+        'Please upload your Address Proof',
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
       return;
     }
     if (!isConsentChecked.value) {
-      Get.snackbar('Validation Error', 'Please agree to the Terms & Conditions',
-          backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+      Get.snackbar(
+        'Validation Error',
+        'Please agree to the Terms & Conditions',
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
       return;
     }
 
@@ -446,13 +544,16 @@ class MembershipFormController extends GetxController {
       print("========== MEMBER DETAILS PAYLOAD ==========");
       print(const JsonEncoder.withIndent('  ').convert(memberDetails));
       print("============================================");
-      
-      final response = await membershipRepo.createRazorpayOrder(selectedTier.id, memberDetails);
+
+      final response = await membershipRepo.createRazorpayOrder(
+        selectedTier.id,
+        memberDetails,
+      );
       print("========== CREATE ORDER RESPONSE ==========");
       print("Status Code: ${response.statusCode}");
       print("Body: ${response.body}");
       print("===========================================");
-      
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         var options = {
@@ -463,9 +564,9 @@ class MembershipFormController extends GetxController {
           'order_id': data['order']['id'],
           'prefill': {
             'contact': mobileController.text,
-            'email': emailController.text
+            'email': emailController.text,
           },
-          'notes': data['order']['notes']
+          'notes': data['order']['notes'],
         };
         _razorpay.open(options);
       } else {
@@ -502,7 +603,7 @@ class MembershipFormController extends GetxController {
       if (verifyRes.statusCode == 200) {
         final verifyData = jsonDecode(verifyRes.body);
         final userModel = UserModel.fromJson(verifyData['user']);
-        
+
         // Save to AccountController
         Get.find<AccountController>().userData.value = userModel;
         Get.find<AccountController>().isLoggedIn.value = true;
@@ -510,7 +611,10 @@ class MembershipFormController extends GetxController {
         Get.offAllNamed(Routes.MEMBER_DETAILS);
         Get.snackbar('Success', 'Welcome to Own Holiday Club!');
       } else {
-        Get.snackbar('Error', 'Payment verification failed. Please contact support.');
+        Get.snackbar(
+          'Error',
+          'Payment verification failed. Please contact support.',
+        );
       }
     } catch (e) {
       Get.snackbar('Error', 'Internal error during verification');
@@ -520,8 +624,12 @@ class MembershipFormController extends GetxController {
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    Get.snackbar('Payment Failed', response.message ?? 'Unknown error',
-        backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+    Get.snackbar(
+      'Payment Failed',
+      response.message ?? 'Unknown error',
+      backgroundColor: AppColors.brownAccent,
+      colorText: Colors.white,
+    );
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {

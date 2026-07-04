@@ -65,7 +65,9 @@ class _DestinationDetailsViewState extends State<DestinationDetailsView> {
   }
 
   @override
-    @override
+
+
+  @override
   Widget build(BuildContext context) {
     final images = _getImages();
     final stats = destination['travelStats'] ?? {};
@@ -802,6 +804,13 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
   bool _isMobileVerified = false;
   bool _isSendingMobileOtp = false;
   bool _isVerifyingMobileOtp = false;
+  
+  bool _isSendingEmailOtp = false;
+  bool _isEmailOtpSent = false;
+  bool _isEmailVerified = false;
+  bool _isVerifyingEmailOtp = false;
+  bool _isEmailSkipped = false;
+  final _emailOtpCtrl = TextEditingController();
   String? _tempMobile;
 
 
@@ -973,6 +982,57 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
 
 
 
+        Future<void> _sendEmailOtp() async {
+    final email = _emailCtrl.text.trim();
+    if (email.isEmpty || !GetUtils.isEmail(email)) {
+      Get.snackbar('Error', 'Please enter a valid email address.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+      return;
+    }
+    setState(() => _isSendingEmailOtp = true);
+    try {
+      final response = await _serviceRepo.sendEmailOtp(email);
+      if (response.statusCode == 200) {
+        setState(() {
+          _isEmailOtpSent = true;
+          _emailOtpCtrl.clear();
+        });
+        Get.snackbar('Success', 'OTP sent to email.', backgroundColor: Colors.black, colorText: Colors.white);
+      } else {
+        final data = jsonDecode(response.body);
+        Get.snackbar('Error', data['message'] ?? 'Failed to send OTP.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Connection failed.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+    } finally {
+      setState(() => _isSendingEmailOtp = false);
+    }
+  }
+
+  Future<void> _verifyEmailOtp() async {
+    final otp = _emailOtpCtrl.text;
+    if (otp.isEmpty) {
+      Get.snackbar('Error', 'Please enter the OTP.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+      return;
+    }
+    setState(() => _isVerifyingEmailOtp = true);
+    try {
+      final response = await _serviceRepo.verifyEmailOtp(_emailCtrl.text.trim(), otp);
+      if (response.statusCode == 200) {
+        setState(() {
+          _isEmailVerified = true;
+          _isEmailOtpSent = false;
+        });
+        Get.snackbar('Success', 'Email verified successfully!', backgroundColor: Colors.black, colorText: Colors.white);
+      } else {
+        Get.snackbar('Error', 'Invalid OTP code.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Verification failed.', backgroundColor: AppColors.brownAccent, colorText: Colors.white);
+    } finally {
+      setState(() => _isVerifyingEmailOtp = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
@@ -1135,7 +1195,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                             ),
                           )
                         : SizedBox(
-                            height: 38,
+                            height: 39,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryYellow,
@@ -1165,7 +1225,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                                       style: GoogleFonts.poppins(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.black,
+                                        color: Colors.white,
                                       ),
                                     ),
                             ),
@@ -1176,20 +1236,171 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
 
                 // Email Address
                 _buildLabel("EMAIL ADDRESS *"),
-                TextFormField(
-                  controller: _emailCtrl,
-                  keyboardType: TextInputType.emailAddress,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF0D1321),
-                  ),
-                  decoration: _inputDecoration(
-                    'you@example.com',
-                    Icons.mail_outline_rounded,
-                  ),
-                  validator: (v) => (v == null || v.isEmpty || !GetUtils.isEmail(v)) ? "Required" : null,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _emailCtrl,
+                        keyboardType: TextInputType.emailAddress,
+                        enabled: !_isEmailVerified && !_isEmailSkipped,
+                        style: GoogleFonts.poppins(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF0D1321),
+                        ),
+                        decoration: _inputDecoration(
+                          'you@example.com',
+                          Icons.mail_outline_rounded,
+                        ),
+                        validator: (v) => (v == null || v.isEmpty || !GetUtils.isEmail(v)) ? "Required" : null,
+                        onChanged: (val) {
+                          if (_isEmailOtpSent) {
+                            setState(() {
+                              _isEmailOtpSent = false;
+                              _emailOtpCtrl.clear();
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    if (!_isEmailSkipped) ...[
+                      const SizedBox(width: 10),
+                      _isEmailVerified
+                          ? Container(
+                              height: 38,
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFECFDF5),
+                                borderRadius: BorderRadius.circular(5),
+                                border: Border.all(color: const Color(0xFF059669)),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                "✓ VERIFIED",
+                                style: GoogleFonts.poppins(
+                                  color: const Color(0xFF047857),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )
+                          : Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                SizedBox(
+                                  height: 39,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primaryYellow,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                      elevation: 0,
+                                    ),
+                                    onPressed: _isSendingEmailOtp ? null : _sendEmailOtp,
+                                    child: _isSendingEmailOtp
+                                        ? const SizedBox(
+                                            height: 14,
+                                            width: 14,
+                                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                          )
+                                        : Text(
+                                            _isEmailOtpSent ? "RESEND" : "SEND OTP",
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () => setState(() => _isEmailSkipped = true),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(
+                                      "SKIP",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey.shade600,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ],
+                  ],
                 ),
+                if (_isEmailOtpSent && !_isEmailVerified && !_isEmailSkipped) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _emailOtpCtrl,
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          style: GoogleFonts.poppins(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF0D1321),
+                          ),
+                          decoration: InputDecoration(
+                            hintText: "Enter Email OTP",
+                            hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 11.5),
+                            prefixIcon: const Icon(Icons.password, size: 18, color: Colors.grey),
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                            isDense: true,
+                            counterText: "",
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide: const BorderSide(color: Color(0xFFCED4DA)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide: const BorderSide(color: Color(0xFF000000), width: 1.5),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      SizedBox(
+                        height: 44,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryYellow,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            elevation: 0,
+                          ),
+                          onPressed: _isVerifyingEmailOtp ? null : _verifyEmailOtp,
+                          child: _isVerifyingEmailOtp
+                              ? const SizedBox(
+                                  height: 16,
+                                  width: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                )
+                              : Text(
+                                  "VERIFY",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 8),
 
                 // Arrival & Departure Row

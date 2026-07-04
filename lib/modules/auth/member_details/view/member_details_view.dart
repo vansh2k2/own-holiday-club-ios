@@ -309,6 +309,24 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
 
   // ── INLINE ACCORDION MENU SECTION (No routing!) ───────────────────────────
   Widget _buildAccordionMenuSection(UserModel u) {
+    final dashCtrl = Get.isRegistered<DashboardController>() ? Get.find<DashboardController>() : null;
+    var tierFeatures = <String>[];
+    if (dashCtrl != null) {
+      try {
+        final t = dashCtrl.membershipTiers.firstWhere((t) => t.id == u.membership?.tierId);
+        tierFeatures = t.features;
+      } catch (e) {}
+    }
+    
+    String nightsDisplay = u.membership?.nightsPerYear ?? 'N/A';
+    if (tierFeatures.isNotEmpty) {
+      if (tierFeatures.length >= 2) {
+        nightsDisplay = '${tierFeatures[0]} • ${tierFeatures[1]}';
+      } else {
+        nightsDisplay = tierFeatures.first;
+      }
+    }
+
     return Column(
       children: [
         _buildAccordionItem(
@@ -323,7 +341,7 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
           index: 1,
           icon: Icons.card_membership_rounded,
           label: 'Membership Details',
-          subtitle: '${u.membership?.name ?? 'OHC'} • ${u.membership?.nightsPerYear ?? 'N/A'}',
+          subtitle: '${u.membership?.name ?? 'OHC'} • $nightsDisplay',
           color: const Color(0xFFF59E0B),
           child: _buildMembershipContent(u),
         ),

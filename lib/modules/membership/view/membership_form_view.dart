@@ -557,6 +557,7 @@ class MembershipFormView extends StatelessWidget {
           prefixIcon: Icons.work_outline,
         ),
         const SizedBox(height: 24),
+        // ─── ADDRESS INFORMATION HEADER ───────────────────────────────────
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -578,14 +579,26 @@ class MembershipFormView extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 14),
+
+        // ── PERMANENT ADDRESS ──────────────────────────────────────────────
+        Text(
+          'PERMANENT ADDRESS',
+          style: GoogleFonts.poppins(
+            color: Colors.grey[600],
+            fontWeight: FontWeight.bold,
+            fontSize: 10.0,
+            letterSpacing: 1.0,
+          ),
+        ),
+        const SizedBox(height: 10),
         _buildTextField(
           'House No. / Block No.',
           controller.houseNoController,
-          prefixIcon: Icons.location_on_outlined,
+          prefixIcon: Icons.home_outlined,
         ),
         const SizedBox(height: 14),
         _buildTextField(
-          'Permanent Address *',
+          'Address Line *',
           controller.residenceAddressController,
           prefixIcon: Icons.location_on_outlined,
         ),
@@ -593,46 +606,19 @@ class MembershipFormView extends StatelessWidget {
         _buildTextField(
           'City *',
           controller.residenceCityController,
-          prefixIcon: Icons.location_on_outlined,
+          prefixIcon: Icons.location_city_outlined,
         ),
         const SizedBox(height: 14),
         _buildDropdown('State *', controller.selectedStateRes, [
-          'Andhra Pradesh',
-          'Arunachal Pradesh',
-          'Assam',
-          'Bihar',
-          'Chhattisgarh',
-          'Goa',
-          'Gujarat',
-          'Haryana',
-          'Himachal Pradesh',
-          'Jharkhand',
-          'Karnataka',
-          'Kerala',
-          'Madhya Pradesh',
-          'Maharashtra',
-          'Manipur',
-          'Meghalaya',
-          'Mizoram',
-          'Nagaland',
-          'Odisha',
-          'Punjab',
-          'Rajasthan',
-          'Sikkim',
-          'Tamil Nadu',
-          'Telangana',
-          'Tripura',
-          'Uttar Pradesh',
-          'Uttarakhand',
-          'West Bengal',
-          'Andaman & Nicobar Islands',
-          'Chandigarh',
-          'Dadra & Nagar Haveli and Daman & Diu',
-          'Delhi',
-          'Jammu & Kashmir',
-          'Ladakh',
-          'Lakshadweep',
-          'Puducherry',
+          'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar',
+          'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh',
+          'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra',
+          'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+          'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+          'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+          'Andaman & Nicobar Islands', 'Chandigarh',
+          'Dadra & Nagar Haveli and Daman & Diu', 'Delhi',
+          'Jammu & Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
         ], prefixIcon: Icons.map_outlined),
         const SizedBox(height: 14),
         _buildCountryDropdown(
@@ -647,7 +633,136 @@ class MembershipFormView extends StatelessWidget {
           controller.pinController,
           prefixIcon: Icons.pin_drop_outlined,
         ),
+
+        // ── CORRESPONDENCE ADDRESS ─────────────────────────────────────────
+        const SizedBox(height: 24),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'CORRESPONDENCE ADDRESS',
+              style: GoogleFonts.poppins(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.bold,
+                fontSize: 10.0,
+                letterSpacing: 1.0,
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              height: 1,
+              margin: const EdgeInsets.only(top: 6),
+              color: Colors.grey[200],
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+
+        // "Same as Permanent" checkbox
+        Obx(() => GestureDetector(
+          onTap: () {
+            final newVal = !controller.sameAsPermanent.value;
+            controller.sameAsPermanent.value = newVal;
+            if (newVal) controller.syncCorrespondenceFromPermanent();
+          },
+          child: Row(
+            children: [
+              Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: controller.sameAsPermanent.value
+                      ? AppColors.primaryYellow
+                      : Colors.white,
+                  border: Border.all(
+                    color: controller.sameAsPermanent.value
+                        ? AppColors.primaryYellow
+                        : Colors.grey[400]!,
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: controller.sameAsPermanent.value
+                    ? const Icon(Icons.check, size: 14, color: Colors.black)
+                    : null,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Same as Permanent Address',
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF1565C0),
+                ),
+              ),
+            ],
+          ),
+        )),
+        const SizedBox(height: 14),
+
+        // Correspondence fields (editable or synced)
+        Obx(() {
+          final isSame = controller.sameAsPermanent.value;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTextField(
+                'House No. / Block No.',
+                isSame ? controller.houseNoController : controller.corrHouseNoController,
+                prefixIcon: Icons.home_outlined,
+                readOnly: isSame,
+              ),
+              const SizedBox(height: 14),
+              _buildTextField(
+                'Address Line',
+                isSame ? controller.residenceAddressController : controller.corrAddressController,
+                prefixIcon: Icons.location_on_outlined,
+                readOnly: isSame,
+              ),
+              const SizedBox(height: 14),
+              _buildTextField(
+                'City',
+                isSame ? controller.residenceCityController : controller.corrCityController,
+                prefixIcon: Icons.location_city_outlined,
+                readOnly: isSame,
+              ),
+              const SizedBox(height: 14),
+              _buildDropdown(
+                'State',
+                isSame ? controller.selectedStateRes : controller.selectedStateCorrAddress,
+                [
+                  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar',
+                  'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh',
+                  'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra',
+                  'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+                  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+                  'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+                  'Andaman & Nicobar Islands', 'Chandigarh',
+                  'Dadra & Nagar Haveli and Daman & Diu', 'Delhi',
+                  'Jammu & Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
+                ],
+                prefixIcon: Icons.map_outlined,
+                enabled: !isSame,
+              ),
+              const SizedBox(height: 14),
+              _buildCountryDropdown(
+                'Country',
+                isSame ? controller.selectedCountryRes : controller.selectedCountryCorrAddress,
+                controller,
+                prefixIcon: Icons.public_outlined,
+              ),
+              const SizedBox(height: 14),
+              _buildTextField(
+                'Pin Code',
+                isSame ? controller.pinController : controller.corrPinController,
+                prefixIcon: Icons.pin_drop_outlined,
+                readOnly: isSame,
+              ),
+            ],
+          );
+        }),
         const SizedBox(height: 20),
+
         Obx(
           () => GestureDetector(
             onTap: () => controller.showOfficeAddress.value =
@@ -1650,6 +1765,7 @@ class MembershipFormView extends StatelessWidget {
     List<String> items, {
     bool isHighlight = false,
     IconData? prefixIcon,
+    bool enabled = true,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1664,13 +1780,13 @@ class MembershipFormView extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 13,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF0D1321),
+              color: enabled ? const Color(0xFF0D1321) : Colors.grey,
             ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 12),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: enabled ? Colors.white : const Color(0xFFF1F3F5),
               contentPadding: const EdgeInsets.symmetric(
                 vertical: 7,
                 horizontal: 8,
@@ -1718,14 +1834,17 @@ class MembershipFormView extends StatelessWidget {
             items: items.map((item) {
               return DropdownMenuItem<String>(value: item, child: Text(item));
             }).toList(),
-            onChanged: (val) {
-              if (val != null) rxValue.value = val;
-            },
+            onChanged: enabled
+                ? (val) {
+                    if (val != null) rxValue.value = val;
+                  }
+                : null,
           ),
         ),
       ],
     );
   }
+
 
   Widget _buildFileRow(
     String label,

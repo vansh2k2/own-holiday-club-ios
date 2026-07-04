@@ -37,11 +37,31 @@ class MembershipFormController extends GetxController {
   final emailOtpController = TextEditingController();
   final anniversaryController = TextEditingController();
 
-  // Address Controllers
+  // Permanent (Residence) Address Controllers
   final houseNoController = TextEditingController();
   final residenceAddressController = TextEditingController();
   final residenceCityController = TextEditingController();
   final pinController = TextEditingController();
+
+  // Correspondence Address Controllers
+  final corrHouseNoController = TextEditingController();
+  final corrAddressController = TextEditingController();
+  final corrCityController = TextEditingController();
+  final corrPinController = TextEditingController();
+  var selectedStateCorrAddress = RxnString();
+  var selectedCountryCorrAddress = RxnString('India');
+
+  // "Same as Permanent" toggle for Correspondence Address
+  var sameAsPermanent = false.obs;
+
+  void syncCorrespondenceFromPermanent() {
+    corrHouseNoController.text = houseNoController.text;
+    corrAddressController.text = residenceAddressController.text;
+    corrCityController.text = residenceCityController.text;
+    corrPinController.text = pinController.text;
+    selectedStateCorrAddress.value = selectedStateRes.value;
+    selectedCountryCorrAddress.value = selectedCountryRes.value;
+  }
 
 
   // Family Details
@@ -141,6 +161,10 @@ class MembershipFormController extends GetxController {
     residenceAddressController.dispose();
     residenceCityController.dispose();
     pinController.dispose();
+    corrHouseNoController.dispose();
+    corrAddressController.dispose();
+    corrCityController.dispose();
+    corrPinController.dispose();
     officeAddressController.dispose();
     officeCityController.dispose();
     officePhoneController.dispose();
@@ -419,7 +443,7 @@ class MembershipFormController extends GetxController {
         'anniversary': selectedMarried.value == 'Married'
             ? anniversaryController.text
             : '',
-        'residenceAddress': {
+        'permanentAddress': {
           'houseNo': houseNoController.text,
           'addressLine': residenceAddressController.text,
           'city': residenceCityController.text,
@@ -427,6 +451,25 @@ class MembershipFormController extends GetxController {
           'country': selectedCountryRes.value,
           'pin': pinController.text,
         },
+        'correspondenceAddress': sameAsPermanent.value
+            ? {
+                'houseNo': houseNoController.text,
+                'addressLine': residenceAddressController.text,
+                'city': residenceCityController.text,
+                'state': selectedStateRes.value,
+                'country': selectedCountryRes.value,
+                'pin': pinController.text,
+                'sameAsPermanent': true,
+              }
+            : {
+                'houseNo': corrHouseNoController.text,
+                'addressLine': corrAddressController.text,
+                'city': corrCityController.text,
+                'state': selectedStateCorrAddress.value,
+                'country': selectedCountryCorrAddress.value,
+                'pin': corrPinController.text,
+                'sameAsPermanent': false,
+              },
         'officeAddress': showOfficeAddress.value
             ? {
                 'addressLine': officeAddressController.text,

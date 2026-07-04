@@ -681,17 +681,16 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       padding: EdgeInsets.fromLTRB(20, 10, 20, 16 + bottomPadding),
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.92,
-      ),
+      height: screenHeight * 0.92,
       child: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         clipBehavior: Clip.none,
         child: Padding(
           padding: EdgeInsets.only(bottom: bottomInset),
@@ -848,7 +847,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                                       style: GoogleFonts.poppins(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                        color: Colors.black,
                                       ),
                                     ),
                             ),
@@ -1021,7 +1020,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                                             style: GoogleFonts.poppins(
                                               fontSize: 10,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.white,
+                                              color: Colors.black,
                                             ),
                                           ),
                                   ),
@@ -1034,14 +1033,17 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                                       _emailOtpController.clear();
                                     });
                                   },
-                                  child: Text(
-                                    "SKIP",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF6B7280),
-                                      decoration: TextDecoration.underline,
-                                      height: 1.0,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 4),
+                                    child: Text(
+                                      "SKIP",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF6B7280),
+                                        decoration: TextDecoration.underline,
+                                        height: 1.0,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -1332,7 +1334,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 12,
-                                  color: Colors.white,
+                                  color: Colors.black,
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -1340,7 +1342,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                               Icon(
                                 Icons.send_rounded,
                                 size: 14,
-                                color: Colors.white,
+                                color: Colors.black,
                               ),
                             ],
                           ),

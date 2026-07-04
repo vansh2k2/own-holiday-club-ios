@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter (Chrome - My Profile)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--web-browser-flag",
+        "--user-data-dir=C:\\Users\\PC\\AppData\\Local\\Google\\Chrome\\User Data",
+        "--web-browser-flag",
+        "--profile-directory=Default"
+      ]
+    }
+  ]
+}

@@ -703,33 +703,32 @@ class MembershipFormView extends StatelessWidget {
         // Correspondence fields (editable or synced)
         Obx(() {
           final isSame = controller.sameAsPermanent.value;
+          if (isSame) return const SizedBox.shrink();
+          
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTextField(
                 'House No. / Block No.',
-                isSame ? controller.houseNoController : controller.corrHouseNoController,
+                controller.corrHouseNoController,
                 prefixIcon: Icons.home_outlined,
-                readOnly: isSame,
               ),
               const SizedBox(height: 14),
               _buildTextField(
                 'Address Line',
-                isSame ? controller.residenceAddressController : controller.corrAddressController,
+                controller.corrAddressController,
                 prefixIcon: Icons.location_on_outlined,
-                readOnly: isSame,
               ),
               const SizedBox(height: 14),
               _buildTextField(
                 'City',
-                isSame ? controller.residenceCityController : controller.corrCityController,
+                controller.corrCityController,
                 prefixIcon: Icons.location_city_outlined,
-                readOnly: isSame,
               ),
               const SizedBox(height: 14),
               _buildDropdown(
                 'State',
-                isSame ? controller.selectedStateRes : controller.selectedStateCorrAddress,
+                controller.selectedStateCorrAddress,
                 [
                   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar',
                   'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh',
@@ -742,21 +741,19 @@ class MembershipFormView extends StatelessWidget {
                   'Jammu & Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
                 ],
                 prefixIcon: Icons.map_outlined,
-                enabled: !isSame,
               ),
               const SizedBox(height: 14),
               _buildCountryDropdown(
                 'Country',
-                isSame ? controller.selectedCountryRes : controller.selectedCountryCorrAddress,
+                controller.selectedCountryCorrAddress,
                 controller,
                 prefixIcon: Icons.public_outlined,
               ),
               const SizedBox(height: 14),
               _buildTextField(
                 'Pin Code',
-                isSame ? controller.pinController : controller.corrPinController,
+                controller.corrPinController,
                 prefixIcon: Icons.pin_drop_outlined,
-                readOnly: isSame,
               ),
             ],
           );

@@ -261,85 +261,82 @@ class MembershipBottomSheet {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (plan.name.toLowerCase().contains('privilege')) ...[
-                          if (plan.actuallyPrice != null && plan.actuallyPrice!.isNotEmpty)
-                            Text(
-                              plan.actuallyPrice!.contains('₹') ? plan.actuallyPrice! : '₹ ${plan.actuallyPrice}',
-                              style: const TextStyle(
-                                fontSize: 13.0,
-                                color: AppColors.greyText,
-                                fontWeight: FontWeight.w500,
-                                decoration: TextDecoration.lineThrough,
-                                decorationColor: Colors.red,
-                                decorationThickness: 1.5,
-                              ),
-                            )
-                          else
-                            const Text(
-                              '₹ 52,789',
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2E7D32).withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: const Color(0xFF2E7D32).withOpacity(0.2), width: 1),
+                            ),
+                            child: const Text(
+                              'LIMITED OFFER',
                               style: TextStyle(
-                                fontSize: 13.0,
-                                color: AppColors.greyText,
-                                fontWeight: FontWeight.w500,
-                                decoration: TextDecoration.lineThrough,
-                                decorationColor: Colors.red,
-                                decorationThickness: 1.5,
+                                fontSize: 8.0,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF2E7D32),
+                                letterSpacing: 0.5,
                               ),
                             ),
-                          const SizedBox(height: 2),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        const TextSpan(
-                                          text: 'Pay ',
-                                          style: TextStyle(
-                                            fontSize: 14.0,
-                                            fontWeight: FontWeight.w500,
-                                            color: AppColors.primaryBlack,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: plan.price.contains('₹') ? plan.price : '₹ ${plan.price}',
-                                          style: TextStyle(
-                                            fontSize: 26.0,
-                                            fontWeight: FontWeight.w900,
-                                            color: planColors.primary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                              if (plan.actuallyPrice != null && plan.actuallyPrice!.isNotEmpty)
+                                Text(
+                                  plan.actuallyPrice!.contains('₹') ? plan.actuallyPrice! : '₹ ${plan.actuallyPrice}',
+                                  style: const TextStyle(
+                                    fontSize: 16.0,
+                                    color: AppColors.greyText,
+                                    fontWeight: FontWeight.w500,
+                                    decoration: TextDecoration.lineThrough,
+                                    decorationColor: Colors.red,
+                                    decorationThickness: 1.5,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF2E7D32).withOpacity(0.08),
-                                      borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(color: const Color(0xFF2E7D32).withOpacity(0.2), width: 1),
-                                    ),
-                                    child: const Text(
-                                      'LIMITED',
+                                )
+                              else
+                                const Text(
+                                  '₹ 52,789',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    color: AppColors.greyText,
+                                    fontWeight: FontWeight.w500,
+                                    decoration: TextDecoration.lineThrough,
+                                    decorationColor: Colors.red,
+                                    decorationThickness: 1.5,
+                                  ),
+                                ),
+                              const SizedBox(width: 8),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    const TextSpan(
+                                      text: 'Pay ',
                                       style: TextStyle(
-                                        fontSize: 8.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF2E7D32),
-                                        letterSpacing: 0.5,
+                                        fontSize: 14.0,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColors.primaryBlack,
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    TextSpan(
+                                      text: plan.price.contains('₹') ? plan.price : '₹ ${plan.price}',
+                                      style: TextStyle(
+                                        fontSize: 26.0,
+                                        fontWeight: FontWeight.w900,
+                                        color: planColors.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              const SizedBox(height: 2),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
                               RichText(
                                 text: TextSpan(
                                   style: const TextStyle(fontSize: 11.0, color: AppColors.primaryBlack),
                                   children: [
-                                    const TextSpan(text: 'Admin Fee: '),
+                                    const TextSpan(text: '+ Admin Fee: '),
                                     TextSpan(
                                       text: plan.adminFee != null ? (plan.adminFee!.contains('₹') ? plan.adminFee! : '₹ ${plan.adminFee}') : '₹ 0',
                                       style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),
@@ -347,8 +344,6 @@ class MembershipBottomSheet {
                                   ],
                                 ),
                               ),
-                            ],
-                          ),
                         ] else ...[
                           // Standard plans pricing
                           Column(
@@ -368,7 +363,7 @@ class MembershipBottomSheet {
                                 text: TextSpan(
                                   style: const TextStyle(fontSize: 11.0, color: AppColors.primaryBlack),
                                   children: [
-                                    const TextSpan(text: 'Admin Fee: '),
+                                    const TextSpan(text: '+ Admin Fee: '),
                                     TextSpan(
                                       text: plan.adminFee != null ? (plan.adminFee!.contains('₹') ? plan.adminFee! : '₹ ${plan.adminFee}') : '₹ 0',
                                       style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD32F2F)),

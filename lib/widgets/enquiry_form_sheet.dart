@@ -867,7 +867,7 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
                       child: TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        enabled: !_isEmailVerified && !_isEmailSkipped,
+                        enabled: !_isEmailVerified,
                         style: GoogleFonts.poppins(
                           fontSize: 13.5,
                           fontWeight: FontWeight.w600,

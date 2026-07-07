@@ -262,7 +262,7 @@ class HomeView extends GetView<HomeController> {
             const SizedBox(height: 16),
 
               const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.symmetric(horizontal: 14),
                 child: _BannerCarousel(
                   images: [
                     'assets/images/slide1.png',
@@ -1199,7 +1199,7 @@ class _BannerCarouselState extends State<_BannerCarousel> {
     return Column(
       children: [
         SizedBox(
-          height: 210,
+          height: 225,
           width: double.infinity,
           child: PageView.builder(
             controller: _pageCtrl,
@@ -1208,14 +1208,33 @@ class _BannerCarouselState extends State<_BannerCarousel> {
               if (widget.images.isEmpty) return const SizedBox();
               final imageIndex = index % widget.images.length;
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
                 child: GestureDetector(
                   onTap: () => MembershipBottomSheet.show(context),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.asset(
-                      widget.images[imageIndex],
-                      fit: BoxFit.cover,
+                    borderRadius: BorderRadius.circular(10), // Matched second image curve
+                    child: Builder(
+                      builder: (context) {
+                        if (widget.images[imageIndex].contains('slide2')) {
+                          return Transform(
+                            transform: Matrix4.identity()..scale(1.0, 1.10, 1.0), // Scale only Y to remove transparent padding
+                            alignment: Alignment.center,
+                            child: Image.asset(
+                              widget.images[imageIndex],
+                              fit: BoxFit.cover,
+                              alignment: Alignment.centerLeft, // Align left so text is not clipped
+                              width: double.infinity,
+                              height: double.infinity,
+                            ),
+                          );
+                        }
+                        return Image.asset(
+                          widget.images[imageIndex],
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        );
+                      },
                     ),
                   ),
                 ),

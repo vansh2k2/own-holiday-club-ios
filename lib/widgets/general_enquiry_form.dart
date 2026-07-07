@@ -937,218 +937,226 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
 
                       // Email Address
                       _buildLabel("EMAIL ADDRESS"),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Stack(
+                        clipBehavior: Clip.none,
                         children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              enabled: !_isEmailVerified,
-                              style: GoogleFonts.poppins(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF0D1321),
-                              ),
-                              decoration: _inputDecoration(
-                                "email@example.com",
-                                Icons.mail_outline_rounded,
-                              ),
-                              validator: (v) =>
-                                  (v == null || v.isEmpty || !v.contains('@'))
-                                  ? "Required"
-                                  : null,
-                              onChanged: (val) {
-                                if (_isEmailOtpSent) {
-                                  setState(() {
-                                    _isEmailOtpSent = false;
-                                    _emailOtpController.clear();
-                                  });
-                                }
-                              },
-                            ),
-                          ),
-                          if (!_isEmailSkipped) ...[
-                            const SizedBox(width: 10),
-                            _isEmailVerified
-                                ? Container(
-                                    height: 38,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFECFDF5),
-                                      borderRadius: BorderRadius.circular(5),
-                                      border: Border.all(
-                                        color: const Color(0xFF059669),
-                                      ),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      "✓ VERIFIED",
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _emailController,
+                                      keyboardType: TextInputType.emailAddress,
+                                      enabled: !_isEmailVerified,
                                       style: GoogleFonts.poppins(
-                                        color: const Color(0xFF047857),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF0D1321),
                                       ),
+                                      decoration: _inputDecoration(
+                                        "email@example.com",
+                                        Icons.mail_outline_rounded,
+                                      ),
+                                      validator: (v) =>
+                                          (v == null || v.isEmpty || !v.contains('@'))
+                                          ? "Required"
+                                          : null,
+                                      onChanged: (val) {
+                                        if (_isEmailOtpSent) {
+                                          setState(() {
+                                            _isEmailOtpSent = false;
+                                            _emailOtpController.clear();
+                                          });
+                                        }
+                                      },
                                     ),
-                                  )
-                                : Stack(
-                                    clipBehavior: Clip.none,
-                                    alignment: Alignment.topRight,
-                                    children: [
-                                      SizedBox(
-                                        height: 38,
-                                        child: ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                AppColors.primaryYellow,
-                                            foregroundColor: Colors.black,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(5),
-                                            ),
+                                  ),
+                                  if (!_isEmailSkipped) ...[
+                                    const SizedBox(width: 10),
+                                    _isEmailVerified
+                                        ? Container(
+                                            height: 38,
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 10,
                                             ),
-                                            elevation: 0,
-                                          ),
-                                          onPressed: _isSendingEmailOtp
-                                              ? null
-                                              : _sendEmailOtp,
-                                          child: _isSendingEmailOtp
-                                              ? const SizedBox(
-                                                  width: 14,
-                                                  height: 14,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                        color: Colors.black,
-                                                        strokeWidth: 2,
-                                                      ),
-                                                )
-                                              : Text(
-                                                  _isEmailOtpSent
-                                                      ? "RESEND"
-                                                      : "SEND OTP",
-                                                  style: GoogleFonts.poppins(
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                  ),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFECFDF5),
+                                              borderRadius: BorderRadius.circular(5),
+                                              border: Border.all(
+                                                color: const Color(0xFF059669),
+                                              ),
+                                            ),
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              "✓ VERIFIED",
+                                              style: GoogleFonts.poppins(
+                                                color: const Color(0xFF047857),
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          )
+                                        : SizedBox(
+                                            height: 38,
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    AppColors.primaryYellow,
+                                                foregroundColor: Colors.black,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(5),
                                                 ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 41,
-                                        right: 8,
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              _isEmailSkipped = true;
-                                              _isEmailOtpSent = false;
-                                              _emailOtpController.clear();
-                                            });
-                                          },
-                                          child: Text(
-                                            "SKIP",
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w600,
-                                              color: const Color(0xFF6B7280),
-                                              decoration:
-                                                  TextDecoration.underline,
-                                              height: 1.0,
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 10,
+                                                ),
+                                                elevation: 0,
+                                              ),
+                                              onPressed: _isSendingEmailOtp
+                                                  ? null
+                                                  : _sendEmailOtp,
+                                              child: _isSendingEmailOtp
+                                                  ? const SizedBox(
+                                                      width: 14,
+                                                      height: 14,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                            color: Colors.black,
+                                                            strokeWidth: 2,
+                                                          ),
+                                                    )
+                                                  : Text(
+                                                      _isEmailOtpSent
+                                                          ? "RESEND"
+                                                          : "SEND OTP",
+                                                      style: GoogleFonts.poppins(
+                                                        fontSize: 10,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.black,
+                                                      ),
+                                                    ),
                                             ),
                                           ),
+                                  ],
+                                ],
+                              ),
+                              if (_isEmailOtpSent &&
+                                  !_isEmailVerified &&
+                                  !_isEmailSkipped) ...[
+                                const SizedBox(height: 5),
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF8F9FA),
+                                    borderRadius: BorderRadius.circular(5),
+                                    border: Border.all(color: const Color(0xFFEDEFF2)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller: _emailOtpController,
+                                          keyboardType: TextInputType.number,
+                                          maxLength: 6,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 3,
+                                          ),
+                                          decoration: InputDecoration(
+                                            hintText: "Enter 6-digit OTP",
+                                            hintStyle: GoogleFonts.poppins(
+                                              fontSize: 13,
+                                              letterSpacing: 0,
+                                              color: Colors.grey,
+                                            ),
+                                            counterText: "",
+                                            border: InputBorder.none,
+                                            isDense: true,
+                                          ),
                                         ),
+                                      ),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: const Color(0xFF059669),
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(5),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                          ),
+                                        ),
+                                        onPressed: _isVerifyingEmailOtp
+                                            ? null
+                                            : _verifyEmailOtp,
+                                        child: _isVerifyingEmailOtp
+                                            ? const SizedBox(
+                                                width: 16,
+                                                height: 16,
+                                                child: CircularProgressIndicator(
+                                                  color: Colors.white,
+                                                  strokeWidth: 2,
+                                                ),
+                                              )
+                                            : Text(
+                                                "VERIFY",
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
                                       ),
                                     ],
                                   ),
-                          ],
-                        ],
-                      ),
-                      if (_isEmailOtpSent &&
-                          !_isEmailVerified &&
-                          !_isEmailSkipped) ...[
-                        const SizedBox(height: 5),
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF8F9FA),
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(color: const Color(0xFFEDEFF2)),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _emailOtpController,
-                                  keyboardType: TextInputType.number,
-                                  maxLength: 6,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 3,
-                                  ),
-                                  decoration: InputDecoration(
-                                    hintText: "Enter 6-digit OTP",
-                                    hintStyle: GoogleFonts.poppins(
-                                      fontSize: 13,
-                                      letterSpacing: 0,
-                                      color: Colors.grey,
-                                    ),
-                                    counterText: "",
-                                    border: InputBorder.none,
-                                    isDense: true,
-                                  ),
                                 ),
-                              ),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF059669),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                  ),
-                                ),
-                                onPressed: _isVerifyingEmailOtp
-                                    ? null
-                                    : _verifyEmailOtp,
-                                child: _isVerifyingEmailOtp
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Text(
-                                        "VERIFY",
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                              ],
+                              const SizedBox(height: 8),
+        
+                              _buildLocationField(
+                                label: "FROM LOCATION",
+                                hint: "Where are you now?",
+                                controller: _fromController,
+                                isLoading: _isLoadingFromSuggestions,
+                                onChanged: _onFromChanged,
+                                layerLink: _fromLayerLink,
+                                fieldKey: _fromKey,
+                                isFrom: true,
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                      const SizedBox(height: 8),
-
-                      _buildLocationField(
-                        label: "FROM LOCATION",
-                        hint: "Where are you now?",
-                        controller: _fromController,
-                        isLoading: _isLoadingFromSuggestions,
-                        onChanged: _onFromChanged,
-                        layerLink: _fromLayerLink,
-                        fieldKey: _fromKey,
-                        isFrom: true,
+                          if (!_isEmailSkipped && !_isEmailVerified)
+                            Positioned(
+                              top: 41,
+                              right: 8,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () {
+                                  setState(() {
+                                    _isEmailSkipped = true;
+                                    _isEmailOtpSent = false;
+                                    _emailOtpController.clear();
+                                  });
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
+                                  child: Text(
+                                    "SKIP",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF6B7280),
+                                      decoration: TextDecoration.underline,
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 8),
                       _buildLocationField(
@@ -1478,7 +1486,6 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                   minWidth: 40,
                   minHeight: 0,
                 ),
-                constraints: const BoxConstraints(maxHeight: 44),
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(
@@ -1486,6 +1493,11 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                   horizontal: 10,
                 ),
                 isDense: true,
+                errorStyle: GoogleFonts.poppins(
+                  color: const Color(0xFFE91E63),
+                  fontSize: 10,
+                  height: 1,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(5),
                   borderSide: const BorderSide(color: Color(0xFFCED4DA)),
@@ -1606,12 +1618,16 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
       hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 11.5),
       prefixIcon: Icon(icon, size: 18, color: Colors.grey),
       prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 0),
-      constraints: const BoxConstraints(maxHeight: 44),
       filled: true,
       fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
 
       isDense: true,
+      errorStyle: GoogleFonts.poppins(
+        color: const Color(0xFFE91E63),
+        fontSize: 10,
+        height: 1,
+      ),
 
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(5),

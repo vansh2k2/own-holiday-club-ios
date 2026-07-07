@@ -530,10 +530,14 @@ class _BookingSheet extends StatefulWidget {
 class _BookingSheetState extends State<_BookingSheet> {
   final _formKey = GlobalKey<FormState>();
   final _placeController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _adultsController = TextEditingController(text: '2');
+  final _kidsController = TextEditingController(text: '0');
+  
   DateTime? _checkIn;
   DateTime? _checkOut;
-  int _adults = 2;
-  int _kids = 0;
   bool _isSubmitting = false;
 
   List<String> _locationSuggestions = [];
@@ -541,8 +545,24 @@ class _BookingSheetState extends State<_BookingSheet> {
   Timer? _debounceTimer;
 
   @override
+  void initState() {
+    super.initState();
+    final user = widget.controller.user.value;
+    if (user != null) {
+      _nameController.text = user.name ?? '';
+      _emailController.text = user.email ?? '';
+      _phoneController.text = user.mobile ?? '';
+    }
+  }
+
+  @override
   void dispose() {
     _placeController.dispose();
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _adultsController.dispose();
+    _kidsController.dispose();
     _debounceTimer?.cancel();
     super.dispose();
   }
@@ -633,29 +653,47 @@ class _BookingSheetState extends State<_BookingSheet> {
                     fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 20),
+              
+              _fieldLabel('FULL NAME'),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _nameController,
+                style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w600, color: const Color(0xFF0D1321)),
+                decoration: _inputDecoration("Enter full name", Icons.person_outline_rounded),
+                validator: (val) => val == null || val.trim().isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: 12),
 
-              _fieldLabel('Destination / Place'),
+              _fieldLabel('EMAIL ADDRESS'),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w600, color: const Color(0xFF0D1321)),
+                decoration: _inputDecoration("Enter email address", Icons.email_outlined),
+                validator: (val) => val == null || val.trim().isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: 12),
+
+              _fieldLabel('PHONE NUMBER'),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w600, color: const Color(0xFF0D1321)),
+                decoration: _inputDecoration("10-digit mobile number", Icons.phone_android_rounded),
+                validator: (val) => val == null || val.trim().isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: 12),
+
+              _fieldLabel('DESTINATION / PLACE'),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _placeController,
-                style: GoogleFonts.montserrat(
-                    fontSize: 12.0, fontWeight: FontWeight.w500),
-                validator: (val) => val == null || val.trim().isEmpty
-                    ? 'Please enter a destination'
-                    : null,
+                style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w600, color: const Color(0xFF0D1321)),
+                validator: (val) => val == null || val.trim().isEmpty ? 'Required' : null,
                 onChanged: _onLocationChanged,
-                decoration: InputDecoration(
-                  hintText: 'Enter destination...',
-                  hintStyle: GoogleFonts.montserrat(
-                      fontSize: 11.0, color: AppColors.greyText),
-                  filled: true,
-                  fillColor: const Color(0xFFF8F9FB),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 12),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none),
-                ),
+                decoration: _inputDecoration('Enter your preferred destination', Icons.location_on_outlined),
               ),
               if (_locationSuggestions.isNotEmpty)
                 Container(
@@ -726,10 +764,14 @@ class _BookingSheetState extends State<_BookingSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _fieldLabel('Adults'),
+                        _fieldLabel('ADULTS'),
                         const SizedBox(height: 6),
-                        _buildCounter(_adults,
-                            (val) => setState(() => _adults = val), 1),
+                        TextFormField(
+                          controller: _adultsController,
+                          keyboardType: TextInputType.number,
+                          style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w600, color: const Color(0xFF0D1321)),
+                          decoration: _inputDecoration("Adults", Icons.person_outline),
+                        ),
                       ],
                     ),
                   ),
@@ -738,10 +780,14 @@ class _BookingSheetState extends State<_BookingSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _fieldLabel('Kids'),
+                        _fieldLabel('KIDS (BELOW 10 YEARS)'),
                         const SizedBox(height: 6),
-                        _buildCounter(_kids,
-                            (val) => setState(() => _kids = val), 0),
+                        TextFormField(
+                          controller: _kidsController,
+                          keyboardType: TextInputType.number,
+                          style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w600, color: const Color(0xFF0D1321)),
+                          decoration: _inputDecoration("Kids", Icons.child_care_outlined),
+                        ),
                       ],
                     ),
                   ),
@@ -782,12 +828,43 @@ class _BookingSheetState extends State<_BookingSheet> {
   }
 
   Widget _fieldLabel(String text) => Text(
-        text,
-        style: GoogleFonts.montserrat(
-            fontSize: 11.0,
+        text.toUpperCase(),
+        style: GoogleFonts.poppins(
+            fontSize: 10.0,
             fontWeight: FontWeight.bold,
-            color: AppColors.primaryBlack),
+            letterSpacing: 0.5,
+            color: const Color(0xFF0D1321)),
       );
+
+  InputDecoration _inputDecoration(String? hint, IconData icon) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 11.5),
+      prefixIcon: Icon(icon, size: 18, color: Colors.grey),
+      prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 0),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+      isDense: true,
+      errorStyle: GoogleFonts.poppins(
+        color: const Color(0xFFE91E63),
+        fontSize: 10,
+        height: 1,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5),
+        borderSide: const BorderSide(color: Color(0xFFCED4DA)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5),
+        borderSide: const BorderSide(color: Color(0xFFCED4DA)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5),
+        borderSide: const BorderSide(color: Color(0xFF000000), width: 1.5),
+      ),
+    );
+  }
 
   Widget _buildDateButton(DateTime? date, Function(DateTime) onSelect) {
     return InkWell(
@@ -806,66 +883,31 @@ class _BookingSheetState extends State<_BookingSheet> {
       },
       child: Container(
         width: double.infinity,
-        padding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
-            color: const Color(0xFFF8F9FB),
-            borderRadius: BorderRadius.circular(10)),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(color: const Color(0xFFCED4DA)),
+        ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            const Icon(Icons.calendar_today_rounded, size: 18, color: Colors.grey),
+            const SizedBox(width: 4),
             Text(
-              date != null
-                  ? DateFormat('dd MMM yyyy').format(date)
-                  : 'Select Date',
-              style: GoogleFonts.montserrat(
-                  fontSize: 12.0,
-                  color: date != null
-                      ? AppColors.primaryBlack
-                      : AppColors.greyText,
-                  fontWeight: FontWeight.w500),
+              date != null ? DateFormat('dd-MM-yyyy').format(date) : 'dd-mm-yyyy',
+              style: GoogleFonts.poppins(
+                fontSize: 13.5,
+                color: date != null ? const Color(0xFF0D1321) : Colors.grey,
+                fontWeight: date != null ? FontWeight.w600 : FontWeight.normal,
+              ),
             ),
-            const Icon(Icons.calendar_today_rounded,
-                size: 14, color: AppColors.greyText),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCounter(int val, Function(int) onChange, int minVal) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FB),
-          borderRadius: BorderRadius.circular(10)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            onPressed:
-                val > minVal ? () => onChange(val - 1) : null,
-            icon: const Icon(Icons.remove,
-                size: 14, color: AppColors.primaryBlack),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-          Text('$val',
-              style: GoogleFonts.montserrat(
-                  fontSize: 13.0,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryBlack)),
-          IconButton(
-            onPressed: () => onChange(val + 1),
-            icon: const Icon(Icons.add,
-                size: 14, color: AppColors.primaryBlack),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -891,11 +933,14 @@ class _BookingSheetState extends State<_BookingSheet> {
     setState(() => _isSubmitting = true);
     final payload = {
       'slotNumber': widget.slot,
+      'name': _nameController.text.trim(),
+      'email': _emailController.text.trim(),
+      'phone': _phoneController.text.trim(),
       'place': _placeController.text.trim(),
       'checkIn': _checkIn!.toIso8601String(),
       'checkOut': _checkOut!.toIso8601String(),
-      'adults': _adults,
-      'kids': _kids,
+      'adults': int.tryParse(_adultsController.text) ?? 2,
+      'kids': int.tryParse(_kidsController.text) ?? 0,
     };
 
     final errorMessage =

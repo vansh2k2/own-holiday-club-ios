@@ -78,6 +78,9 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
       Get.put(ServiceRepo(apiClient: Get.find()));
     }
     _serviceRepo = Get.find<ServiceRepo>();
+    
+    final String destName = widget.destination['name'] ?? widget.destination['title'] ?? '';
+    _toController.text = destName;
   }
 
   
@@ -93,7 +96,6 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
         minWidth: 40,
         minHeight: 0,
       ),
-      constraints: const BoxConstraints(maxHeight: 44),
       filled: true,
       fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(
@@ -101,6 +103,11 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
         horizontal: 10,
       ),
       isDense: true,
+      errorStyle: GoogleFonts.poppins(
+        color: const Color(0xFFE91E63),
+        fontSize: 10,
+        height: 1,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(5),
         borderSide: const BorderSide(color: Color(0xFFCED4DA)),
@@ -169,7 +176,6 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
                   minWidth: 40,
                   minHeight: 0,
                 ),
-                constraints: const BoxConstraints(maxHeight: 44),
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(
@@ -177,6 +183,11 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
                   horizontal: 10,
                 ),
                 isDense: true,
+                errorStyle: GoogleFonts.poppins(
+                  color: const Color(0xFFE91E63),
+                  fontSize: 10,
+                  height: 1,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(5),
                   borderSide: const BorderSide(color: Color(0xFFCED4DA)),
@@ -553,12 +564,13 @@ class _EnquiryFormSheetState extends State<EnquiryFormSheet> {
         "email": _emailController.text,
         "phone": _phoneController.text,
         "destinationId": widget.destination['id'] ?? widget.destination['_id'],
-        "destinationName": _toController.text,
+        "destinationName": widget.destination['name'] ?? widget.destination['title'] ?? _toController.text,
+        "toLocation": _toController.text,
         "fromLocation": _fromController.text,
-        "startDate": _startDate?.toIso8601String(),
-        "endDate": _endDate?.toIso8601String(),
+        "checkIn": _startDate?.toIso8601String(),
+        "checkOut": _endDate?.toIso8601String(),
         "adults": _adults,
-        "children": _children,
+        "kids": _children,
         "message": _messageController.text,
         "source": "Mobile App Destination Reel"
       };

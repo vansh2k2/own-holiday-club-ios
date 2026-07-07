@@ -1755,13 +1755,11 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                                 elevation: 0,
                               ),
                               onPressed:
-                                  _isSendingMobileOtp || _isVerifyingMobileOtp
+                                  _isSendingMobileOtp
                                   ? () {}
-                                  : (_isMobileOtpSent
-                                        ? _verifyMobileOtp
-                                        : _sendMobileOtp),
+                                  : _sendMobileOtp,
                               child:
-                                  _isSendingMobileOtp || _isVerifyingMobileOtp
+                                  _isSendingMobileOtp
                                   ? const SizedBox(
                                       width: 14,
                                       height: 14,
@@ -1771,7 +1769,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                                       ),
                                     )
                                   : Text(
-                                      _isMobileOtpSent ? "VERIFY" : "SEND OTP",
+                                      _isMobileOtpSent ? "RESEND" : "SEND OTP",
                                       style: GoogleFonts.poppins(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
@@ -1782,6 +1780,80 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                           ),
                   ],
                 ),
+                if (_isMobileOtpSent && !_isMobileVerified) ...[
+                  const SizedBox(height: 5),
+                  Container(
+                    height: 44,
+                    padding: const EdgeInsets.only(left: 10, right: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F9FA),
+                      borderRadius: BorderRadius.circular(5),
+                      border: Border.all(color: const Color(0xFFEDEFF2)),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _mobileOtpCtrl,
+                            keyboardType: TextInputType.number,
+                            maxLength: 6,
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 3,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: "Enter 6-digit OTP",
+                              hintStyle: GoogleFonts.poppins(
+                                fontSize: 13,
+                                letterSpacing: 0,
+                                color: Colors.grey,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                              counterText: "",
+                              border: InputBorder.none,
+                              isDense: true,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 34,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF059669),
+                              foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                            ),
+                          ),
+                          onPressed: _isVerifyingMobileOtp
+                              ? null
+                              : _verifyMobileOtp,
+                          child: _isVerifyingMobileOtp
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  "VERIFY",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 8),
 
                 // Email Address
@@ -1921,7 +1993,8 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                     !_isEmailSkipped) ...[
                   const SizedBox(height: 5),
                   Container(
-                    padding: const EdgeInsets.all(6),
+                    height: 44,
+                    padding: const EdgeInsets.only(left: 10, right: 4),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF8F9FA),
                       borderRadius: BorderRadius.circular(5),
@@ -1946,16 +2019,19 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                                 letterSpacing: 0,
                                 color: Colors.grey,
                               ),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 10),
                               counterText: "",
                               border: InputBorder.none,
                               isDense: true,
                             ),
                           ),
                         ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF059669),
-                            foregroundColor: Colors.white,
+                        SizedBox(
+                          height: 34,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF059669),
+                              foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5),
                             ),
@@ -1982,6 +2058,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
+                        ),
                         ),
                       ],
                     ),
@@ -2240,12 +2317,21 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                 const SizedBox(height: 8),
 
                 // No of Guests
-                _buildCounterField(
-                  label: "NO OF GUESTS",
-                  icon: Icons.people_outline_rounded,
-                  value: _adults,
-                  onChanged: (v) {
-                    if (v >= 0) setState(() => _adults = v);
+                _buildLabel("NO OF GUESTS"),
+                TextFormField(
+                  initialValue: _adults > 0 ? _adults.toString() : '',
+                  keyboardType: TextInputType.number,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF0D1321),
+                  ),
+                  decoration: _inputDecoration(
+                    "Enter number of guests",
+                    Icons.people_outline_rounded,
+                  ),
+                  onChanged: (val) {
+                    _adults = int.tryParse(val) ?? 0;
                   },
                 ),
                 const SizedBox(height: 8),
@@ -2359,7 +2445,6 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                   minWidth: 40,
                   minHeight: 0,
                 ),
-                constraints: const BoxConstraints(maxHeight: 44),
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(
@@ -2367,6 +2452,11 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
                   horizontal: 10,
                 ),
                 isDense: true,
+                errorStyle: GoogleFonts.poppins(
+                  color: const Color(0xFFE91E63),
+                  fontSize: 10,
+                  height: 1,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(5),
                   borderSide: const BorderSide(color: Color(0xFFCED4DA)),
@@ -2539,11 +2629,15 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
       hintStyle: GoogleFonts.poppins(color: Colors.grey, fontSize: 11.5),
       prefixIcon: Icon(icon, size: 18, color: Colors.grey),
       prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 0),
-      constraints: const BoxConstraints(maxHeight: 44),
       filled: true,
       fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
       isDense: true,
+      errorStyle: GoogleFonts.poppins(
+        color: const Color(0xFFE91E63),
+        fontSize: 10,
+        height: 1,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(5),
         borderSide: const BorderSide(color: Color(0xFFCED4DA)),

@@ -934,9 +934,14 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
         if (data['success'] == true) {
           final List budgetsList = data['data'];
           List<String> newBudgets = [];
+          final destName = (widget.destination['name'] ?? '').toString().toLowerCase().trim();
           for (var item in budgetsList) {
             if (item['type'] == 'destination' && item['budgets'] != null) {
-              newBudgets.addAll(List<String>.from(item['budgets']));
+              final apiTitle = item['title']?.toString().toLowerCase().trim() ?? '';
+              if (destName.isNotEmpty && apiTitle.isNotEmpty && 
+                  (apiTitle.contains(destName) || destName.contains(apiTitle))) {
+                newBudgets.addAll(List<String>.from(item['budgets']));
+              }
             }
           }
           newBudgets = newBudgets.toSet().toList();
@@ -944,6 +949,9 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
           if (mounted) {
             setState(() {
               _fetchedBudgets = newBudgets;
+              if (_fetchedBudgets.isNotEmpty && !_fetchedBudgets.contains(_budget)) {
+                _budget = '';
+              }
             });
           }
         }
@@ -953,38 +961,6 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
     }
   }
 
-  final Map<String, List<Map<String, String>>> _budgetOptions = {
-    'Holiday': [
-      {'label': 'Below 5,000 (per day)', 'value': 'Below 5000'},
-      {'label': '5,000 - 7,000 (per day)', 'value': '5000 - 7000'},
-      {'label': '7,000 - 10,000 (per day)', 'value': '7000 - 10000'},
-      {'label': 'Above 10,000 (per day)', 'value': 'Above 10000'},
-    ],
-    'Events': [
-      {'label': 'Below 1,000 (per person)', 'value': 'Below 1000'},
-      {'label': '1,000 - 2,000 (per person)', 'value': '1000 - 2000'},
-      {'label': '2,000 - 3,000 (per person)', 'value': '2000 - 3000'},
-      {'label': 'Above 3,000 (per person)', 'value': 'Above 3000'},
-    ],
-    'Wedding': [
-      {'label': 'Below 1,500', 'value': 'Below 1500'},
-      {'label': '1,500 - 2,500', 'value': '1500 - 2500'},
-      {'label': '2,500 - 3,500', 'value': '2500 - 3500'},
-      {'label': 'Above 5,000', 'value': 'Above 5000'},
-    ],
-    'Weddings': [
-      {'label': 'Below 1,500', 'value': 'Below 1500'},
-      {'label': '1,500 - 2,500', 'value': '1500 - 2500'},
-      {'label': '2,500 - 3,500', 'value': '2500 - 3500'},
-      {'label': 'Above 5,000', 'value': 'Above 5000'},
-    ],
-    'Outing': [
-      {'label': 'Below 500 (per person)', 'value': 'Below 500'},
-      {'label': '1,000 - 2,000 (per person)', 'value': '1000 - 2000'},
-      {'label': '3,000 - 5,000 (per person)', 'value': '3000 - 5000'},
-      {'label': 'Above 5,000 (per person)', 'value': 'Above 5000'},
-    ],
-  };
 
   @override
   void dispose() {
@@ -1104,7 +1080,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
         setState(() {
           _tempMobile = mobile;
           _isMobileOtpSent = true;
-          _phoneCtrl.clear();
+          _mobileOtpCtrl.clear();
         });
         Get.snackbar(
           'Success',
@@ -1134,7 +1110,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
   }
 
   Future<void> _verifyMobileOtp() async {
-    final otp = _phoneCtrl.text;
+    final otp = _mobileOtpCtrl.text;
     if (otp.isEmpty) {
       Get.snackbar(
         'Error',
@@ -1411,22 +1387,24 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                                 color: const Color(0xFF0D1321),
                               ),
                               decoration: _inputDecoration(
-                                _isMobileVerified
-                                    ? 'Verified Phone'
-                                    : (_isMobileOtpSent
-                                          ? '6-digit OTP'
-                                          : '10-digit mobile'),
-                                Icons.phone_iphone_rounded,
+                                "10-digit mobile number",
+                                Icons.phone_android_rounded,
                               ),
+                              onChanged: (val) {
+                                if (_isMobileOtpSent) {
+                                  setState(() {
+                                    _isMobileOtpSent = false;
+                                    _mobileOtpCtrl.clear();
+                                  });
+                                }
+                              },
                             ),
                           ),
                           const SizedBox(width: 10),
                           _isMobileVerified
                               ? Container(
-                                  height: 38,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                  ),
+                                  height: 39,
+                                  padding: const EdgeInsets.symmetric(horizontal: 10),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFECFDF5),
                                     borderRadius: BorderRadius.circular(5),
@@ -1454,7 +1432,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                                         borderRadius: BorderRadius.circular(5),
                                       ),
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
+                                        horizontal: 8,
                                       ),
                                       elevation: 0,
                                     ),
@@ -1473,9 +1451,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                                             ),
                                           )
                                         : Text(
-                                            _isMobileOtpSent
-                                                ? "RESEND"
-                                                : "SEND OTP",
+                                            _isMobileOtpSent ? "RESEND" : "SEND OTP",
                                             style: GoogleFonts.poppins(
                                               fontSize: 10,
                                               fontWeight: FontWeight.bold,
@@ -1528,33 +1504,33 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF059669),
                                     foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                    ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
                                   ),
-                                  onPressed: _isVerifyingMobileOtp
-                                      ? null
-                                      : _verifyMobileOtp,
-                                  child: _isVerifyingMobileOtp
-                                      ? const SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeWidth: 2,
-                                          ),
-                                        )
-                                      : Text(
-                                          "VERIFY",
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
                                 ),
+                                onPressed: _isVerifyingMobileOtp
+                                    ? null
+                                    : _verifyMobileOtp,
+                                child: _isVerifyingMobileOtp
+                                    ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Text(
+                                        "VERIFY",
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                              ),
                               ),
                             ],
                           ),
@@ -1578,13 +1554,11 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                                 color: const Color(0xFF0D1321),
                               ),
                               decoration: _inputDecoration(
-                                'you@example.com',
+                                "you@example.com",
                                 Icons.mail_outline_rounded,
                               ),
                               validator: (v) =>
-                                  (v == null ||
-                                      v.isEmpty ||
-                                      !GetUtils.isEmail(v))
+                                  (v == null || v.isEmpty || !v.contains('@'))
                                   ? "Required"
                                   : null,
                               onChanged: (val) {
@@ -1631,31 +1605,29 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                                           height: 39,
                                           child: ElevatedButton(
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  AppColors.primaryYellow,
-                                              foregroundColor: Colors.white,
+                                              backgroundColor: AppColors.primaryYellow,
+                                              foregroundColor: Colors.black,
                                               shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
+                                                borderRadius: BorderRadius.circular(5),
                                               ),
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 10,
-                                                  ),
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                              ),
                                               elevation: 0,
                                             ),
                                             onPressed: _isSendingEmailOtp
                                                 ? null
-                                                : _sendEmailOtp,
+                                                : () {
+                                                    _sendEmailOtp();
+                                                  },
                                             child: _isSendingEmailOtp
                                                 ? const SizedBox(
-                                                    height: 14,
                                                     width: 14,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                          strokeWidth: 2,
-                                                          color: Colors.white,
-                                                        ),
+                                                    height: 14,
+                                                    child: CircularProgressIndicator(
+                                                      color: Colors.black,
+                                                      strokeWidth: 2,
+                                                    ),
                                                   )
                                                 : Text(
                                                     _isEmailOtpSent
@@ -1663,8 +1635,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                                                         : "SEND OTP",
                                                     style: GoogleFonts.poppins(
                                                       fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                                      fontWeight: FontWeight.bold,
                                                       color: Colors.black,
                                                     ),
                                                   ),
@@ -1672,19 +1643,23 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                                         ),
                                         Positioned(
                                           bottom: -1,
-                                          right: 16,
+                                          right: 25,
                                           child: GestureDetector(
-                                            onTap: () => setState(
-                                              () => _isEmailSkipped = true,
-                                            ),
+                                            onTap: () {
+                                              setState(() {
+                                                _isEmailSkipped = true;
+                                                _isEmailOtpSent = false;
+                                                _emailOtpCtrl.clear();
+                                              });
+                                            },
                                             child: Text(
                                               "SKIP",
                                               style: GoogleFonts.poppins(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey.shade600,
-                                                decoration:
-                                                    TextDecoration.underline,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600,
+                                                color: const Color(0xFF6B7280),
+                                                decoration: TextDecoration.underline,
+                                                height: 1.0,
                                               ),
                                             ),
                                           ),
@@ -1885,56 +1860,26 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
                       ),
                       const SizedBox(height: 8),
 
-                      _buildLocationAutocompleteField(
-                        "TO LOCATION",
-                        "Search destination...",
-                        _toController,
-                        _isLoadingToSuggestions,
-                        _toSuggestions,
-                        _onToChanged,
-                        (val) {
-                          setState(() {
-                            _toController.text = val;
-                            _toSuggestions = [];
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 8),
-
-                      // Select Service
-                      _buildLabel("SELECT SERVICE"),
+                      // Select Destination (Read Only)
+                      _buildLabel("SELECT DESTINATION"),
                       SizedBox(
                         height: 40,
-                        child: DropdownButtonFormField<String>(
-                          value: _travelType,
-                          isExpanded: true,
-                          isDense: true,
-                          menuMaxHeight: 250,
-                          dropdownColor: Colors.white,
-                          iconSize: 20,
+                        child: TextFormField(
+                          initialValue: widget.destination['name']?.toString() ?? 'Unknown',
+                          readOnly: true,
+                          enabled: false,
                           style: GoogleFonts.poppins(
                             fontSize: 13.5,
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFF0D1321),
                           ),
                           decoration: _inputDecoration(
-                            "Select a service...",
-                            Icons.room_service_outlined,
+                            "",
+                            Icons.location_on_outlined,
+                          ).copyWith(
+                            fillColor: Colors.grey.shade100,
+                            filled: true,
                           ),
-                          items: _travelTypes.map((type) {
-                            return DropdownMenuItem<String>(
-                              value: type,
-                              child: Text(type),
-                            );
-                          }).toList(),
-                          onChanged: (val) {
-                            if (val != null) {
-                              setState(() {
-                                _travelType = val;
-                                _budget = '';
-                              });
-                            }
-                          },
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -2353,15 +2298,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
       );
       return;
     }
-    if (_travelType == null || _travelType!.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please select a service.',
-        backgroundColor: AppColors.brownAccent,
-        colorText: Colors.white,
-      );
-      return;
-    }
+
     if (_budget.isEmpty) {
       Get.snackbar(
         'Error',
@@ -2375,6 +2312,8 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
     setState(() => _isSubmitting = true);
     final controller = Get.find<HomeController>();
 
+    final destName = widget.destination['name']?.toString() ?? 'Unknown';
+    
     final payload = {
       'name': _nameCtrl.text,
       'email': _emailCtrl.text,
@@ -2384,12 +2323,12 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
       'adults': _adults,
       'kids': _kids,
       'fromLocation': _fromController.text,
-      'toLocation': _toController.text,
-      'location': '${_fromController.text} to ${_toController.text}',
-      'service': _travelType ?? '',
+      'toLocation': destName,
+      'location': '${_fromController.text} to $destName',
+      'travelType': '',
       'budget': _budget,
       'message': _msgCtrl.text,
-      'destinationName': widget.destination['name'] ?? 'Unknown',
+      'destinationName': destName,
       'destinationId': widget.destination['_id'] ?? '',
     };
 

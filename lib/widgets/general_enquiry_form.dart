@@ -571,12 +571,21 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
     setState(() => _isSubmitting = true);
 
     try {
+      final String fromLoc = _fromController.text.trim();
+      final String toLoc = _toController.text.trim();
+      final String originalMessage = _messageController.text.trim();
+      
+      final String combinedMessage = 
+          "From: $fromLoc\n"
+          "To: $toLoc\n"
+          "Message: $originalMessage";
+
       final Map<String, dynamic> data = {
         "name": _nameController.text.trim(),
         "email": _emailController.text.trim(),
         "phone": _phoneController.text.trim(),
-        "from": _fromController.text.trim(),
-        "to": _toController.text.trim(),
+        "location": fromLoc,
+        "searchLocation": toLoc,
         "locationType": "General",
         "checkIn": DateFormat('yyyy-MM-dd').format(_checkInDate!),
         "checkOut": DateFormat('yyyy-MM-dd').format(_checkOutDate!),
@@ -584,13 +593,22 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
         "kids": _kids,
         "travelType": _travelType,
         "budget": _selectedBudget,
-        "message": _messageController.text.trim(),
+        "message": combinedMessage,
         "source": "Mobile App Side Drawer",
         "contextType": "callback-request",
         "contextName": "Mobile Side Drawer",
       };
 
+      print('--- 🚀 API REQUEST [POST] ---');
+      print('🌐 URL: /api/holiday-leads (General Enquiry)'); // Note: Uses ApiConstants.holidayLeads inside repo
+      print('📦 PAYLOAD: $data');
+
       final response = await _serviceRepo.submitGeneralEnquiry(data);
+      
+      print('✅ STATUS CODE: ${response.statusCode}');
+      print('📩 RESPONSE: ${response.body}');
+      print('----------------------------');
+
       final body = jsonDecode(response.body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -744,15 +762,13 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
             child: SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
               clipBehavior: Clip.hardEdge,
-              child: Padding(
-                padding: EdgeInsets.only(bottom: bottomInset),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Full Name
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Full Name
                       _buildLabel("FULL NAME"),
                       TextFormField(
                         controller: _nameController,
@@ -865,9 +881,10 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
 
                       // Mobile OTP verification box
                       if (_isMobileOtpSent && !_isMobileVerified) ...[
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 5),
                         Container(
-                          padding: const EdgeInsets.all(6),
+                          height: 44,
+                          padding: const EdgeInsets.only(left: 10, right: 4),
                           decoration: BoxDecoration(
                             color: const Color(0xFFF8F9FA),
                             borderRadius: BorderRadius.circular(5),
@@ -892,42 +909,46 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                                       letterSpacing: 0,
                                       color: Colors.grey,
                                     ),
+                                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
                                     counterText: "",
                                     border: InputBorder.none,
                                     isDense: true,
                                   ),
                                 ),
                               ),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF059669),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5),
+                              SizedBox(
+                                height: 34,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF059669),
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
                                   ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                  ),
+                                  onPressed: _isVerifyingMobileOtp
+                                      ? null
+                                      : _verifyMobileOtp,
+                                  child: _isVerifyingMobileOtp
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : Text(
+                                          "VERIFY",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                 ),
-                                onPressed: _isVerifyingMobileOtp
-                                    ? null
-                                    : _verifyMobileOtp,
-                                child: _isVerifyingMobileOtp
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Text(
-                                        "VERIFY",
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
                               ),
                             ],
                           ),
@@ -1048,7 +1069,8 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                                   !_isEmailSkipped) ...[
                                 const SizedBox(height: 5),
                                 Container(
-                                  padding: const EdgeInsets.all(6),
+                                  height: 44,
+                                  padding: const EdgeInsets.only(left: 10, right: 4),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFF8F9FA),
                                     borderRadius: BorderRadius.circular(5),
@@ -1073,42 +1095,46 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                                               letterSpacing: 0,
                                               color: Colors.grey,
                                             ),
+                                            contentPadding: const EdgeInsets.symmetric(vertical: 10),
                                             counterText: "",
                                             border: InputBorder.none,
                                             isDense: true,
                                           ),
                                         ),
                                       ),
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFF059669),
-                                          foregroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(5),
+                                      SizedBox(
+                                        height: 34,
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(0xFF059669),
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(5),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                            ),
                                           ),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                          ),
+                                          onPressed: _isVerifyingEmailOtp
+                                              ? null
+                                              : _verifyEmailOtp,
+                                          child: _isVerifyingEmailOtp
+                                              ? const SizedBox(
+                                                  width: 16,
+                                                  height: 16,
+                                                  child: CircularProgressIndicator(
+                                                    color: Colors.white,
+                                                    strokeWidth: 2,
+                                                  ),
+                                                )
+                                              : Text(
+                                                  "VERIFY",
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
                                         ),
-                                        onPressed: _isVerifyingEmailOtp
-                                            ? null
-                                            : _verifyEmailOtp,
-                                        child: _isVerifyingEmailOtp
-                                            ? const SizedBox(
-                                                width: 16,
-                                                height: 16,
-                                                child: CircularProgressIndicator(
-                                                  color: Colors.white,
-                                                  strokeWidth: 2,
-                                                ),
-                                              )
-                                            : Text(
-                                                "VERIFY",
-                                                style: GoogleFonts.poppins(
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
                                       ),
                                     ],
                                   ),
@@ -1374,7 +1400,6 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

@@ -1051,12 +1051,7 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
       list.add(currentTitle);
     }
 
-    // Add hardcoded defaults if not present
-    for (final opt in ['Holiday', 'Events', 'Wedding', 'Outing']) {
-      if (!list.any((e) => e.toLowerCase() == opt.toLowerCase())) {
-        list.add(opt);
-      }
-    }
+
     return list;
   }
 
@@ -1077,11 +1072,17 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
           List<String> newBudgets = [];
           for (var item in budgetsList) {
             if (item['type'] == 'service' && item['budgets'] != null) {
-              if (_selectedService != null &&
-                  item['title'] != null &&
-                  item['title'].toString().toLowerCase() ==
-                      _selectedService!.toLowerCase()) {
-                newBudgets.addAll(List<String>.from(item['budgets']));
+              if (_selectedService != null && item['title'] != null) {
+                final apiTitle = item['title'].toString().toLowerCase().trim();
+                final selService = _selectedService!.toLowerCase().trim();
+                
+                if (apiTitle == selService ||
+                    apiTitle == selService + 's' ||
+                    selService == apiTitle + 's' ||
+                    apiTitle.contains(selService) ||
+                    selService.contains(apiTitle)) {
+                  newBudgets.addAll(List<String>.from(item['budgets']));
+                }
               }
             }
           }
@@ -1090,6 +1091,10 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
           if (mounted) {
             setState(() {
               _fetchedBudgets = newBudgets;
+              // Reset _budget if current selection is not in fetched list
+              if (_fetchedBudgets.isNotEmpty && !_fetchedBudgets.contains(_budget)) {
+                _budget = '';
+              }
             });
           }
         }
@@ -1099,38 +1104,6 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
     }
   }
 
-  final Map<String, List<Map<String, String>>> _budgetOptions = {
-    'Holiday': [
-      {'label': 'Below 5,000 (per day)', 'value': 'Below 5000'},
-      {'label': '5,000 - 7,000 (per day)', 'value': '5000 - 7000'},
-      {'label': '7,000 - 10,000 (per day)', 'value': '7000 - 10000'},
-      {'label': 'Above 10,000 (per day)', 'value': 'Above 10000'},
-    ],
-    'Events': [
-      {'label': 'Below 1,000 (per person)', 'value': 'Below 1000'},
-      {'label': '1,000 - 2,000 (per person)', 'value': '1000 - 2000'},
-      {'label': '2,000 - 3,000 (per person)', 'value': '2000 - 3000'},
-      {'label': 'Above 3,000 (per person)', 'value': 'Above 3000'},
-    ],
-    'Wedding': [
-      {'label': 'Below 1,500', 'value': 'Below 1500'},
-      {'label': '1,500 - 2,500', 'value': '1500 - 2500'},
-      {'label': '2,500 - 3,500', 'value': '2500 - 3500'},
-      {'label': 'Above 5,000', 'value': 'Above 5000'},
-    ],
-    'Weddings': [
-      {'label': 'Below 1,500', 'value': 'Below 1500'},
-      {'label': '1,500 - 2,500', 'value': '1500 - 2500'},
-      {'label': '2,500 - 3,500', 'value': '2500 - 3500'},
-      {'label': 'Above 5,000', 'value': 'Above 5000'},
-    ],
-    'Outing': [
-      {'label': 'Below 500 (per person)', 'value': 'Below 500'},
-      {'label': '1,000 - 2,000 (per person)', 'value': '1000 - 2000'},
-      {'label': '3,000 - 5,000 (per person)', 'value': '3000 - 5000'},
-      {'label': 'Above 5,000 (per person)', 'value': 'Above 5000'},
-    ],
-  };
 
   @override
   void initState() {
@@ -2716,16 +2689,19 @@ class _ServiceInquiryFormSheetState extends State<ServiceInquiryFormSheet> {
       'checkOut': _checkOut?.toIso8601String(),
       'adults': _adults,
       'from': _fromController.text,
+      'fromLocation': _fromController.text,
       'to': _toController.text,
+      'toLocation': _toController.text,
       'location': '${_fromController.text} to ${_toController.text}',
       'service': _selectedService ?? '',
       'serviceCategory': _selectedCategory ?? '',
+      'subEvent': _selectedCategory ?? '',
       'budget': _budget,
       'message': _msgCtrl.text,
       'serviceName': widget.service['title'] ?? 'Unknown',
       'serviceId': widget.service['_id'] ?? '',
       if (_selectedService != null && _selectedService!.toLowerCase().contains('wedding') && _weddingDate != null)
-        'weddingDate': _weddingDate!.toIso8601String(),
+        'marriageDate': _weddingDate!.toIso8601String(),
     };
 
     try {

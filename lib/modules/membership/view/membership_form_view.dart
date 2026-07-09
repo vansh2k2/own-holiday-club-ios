@@ -397,7 +397,7 @@ class MembershipFormView extends StatelessWidget {
                   minimumSize: Size.zero,
                   backgroundColor: isOtpSent
                       ? const Color(0xFF1E293B)
-                      : const Color(0xFFE2E8F0),
+                      : AppColors.primaryYellow,
                   foregroundColor: isOtpSent ? Colors.white : Colors.black,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -413,7 +413,7 @@ class MembershipFormView extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 9,
                     fontWeight: FontWeight.bold,
-                    color: isOtpSent ? Colors.white : Colors.black54,
+                    color: isOtpSent ? Colors.white : Colors.black,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -462,7 +462,7 @@ class MembershipFormView extends StatelessWidget {
                       minimumSize: Size.zero,
                       backgroundColor: isOtpSent
                           ? const Color(0xFF1E293B)
-                          : const Color(0xFFE2E8F0),
+                          : AppColors.primaryYellow,
                       foregroundColor: isOtpSent ? Colors.white : Colors.black,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -478,7 +478,7 @@ class MembershipFormView extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
-                        color: isOtpSent ? Colors.white : Colors.black54,
+                        color: isOtpSent ? Colors.white : Colors.black,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -527,7 +527,7 @@ class MembershipFormView extends StatelessWidget {
                     context: context,
                     initialDate: DateTime.now(),
                     firstDate: DateTime(1900),
-                    lastDate: DateTime.now(),
+                    lastDate: DateTime(2050),
                   );
                   if (picked != null) {
                     controller.anniversaryController.text = DateFormat(

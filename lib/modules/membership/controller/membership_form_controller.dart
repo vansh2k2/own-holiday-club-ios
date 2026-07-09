@@ -443,7 +443,7 @@ class MembershipFormController extends GetxController {
         'anniversary': selectedMarried.value == 'Married'
             ? anniversaryController.text
             : '',
-        'permanentAddress': {
+        'residenceAddress': {
           'houseNo': houseNoController.text,
           'addressLine': residenceAddressController.text,
           'city': residenceCityController.text,

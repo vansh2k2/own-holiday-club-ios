@@ -111,38 +111,19 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
           final List budgetsList = data['data'];
-          final Map<String, List<Map<String, String>>> newOptions = {};
-          for (var item in budgetsList) {
-            final refId = (item['referenceId'] as String).toLowerCase().trim();
-            final List itemBudgets = item['budgets'];
-            newOptions[refId] = itemBudgets
-                .map((b) => {'label': b.toString(), 'value': b.toString()})
-                .toList();
-          }
           if (mounted) {
             setState(() {
-              // Map backend data to frontend keys flexibly
-              for (final k in _budgetOptions.keys.toList()) {
-                final lowerK = k.toLowerCase();
-                // Try exact match
-                if (newOptions.containsKey(lowerK) &&
-                    newOptions[lowerK]!.isNotEmpty) {
-                  _budgetOptions[k] = newOptions[lowerK]!;
-                }
-                // Try plural match (e.g. Wedding -> weddings)
-                else if (newOptions.containsKey(lowerK + 's') &&
-                    newOptions[lowerK + 's']!.isNotEmpty) {
-                  _budgetOptions[k] = newOptions[lowerK + 's']!;
-                }
-                // Try singular match (e.g. Outings -> outing)
-                else if (lowerK.endsWith('s') &&
-                    newOptions.containsKey(
-                      lowerK.substring(0, lowerK.length - 1),
-                    ) &&
-                    newOptions[lowerK.substring(0, lowerK.length - 1)]!
-                        .isNotEmpty) {
-                  _budgetOptions[k] =
-                      newOptions[lowerK.substring(0, lowerK.length - 1)]!;
+              final cbBudgetIndex = budgetsList.indexWhere(
+                (b) => b['type'] == 'callback',
+              );
+
+              if (cbBudgetIndex != -1) {
+                final cbBudget = budgetsList[cbBudgetIndex];
+                if (cbBudget['budgets'] != null) {
+                  final List itemBudgets = cbBudget['budgets'];
+                  _budgetOptions['Holiday'] = itemBudgets
+                      .map((b) => {'label': b.toString(), 'value': b.toString()})
+                      .toList();
                 }
               }
 

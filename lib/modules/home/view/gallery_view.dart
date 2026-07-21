@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:animate_do/animate_do.dart';
+
 import '../controller/home_controller.dart';
 import 'package:own_holiday_app/utils/app_colors.dart';
 import 'package:own_holiday_app/widgets/skeleton.dart';
@@ -163,10 +163,7 @@ class GalleryView extends StatelessWidget {
                   ),
                   childrenDelegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      return FadeInUp(
-                        delay: Duration(milliseconds: (index % 10) * 50),
-                        child: _buildGalleryImage(allImages[index]),
-                      );
+                      return _buildGalleryImage(allImages[index]);
                     },
                     childCount: allImages.length,
                   ),

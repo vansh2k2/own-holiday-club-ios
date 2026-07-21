@@ -1,4 +1,4 @@
-import 'dart:ui';
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -27,6 +27,7 @@ class HomeView extends GetView<HomeController> {
 
     return Scaffold(
       backgroundColor: AppColors.primaryWhite,
+      resizeToAvoidBottomInset: false,
       endDrawer: _buildRightDrawer(context),
       body: Builder(builder: (scaffoldCtx) {
         return Column(
@@ -133,39 +134,37 @@ class HomeView extends GetView<HomeController> {
                     Column(
                       children: [
                         const SizedBox(height: 360),
-                        Padding(
+                          Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: FadeInUp(
                             duration: const Duration(milliseconds: 600),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(28),
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.95),
-                                    borderRadius: BorderRadius.circular(28),
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.6),
-                                      width: 1.5,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color.fromRGBO(50, 50, 93, 0.25),
-                                        offset: const Offset(0, 2),
-                                        blurRadius: 5,
-                                        spreadRadius: -1,
-                                      ),
-                                      BoxShadow(
-                                        color: const Color.fromRGBO(0, 0, 0, 0.3),
-                                        offset: const Offset(0, 1),
-                                        blurRadius: 3,
-                                        spreadRadius: -1,
-                                      ),
-                                    ],
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.97),
+                                  borderRadius: BorderRadius.circular(28),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.6),
+                                    width: 1.5,
                                   ),
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
-                                  child: Column(
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color.fromRGBO(50, 50, 93, 0.25),
+                                      offset: const Offset(0, 2),
+                                      blurRadius: 5,
+                                      spreadRadius: -1,
+                                    ),
+                                    BoxShadow(
+                                      color: const Color.fromRGBO(0, 0, 0, 0.3),
+                                      offset: const Offset(0, 1),
+                                      blurRadius: 3,
+                                      spreadRadius: -1,
+                                    ),
+                                  ],
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
+                                child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Row(
@@ -228,7 +227,6 @@ class HomeView extends GetView<HomeController> {
                                       ),
                                     ],
                                   ),
-                                ),
                               ),
                             ),
                           ),
@@ -1466,21 +1464,11 @@ class _AnimatedVisibleCard extends StatefulWidget {
 
 class _AnimatedVisibleCardState extends State<_AnimatedVisibleCard> {
   bool _isVisible = false;
-  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(milliseconds: 150), (timer) {
-      _checkVisibility();
-    });
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkVisibility());
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
   }
 
   void _checkVisibility() {
@@ -1490,12 +1478,12 @@ class _AnimatedVisibleCardState extends State<_AnimatedVisibleCard> {
       final position = renderObject.localToGlobal(Offset.zero);
       final screenHeight = MediaQuery.of(context).size.height;
       if (position.dy < screenHeight - 100) {
-        setState(() {
-          _isVisible = true;
-        });
-        _timer?.cancel();
+        if (mounted) setState(() => _isVisible = true);
+        return;
       }
     }
+    // Retry once after a short delay if not yet visible
+    Future.delayed(const Duration(milliseconds: 300), _checkVisibility);
   }
 
   @override

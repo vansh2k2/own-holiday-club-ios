@@ -1,4 +1,4 @@
-package com.ownholiday.app
+package com.ownholidayclub.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -554,12 +554,6 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
     try {
       final String fromLoc = _fromController.text.trim();
       final String toLoc = _toController.text.trim();
-      final String originalMessage = _messageController.text.trim();
-      
-      final String combinedMessage = 
-          "From: $fromLoc\n"
-          "To: $toLoc\n"
-          "Message: $originalMessage";
 
       final Map<String, dynamic> data = {
         "name": _nameController.text.trim(),
@@ -574,7 +568,7 @@ class _GeneralEnquiryFormState extends State<GeneralEnquiryForm> {
         "kids": _kids,
         "travelType": _travelType,
         "budget": _selectedBudget,
-        "message": combinedMessage,
+        "message": _messageController.text.trim(),
         "source": "Mobile App Side Drawer",
         "contextType": "callback-request",
         "contextName": "Mobile Side Drawer",

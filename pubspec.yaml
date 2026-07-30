@@ -16,9 +16,12 @@ description: "A new Flutter project."
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
+
+# App ki versioning. '2.0.6' app ka version name hai, aur '+26' build number hai (Play Store pe update push karne ke liye build number badhana padta hai).
 version: 2.0.6+26
 
 environment:
+  # Ye define karta hai ki app kis Dart SDK version par chalegi. Yahan SDK version 3.11.4 ya usse upar required hai.
   sdk: ^3.11.4
 
 # Dependencies specify other packages that your package needs in order to work.

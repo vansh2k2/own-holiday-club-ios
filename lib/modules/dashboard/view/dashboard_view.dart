@@ -2,12 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/dashboard_controller.dart';
 import 'package:own_holiday_app/utils/app_colors.dart';
-import 'package:animate_do/animate_do.dart';
-import 'dart:ui';
-import '../../membership/view/membership_form_view.dart';
-import '../../membership/model/membership_tier.dart';
-import '../../../routes/app_pages.dart';
-import 'package:own_holiday_app/widgets/skeleton.dart';
+
+
 import 'package:own_holiday_app/widgets/membership_bottom_sheet.dart';
 
 class DashboardView extends GetView<DashboardController> {

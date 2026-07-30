@@ -32,16 +32,9 @@ class AccountController extends GetxController {
   Future<void> fetchProfile() async {
     if (userData.value?.id == null) return;
     
-    final url = 'https://api.ownholidayclub.com/api/profile/${userData.value!.id!}';
-    print('\n--- 🚀 [API REQUEST] GET PROFILE ---');
-    print('🔗 URL: $url');
-
     isLoading.value = true;
     try {
       final response = await authRepo.getProfile(userData.value!.id!);
-      print('✅ STATUS CODE: ${response.statusCode}');
-      print('📦 RESPONSE BODY: ${response.body}');
-      print('------------------------------------\n');
       final data = jsonDecode(response.body);
       
       // Handle different API response formats (with success key or just user key)
@@ -50,7 +43,7 @@ class AccountController extends GetxController {
         saveUser(userData.value!); // Update saved data
       }
     } catch (e) {
-      print('❌ Error fetching profile: $e');
+      // Profile fetch failed silently
     } finally {
       isLoading.value = false;
     }
@@ -77,7 +70,7 @@ class AccountController extends GetxController {
         return true;
       }
     } catch (e) {
-      print('Error updating profile: $e');
+      // Profile update failed silently
     } finally {
       isLoading.value = false;
     }

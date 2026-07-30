@@ -534,38 +534,10 @@ class MembershipFormController extends GetxController {
   }
 
   Future<void> proceedToPayment() async {
-    if (profileImageBase64.value.isEmpty) {
-      Get.snackbar(
-        'Validation Error',
-        'Please upload your Profile Image',
-        backgroundColor: AppColors.brownAccent,
-        colorText: Colors.white,
-      );
-      return;
-    }
     if (idProofBase64.value.isEmpty) {
       Get.snackbar(
         'Validation Error',
         'Please upload your Aadhaar Card',
-        backgroundColor: AppColors.brownAccent,
-        colorText: Colors.white,
-      );
-      return;
-    }
-    if (selectedAddressProof.value == null ||
-        selectedAddressProof.value!.isEmpty) {
-      Get.snackbar(
-        'Validation Error',
-        'Please select an Address Proof Type',
-        backgroundColor: AppColors.brownAccent,
-        colorText: Colors.white,
-      );
-      return;
-    }
-    if (addressProofBase64.value.isEmpty) {
-      Get.snackbar(
-        'Validation Error',
-        'Please upload your Address Proof',
         backgroundColor: AppColors.brownAccent,
         colorText: Colors.white,
       );

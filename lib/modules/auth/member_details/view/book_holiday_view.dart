@@ -29,6 +29,25 @@ class _BookHolidayViewState extends State<BookHolidayView> {
         ? Get.find<MemberDetailsController>()
         : Get.put(MemberDetailsController());
     accountController = Get.find<AccountController>();
+    _fetchAndPrintApiResponse();
+  }
+
+  Future<void> _fetchAndPrintApiResponse() async {
+    final userId = accountController.userData.value?.id;
+    if (userId != null) {
+      try {
+        final response = await accountController.authRepo.getProfile(userId);
+        debugPrint("========== BOOK HOLIDAY PAGE API RESPONSE START ==========");
+        final text = response.body;
+        final pattern = RegExp('.{1,800}');
+        pattern.allMatches(text).forEach((match) => debugPrint(match.group(0)));
+        debugPrint("========== BOOK HOLIDAY PAGE API RESPONSE END ==========");
+      } catch (e) {
+        debugPrint("Error fetching API response: $e");
+      }
+    } else {
+      debugPrint("========== USER ID IS NULL ==========");
+    }
   }
 
   Future<void> _onRefresh() async {
@@ -57,7 +76,14 @@ class _BookHolidayViewState extends State<BookHolidayView> {
       ),
       body: Obx(() {
         final u = accountController.userData.value ?? widget.user;
-        final totalSlots = u.membership?.totalDurationYears ?? 5;
+        final List<SlotModel> dynamicSlots = [];
+        if (u.slots != null) {
+          dynamicSlots.addAll(u.slots!);
+        } else if (u.membership?.dynamicSlots != null) {
+          dynamicSlots.addAll(u.membership!.dynamicSlots);
+        }
+
+        final totalSlots = dynamicSlots.length;
         final bookings = u.holidayBookings ?? [];
         final startDate = u.membership?.purchasedAt != null
             ? DateTime.tryParse(u.membership!.purchasedAt!) ?? DateTime.now()
@@ -69,7 +95,7 @@ class _BookHolidayViewState extends State<BookHolidayView> {
             bookings.where((b) => ['booked', 'used', 'approved'].contains(b.status?.toLowerCase())).length;
         final remainingCount =
             (totalSlots - (requestedCount + usedCount)).clamp(0, totalSlots);
-        final lengthOfStay = u.membership?.nightsPerYear ?? '6 Nights / 7 Days';
+        final defaultLengthOfStay = u.membership?.nightsPerYear ?? '6 Nights / 7 Days';
 
         return RefreshIndicator(
           onRefresh: _onRefresh,
@@ -137,11 +163,43 @@ class _BookHolidayViewState extends State<BookHolidayView> {
                   separatorBuilder: (context, index) =>
                       const SizedBox(height: 14),
                   itemBuilder: (context, i) {
-                    final slot = i + 1;
-                    final from = DateTime(
-                        startDate.year + i, startDate.month, startDate.day);
-                    final to = DateTime(startDate.year + i + 1,
-                        startDate.month, startDate.day);
+                    final slotModel = dynamicSlots.isNotEmpty ? dynamicSlots[i] : null;
+                    final slot = slotModel?.slotNumber ?? (i + 1);
+                    
+                    DateTime from = DateTime(startDate.year + i, startDate.month, startDate.day);
+                    DateTime to = DateTime(startDate.year + i + 1, startDate.month, startDate.day);
+                    
+                    if (dynamicSlots.isNotEmpty) {
+                      if (slotModel?.validFrom != null) {
+                        try {
+                          final str = slotModel!.validFrom!;
+                          if (str.contains('/')) {
+                            final parts = str.split('/');
+                            if (parts.length >= 3) {
+                              from = DateTime(int.parse(parts[2].split(' ').first), int.parse(parts[1]), int.parse(parts[0]));
+                            }
+                          } else {
+                            from = DateTime.tryParse(str) ?? from;
+                          }
+                        } catch (_) {}
+                      }
+                      
+                      if (slotModel?.validTo != null) {
+                        try {
+                          final str = slotModel!.validTo!;
+                          if (str.contains('/')) {
+                            final parts = str.split('/');
+                            if (parts.length >= 3) {
+                              to = DateTime(int.parse(parts[2].split(' ').first), int.parse(parts[1]), int.parse(parts[0]));
+                            }
+                          } else {
+                            to = DateTime.tryParse(str) ?? to;
+                          }
+                        } catch (_) {}
+                      }
+                    }
+
+                    final lengthOfStay = slotModel?.lengthOfStay ?? defaultLengthOfStay;
                     final booking =
                         bookings.firstWhereOrNull((b) => b.slotNumber == slot);
 
@@ -935,7 +993,7 @@ class _BookingSheetState extends State<_BookingSheet> {
       'slotNumber': widget.slot,
       'name': _nameController.text.trim(),
       'email': _emailController.text.trim(),
-      'phone': _phoneController.text.trim(),
+      'mobile': _phoneController.text.trim(),
       'place': _placeController.text.trim(),
       'checkIn': _checkIn!.toIso8601String(),
       'checkOut': _checkOut!.toIso8601String(),

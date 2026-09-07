@@ -656,7 +656,14 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
 
   // ── 3. HOLIDAY BOOKINGS SECTION CONTENT ──
   Widget _buildHolidayBookingsContent(UserModel u) {
-    final totalSlots = u.membership?.totalDurationYears ?? 5;
+    final List<SlotModel> dynamicSlots = [];
+    if (u.slots != null) {
+      dynamicSlots.addAll(u.slots!);
+    } else if (u.membership?.dynamicSlots != null) {
+      dynamicSlots.addAll(u.membership!.dynamicSlots);
+    }
+
+    final totalSlots = dynamicSlots.length;
     final bookings = u.holidayBookings ?? [];
     final startDate = u.membership?.purchasedAt != null
         ? DateTime.tryParse(u.membership!.purchasedAt!) ?? DateTime.now()
@@ -681,9 +688,42 @@ class MemberDetailsView extends GetView<MemberDetailsController> {
           itemCount: totalSlots,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, i) {
-            final slot = i + 1;
-            final from = DateTime(startDate.year + i, startDate.month, startDate.day);
-            final to = DateTime(startDate.year + i + 1, startDate.month, startDate.day);
+            final slotModel = dynamicSlots.isNotEmpty ? dynamicSlots[i] : null;
+            final slot = slotModel?.slotNumber ?? (i + 1);
+            
+            DateTime from = DateTime(startDate.year + i, startDate.month, startDate.day);
+            DateTime to = DateTime(startDate.year + i + 1, startDate.month, startDate.day);
+            
+            if (dynamicSlots.isNotEmpty) {
+              if (slotModel?.validFrom != null) {
+                try {
+                  final str = slotModel!.validFrom!;
+                  if (str.contains('/')) {
+                    final parts = str.split('/');
+                    if (parts.length >= 3) {
+                      from = DateTime(int.parse(parts[2].split(' ').first), int.parse(parts[1]), int.parse(parts[0]));
+                    }
+                  } else {
+                    from = DateTime.tryParse(str) ?? from;
+                  }
+                } catch (_) {}
+              }
+              
+              if (slotModel?.validTo != null) {
+                try {
+                  final str = slotModel!.validTo!;
+                  if (str.contains('/')) {
+                    final parts = str.split('/');
+                    if (parts.length >= 3) {
+                      to = DateTime(int.parse(parts[2].split(' ').first), int.parse(parts[1]), int.parse(parts[0]));
+                    }
+                  } else {
+                    to = DateTime.tryParse(str) ?? to;
+                  }
+                } catch (_) {}
+              }
+            }
+
             final booking = bookings.firstWhereOrNull((b) => b.slotNumber == slot);
             final hasActive = bookings.any((b) => b.status != 'cancelled' && b.status != 'completed');
             final isAvailable = booking == null && !hasActive && slot == _firstUnbooked(u);
@@ -1632,7 +1672,7 @@ class _HolidayBookingSheetState extends State<_HolidayBookingSheet> {
     final payload = {
       'name': ctrl.user.value?.name ?? 'Member',
       'email': ctrl.user.value?.email ?? '',
-      'phone': ctrl.user.value?.mobile ?? '',
+      'mobile': ctrl.user.value?.mobile ?? '',
       'checkIn': _checkIn!.toIso8601String(),
       'checkOut': _checkOut!.toIso8601String(),
       'adults': _adults,

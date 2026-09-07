@@ -225,13 +225,17 @@ class MembershipView extends GetView<MembershipController> {
                           Color iconColor;
                           IconData icon;
                           
-                          if (tier.name.toLowerCase().contains('silver')) {
+                          
+                          final planVarieties = ['Silver Plan', 'Premium Plan', 'Gold Plan', 'Platinum Plan'];
+                          final variety = planVarieties[index % planVarieties.length];
+
+                          if (variety.toLowerCase().contains('silver')) {
                             iconColor = const Color(0xFF90A4AE);
                             icon = Icons.workspace_premium_rounded;
-                          } else if (tier.name.toLowerCase().contains('gold')) {
+                          } else if (variety.toLowerCase().contains('gold')) {
                             iconColor = AppColors.primaryYellow;
                             icon = Icons.star_rounded;
-                          } else if (tier.name.toLowerCase().contains('platinum')) {
+                          } else if (variety.toLowerCase().contains('platinum')) {
                             iconColor = const Color(0xFF64B5F6);
                             icon = Icons.diamond_rounded;
                           } else {
@@ -241,10 +245,10 @@ class MembershipView extends GetView<MembershipController> {
 
                           return _PlanCard(
                             index: index,
-                            title: tier.name,
+                            title: variety,
                             price: tier.price,
                             adminFee: tier.adminFee,
-                            tagline: tier.description ?? 'Membership plan',
+                            tagline: tier.name,
                             iconColor: iconColor,
                             icon: icon,
                             features: tier.features,

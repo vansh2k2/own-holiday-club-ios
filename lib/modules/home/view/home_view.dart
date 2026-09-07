@@ -220,7 +220,7 @@ class HomeView extends GetView<HomeController> {
                                               imageScale: 1.3,
                                               imageBoxWidth: 32,
                                               imageLeftPadding: -11,
-                                              onTap: () => Get.toNamed(Routes.MEMBERSHIP_INFO),
+                                              onTap: () => Get.toNamed(Routes.MEMBERSHIP),
                                             ),
                                           ),
                                         ],

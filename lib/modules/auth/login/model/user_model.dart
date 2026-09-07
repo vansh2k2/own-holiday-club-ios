@@ -18,6 +18,7 @@ class UserModel {
   final List<PaymentModel>? payments;
   final AddressModel? residenceAddress;
   final AddressModel? officeAddress;
+  final List<SlotModel>? slots;
 
   UserModel({
     this.id,
@@ -39,6 +40,7 @@ class UserModel {
     this.payments,
     this.residenceAddress,
     this.officeAddress,
+    this.slots,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -66,6 +68,9 @@ class UserModel {
           : null,
       residenceAddress: json['residenceAddress'] != null ? AddressModel.fromJson(json['residenceAddress']) : null,
       officeAddress: json['officeAddress'] != null ? AddressModel.fromJson(json['officeAddress']) : null,
+      slots: json['slots'] != null 
+          ? (json['slots'] as List).map((i) => SlotModel.fromJson(i)).toList() 
+          : null,
     );
   }
 
@@ -87,6 +92,7 @@ class UserModel {
     'payments': payments?.map((i) => i.toJson()).toList(),
     'residenceAddress': residenceAddress?.toJson(),
     'officeAddress': officeAddress?.toJson(),
+    'slots': slots?.map((i) => i.toJson()).toList(),
   };
 }
 
@@ -103,6 +109,8 @@ class UserMembershipModel {
   final int? totalDurationYears;
   final String? nightsPerYear;
   final String? price;
+  final List<SlotModel>? slots;
+  final List<String>? features;
 
   UserMembershipModel({
     this.name,
@@ -117,6 +125,8 @@ class UserMembershipModel {
     this.totalDurationYears,
     this.nightsPerYear,
     this.price,
+    this.slots,
+    this.features,
   });
 
   factory UserMembershipModel.fromJson(Map<String, dynamic> json) {
@@ -133,7 +143,48 @@ class UserMembershipModel {
       totalDurationYears: json['totalDurationYears'],
       nightsPerYear: json['nightsPerYear'],
       price: json['price'],
+      slots: json['slots'] != null 
+          ? (json['slots'] as List).map((i) => SlotModel.fromJson(i)).toList() 
+          : null,
+      features: json['features'] != null 
+          ? List<String>.from(json['features']) 
+          : null,
     );
+  }
+
+  List<SlotModel> get dynamicSlots {
+    List<SlotModel> list = [];
+    if (slots != null && slots!.isNotEmpty) {
+      list.addAll(slots!);
+    } else if (features != null) {
+      int slotIndex = 1;
+      for (final feature in features!) {
+        final f = feature.toLowerCase();
+        if (f.contains("nights") && f.contains("for") && f.contains("year")) {
+          try {
+            final parts = f.split(" for ");
+            if (parts.length == 2) {
+              final lengthOfStayMatch = RegExp(r'(.*? for)', caseSensitive: false).firstMatch(feature);
+              String lengthOfStay = feature;
+              if (lengthOfStayMatch != null) {
+                lengthOfStay = lengthOfStayMatch.group(1)!.replaceAll(RegExp(r'\s*for$', caseSensitive: false), '').trim();
+              } else {
+                lengthOfStay = parts[0].trim();
+              }
+              final yearsStr = parts[1].replaceAll(RegExp(r'[^0-9]'), '');
+              final years = int.tryParse(yearsStr) ?? 0;
+              for (int i = 0; i < years; i++) {
+                list.add(SlotModel(
+                  slotNumber: slotIndex++,
+                  lengthOfStay: lengthOfStay,
+                ));
+              }
+            }
+          } catch (_) {}
+        }
+      }
+    }
+    return list;
   }
 
   Map<String, dynamic> toJson() => {
@@ -149,6 +200,8 @@ class UserMembershipModel {
     'totalDurationYears': totalDurationYears,
     'nightsPerYear': nightsPerYear,
     'price': price,
+    'slots': slots?.map((i) => i.toJson()).toList(),
+    'features': features,
   };
 }
 
@@ -389,5 +442,35 @@ class AddressModel {
     'country': country,
     'pin': pin,
     'phone': phone,
+  };
+}
+
+class SlotModel {
+  final int? slotNumber;
+  final String? lengthOfStay;
+  final String? validFrom;
+  final String? validTo;
+
+  SlotModel({
+    this.slotNumber,
+    this.lengthOfStay,
+    this.validFrom,
+    this.validTo,
+  });
+
+  factory SlotModel.fromJson(Map<String, dynamic> json) {
+    return SlotModel(
+      slotNumber: json['slotNumber'] ?? json['holidayNo'],
+      lengthOfStay: json['lengthOfStay'],
+      validFrom: json['validFrom'],
+      validTo: json['validTo'],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'slotNumber': slotNumber,
+    'lengthOfStay': lengthOfStay,
+    'validFrom': validFrom,
+    'validTo': validTo,
   };
 }

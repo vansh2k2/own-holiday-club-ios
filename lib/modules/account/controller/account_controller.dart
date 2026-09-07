@@ -4,6 +4,8 @@ import 'package:own_holiday_app/modules/auth/login/model/user_model.dart';
 import 'package:own_holiday_app/data/repository/auth_repo.dart';
 import 'dart:convert';
 
+import 'dart:io';
+
 class AccountController extends GetxController {
   final AuthRepo authRepo = Get.find();
   final GetStorage storage = Get.find();
@@ -36,6 +38,10 @@ class AccountController extends GetxController {
     try {
       final response = await authRepo.getProfile(userData.value!.id!);
       final data = jsonDecode(response.body);
+      
+      print("======= PROFILE_JSON_START =======");
+      print(response.body);
+      print("======= PROFILE_JSON_END =======");
       
       // Handle different API response formats (with success key or just user key)
       if (response.statusCode == 200 && (data['user'] != null)) {

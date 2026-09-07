@@ -45,7 +45,7 @@ class MemberDetailsController extends GetxController {
       final data = {
         "userId": user.value?.id,
         "name": user.value?.name,
-        "phone": user.value?.mobile, // Changed from 'mobile' to 'phone' based on backend requirements
+        "mobile": user.value?.mobile, // Changed to 'mobile' based on backend requirements
         "email": user.value?.email,
         "membershipId": user.value?.membershipId,
         "contextType": "holiday-booking",

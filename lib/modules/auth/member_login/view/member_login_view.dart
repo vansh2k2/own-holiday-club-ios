@@ -416,26 +416,19 @@ class MemberLoginView extends GetView<MemberLoginController> {
       width: double.infinity,
       child: Stack(
         children: [
-          // Background Image
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/login_bg.jpg',
-              fit: BoxFit.cover,
-            ),
-          ),
-          // Overlay Gradient
+          // Keep the original plain login header background.
           Positioned.fill(
             child: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    AppColors.primaryBlack.withOpacity(0.3),
-                    Colors.transparent,
-                    AppColors.primaryWhite,
+                    Color(0xFFD6D6D6),
+                    Color(0xFFF4F4F4),
+                    Colors.white,
                   ],
-                  stops: const [0.0, 0.5, 1.0],
+                  stops: [0.0, 0.55, 1.0],
                 ),
               ),
             ),

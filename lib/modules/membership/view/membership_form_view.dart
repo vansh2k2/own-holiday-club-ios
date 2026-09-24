@@ -1218,6 +1218,73 @@ class MembershipFormView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 14),
+          decoration: BoxDecoration(
+            color: AppColors.primaryYellow.withOpacity(0.04),
+            border: Border.all(
+              color: AppColors.primaryYellow.withOpacity(0.25),
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'REFERRAL CODE (OPTIONAL)',
+                style: GoogleFonts.poppins(
+                  color: const Color(0xFF8B6A1F),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11.0,
+                  letterSpacing: 1.0,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: controller.referralCodeController,
+                textCapitalization: TextCapitalization.characters,
+                onChanged: (_) {
+                  if (controller.isReferralCodeValid.value) {
+                    controller.isReferralCodeValid.value = false;
+                  }
+                },
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  color: const Color(0xFF0D1321),
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Enter referral code',
+                  hintStyle: GoogleFonts.poppins(
+                    color: Colors.grey[400],
+                    fontSize: 12,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(
+                      color: AppColors.primaryYellow,
+                      width: 1.5,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(
+                      color: AppColors.primaryYellow,
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
         Text(
           'CONSENT',
           style: GoogleFonts.poppins(
@@ -1591,8 +1658,10 @@ class MembershipFormView extends StatelessWidget {
     IconData? prefixIcon,
     Widget? suffixIcon,
     VoidCallback? onTap,
+    ValueChanged<String>? onChanged,
     Iterable<String>? autofillHints,
     TextInputType? keyboardType,
+    TextCapitalization textCapitalization = TextCapitalization.none,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1603,7 +1672,9 @@ class MembershipFormView extends StatelessWidget {
           controller: controller,
           readOnly: readOnly,
           onTap: onTap,
+          onChanged: onChanged,
           keyboardType: keyboardType,
+          textCapitalization: textCapitalization,
           autofillHints: autofillHints,
           style: GoogleFonts.poppins(
             fontSize: 13,

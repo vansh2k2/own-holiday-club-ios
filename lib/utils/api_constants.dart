@@ -31,6 +31,7 @@ class ApiConstants {
   // Payments
   static const String createOrder = "$baseUrl/payments/membership/order";
   static const String verifyPayment = "$baseUrl/payments/membership/verify";
+  static const String validateReferralCode = "$baseUrl/referral-codes/validate";
   
   // Leads & Forms
   static const String enquiries = "$baseUrl/enquiries";
@@ -43,4 +44,3 @@ class ApiConstants {
   static const String profile = "$baseUrl/profile";
   static const String members = "$baseUrl/members";
 }
-

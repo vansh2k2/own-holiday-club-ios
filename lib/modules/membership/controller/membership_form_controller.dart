@@ -15,6 +15,8 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
+import 'package:own_holiday_app/utils/razorpay_web_platform.dart';
 
 class MembershipFormController extends GetxController {
   final MembershipRepo membershipRepo = Get.find();
@@ -36,6 +38,9 @@ class MembershipFormController extends GetxController {
   final emailController = TextEditingController();
   final emailOtpController = TextEditingController();
   final anniversaryController = TextEditingController();
+  final referralCodeController = TextEditingController();
+  var isReferralCodeValid = false.obs;
+  var isReferralCodeChecking = false.obs;
 
   // Permanent (Residence) Address Controllers
   final houseNoController = TextEditingController();
@@ -63,13 +68,12 @@ class MembershipFormController extends GetxController {
     selectedCountryCorrAddress.value = selectedCountryRes.value;
   }
 
-
   // Family Details
   final spouseNameController = TextEditingController();
   final spouseDobController = TextEditingController();
   final spouseMobileController = TextEditingController();
   final spouseEmailController = TextEditingController();
-  
+
   var numberOfChildren = 0.obs;
   var childrenNameControllers = <TextEditingController>[].obs;
   var childrenGenderOptions = <RxnString>[].obs;
@@ -77,7 +81,7 @@ class MembershipFormController extends GetxController {
 
   void updateChildrenCount(int count) {
     numberOfChildren.value = count;
-    
+
     // Adjust lengths
     while (childrenNameControllers.length < count) {
       childrenNameControllers.add(TextEditingController());
@@ -157,6 +161,7 @@ class MembershipFormController extends GetxController {
     emailController.dispose();
     emailOtpController.dispose();
     anniversaryController.dispose();
+    referralCodeController.dispose();
     houseNoController.dispose();
     residenceAddressController.dispose();
     residenceCityController.dispose();
@@ -173,8 +178,12 @@ class MembershipFormController extends GetxController {
     spouseDobController.dispose();
     spouseMobileController.dispose();
     spouseEmailController.dispose();
-    for (var c in childrenNameControllers) { c.dispose(); }
-    for (var c in childrenDobControllers) { c.dispose(); }
+    for (var c in childrenNameControllers) {
+      c.dispose();
+    }
+    for (var c in childrenDobControllers) {
+      c.dispose();
+    }
     super.onClose();
   }
 
@@ -356,6 +365,47 @@ class MembershipFormController extends GetxController {
 
   // --- Payment Flow ---
 
+  Future<void> validateReferralCode() async {
+    final code = referralCodeController.text.trim().toUpperCase();
+    referralCodeController.text = code;
+
+    if (code.isEmpty) {
+      isReferralCodeValid.value = false;
+      Get.snackbar('Referral Code', 'Please enter a referral code.');
+      return;
+    }
+
+    try {
+      isReferralCodeChecking.value = true;
+      final response = await membershipRepo.validateReferralCode(code);
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && data['valid'] == true) {
+        isReferralCodeValid.value = true;
+        Get.snackbar(
+          'Referral Code',
+          'Referral code applied successfully.',
+          backgroundColor: AppColors.primaryYellow,
+          colorText: Colors.white,
+        );
+      } else {
+        isReferralCodeValid.value = false;
+        Get.snackbar(
+          'Invalid Referral Code',
+          data['message'] ?? 'Please check the code and try again.',
+        );
+      }
+    } catch (e) {
+      isReferralCodeValid.value = false;
+      Get.snackbar(
+        'Referral Code Error',
+        'Could not validate the referral code. Please try again.',
+      );
+    } finally {
+      isReferralCodeChecking.value = false;
+    }
+  }
+
   Future<void> pickFile(String docType) async {
     if (docType == 'addressProof') {
       if (selectedAddressProof.value == null ||
@@ -490,16 +540,19 @@ class MembershipFormController extends GetxController {
       },
       'familyDetails': {
         'spouse': {
-          'name': spouseNameController.text, 
+          'name': spouseNameController.text,
           'dob': spouseDobController.text,
           'mobile': spouseMobileController.text,
           'email': spouseEmailController.text,
         },
-        'children': List.generate(numberOfChildren.value, (index) => {
-          'name': childrenNameControllers[index].text,
-          'gender': childrenGenderOptions[index].value ?? '',
-          'dob': childrenDobControllers[index].text,
-        }),
+        'children': List.generate(
+          numberOfChildren.value,
+          (index) => {
+            'name': childrenNameControllers[index].text,
+            'gender': childrenGenderOptions[index].value ?? '',
+            'dob': childrenDobControllers[index].text,
+          },
+        ),
       },
       'documents': {
         'profileImage': {
@@ -534,6 +587,11 @@ class MembershipFormController extends GetxController {
   }
 
   Future<void> proceedToPayment() async {
+    if (referralCodeController.text.trim().isNotEmpty &&
+        !isReferralCodeValid.value) {
+      await validateReferralCode();
+      if (!isReferralCodeValid.value) return;
+    }
     if (idProofBase64.value.isEmpty) {
       Get.snackbar(
         'Validation Error',
@@ -583,7 +641,15 @@ class MembershipFormController extends GetxController {
           },
           'notes': data['order']['notes'],
         };
-        _razorpay.open(options);
+        if (kIsWeb) {
+          openRazorpayWeb(
+            options,
+            _handleWebPaymentSuccess,
+            _handleWebPaymentError,
+          );
+        } else {
+          _razorpay.open(options);
+        }
       } else {
         final data = jsonDecode(response.body);
         Get.snackbar('Error', data['message'] ?? 'Failed to create order');
@@ -596,14 +662,37 @@ class MembershipFormController extends GetxController {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    await _verifyPayment({
+      'razorpay_payment_id': response.paymentId,
+      'razorpay_order_id': response.orderId,
+      'razorpay_signature': response.signature,
+    });
+  }
+
+  Future<void> _handleWebPaymentSuccess(
+    Map<String, dynamic> response,
+  ) async {
+    await _verifyPayment(response);
+  }
+
+  void _handleWebPaymentError(String message) {
+    Get.snackbar(
+      'Payment Failed',
+      message,
+      backgroundColor: AppColors.brownAccent,
+      colorText: Colors.white,
+    );
+  }
+
+  Future<void> _verifyPayment(Map<String, dynamic> paymentResponse) async {
     try {
       isLoading.value = true;
       final data = {
         'tierId': selectedTier.id,
         'memberDetails': _buildMemberDetails(),
-        'razorpay_payment_id': response.paymentId,
-        'razorpay_order_id': response.orderId,
-        'razorpay_signature': response.signature,
+        if (referralCodeController.text.trim().isNotEmpty)
+          'referralCode': referralCodeController.text.trim().toUpperCase(),
+        ...paymentResponse,
       };
       print("========== VERIFY PAYMENT REQUEST PAYLOAD ==========");
       print(const JsonEncoder.withIndent('  ').convert(data));

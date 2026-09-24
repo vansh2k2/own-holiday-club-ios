@@ -25,4 +25,10 @@ class MembershipRepo {
   Future<http.Response> verifyPayment(dynamic data) async {
     return await apiClient.postData(ApiConstants.verifyPayment, data);
   }
+
+  Future<http.Response> validateReferralCode(String code) async {
+    return await apiClient.postData(ApiConstants.validateReferralCode, {
+      "code": code,
+    });
+  }
 }

@@ -22,6 +22,19 @@ class MembershipRepo {
     });
   }
 
+  Future<http.Response> saveMembership(
+    String tierId,
+    dynamic memberDetails, {
+    String? referralCode,
+  }) async {
+    return await apiClient.postData(ApiConstants.saveMembership, {
+      "tierId": tierId,
+      "memberDetails": memberDetails,
+      if (referralCode != null && referralCode.trim().isNotEmpty)
+        "referralCode": referralCode.trim().toUpperCase(),
+    });
+  }
+
   Future<http.Response> verifyPayment(dynamic data) async {
     return await apiClient.postData(ApiConstants.verifyPayment, data);
   }

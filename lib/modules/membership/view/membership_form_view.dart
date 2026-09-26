@@ -1400,15 +1400,23 @@ class MembershipFormView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: controller.proceedToPayment,
+                  onPressed: controller.isSaved.value
+                      ? controller.proceedToPayment
+                      : controller.saveMembershipDetails,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Icon(Icons.payment, size: 16, color: Colors.white),
+                      Icon(
+                        controller.isSaved.value
+                            ? Icons.payment
+                            : Icons.save_outlined,
+                        size: 16,
+                        color: Colors.white,
+                      ),
                       const SizedBox(width: 8),
                       Text(
-                        'Pay Now',
+                        controller.isSaved.value ? 'Pay Now' : 'Save & Continue',
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
                           fontSize: 14.0,

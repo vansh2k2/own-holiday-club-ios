@@ -25,6 +25,7 @@ class MembershipFormController extends GetxController {
 
   var currentStep = 1.obs;
   var isLoading = false.obs;
+  var isSaved = false.obs;
   Map<String, dynamic>? savedRazorpayOptions;
 
   late MembershipTier selectedTier;
@@ -189,13 +190,13 @@ class MembershipFormController extends GetxController {
 
   Future<void> nextStep() async {
     if (currentStep.value == 1) {
-      // Mobile OTP verification is optional for mobile app
       if (!isMobileVerified.value) {
-        debugPrint("Mobile number not verified, proceeding anyway.");
+        Get.snackbar('Verification Required', 'Please verify your mobile number first.');
+        return;
       }
-      // Email OTP verification is optional for mobile app
       if (!isEmailVerified.value) {
-        debugPrint("Email address not verified, proceeding anyway.");
+        Get.snackbar('Verification Required', 'Please verify your email address first.');
+        return;
       }
 
       try {
@@ -209,6 +210,17 @@ class MembershipFormController extends GetxController {
         );
         print("===========================================");
 
+        final saveResponse = await membershipRepo.saveMembership(
+          selectedTier.id,
+          memberDetails,
+          referralCode: referralCodeController.text,
+        );
+        final saveData = _decodeApiResponse(saveResponse);
+        if (saveResponse.statusCode != 200 && saveResponse.statusCode != 201) {
+          throw Exception(saveData['message'] ?? 'Unable to save your details.');
+        }
+        isSaved.value = true;
+
         // Save to GetStorage (Local Storage)
         final box = GetStorage();
         await box.write(
@@ -218,8 +230,8 @@ class MembershipFormController extends GetxController {
         print("Saved Step 1 details to local storage successfully!");
 
         Get.snackbar(
-          'Success',
-          'Details saved successfully!',
+          'Step 1 Saved',
+          'Your details are saved. Please continue with the documents.',
           backgroundColor: AppColors.primaryYellow,
           colorText: Colors.white,
         );
@@ -235,6 +247,32 @@ class MembershipFormController extends GetxController {
       } finally {
         isLoading.value = false;
       }
+    }
+
+  }
+
+  Map<String, dynamic> _decodeApiResponse(http.Response response) {
+    final body = response.body.trim();
+    if (body.isEmpty) {
+      return {
+        'message': 'The server returned an empty response (${response.statusCode}).',
+      };
+    }
+
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      return {
+        'message': 'The server returned an invalid response (${response.statusCode}).',
+      };
+    } on FormatException {
+      return {
+        'message': response.statusCode == 404
+            ? 'Membership save service is not available on the server yet. Please try again after the backend is deployed.'
+            : 'The server returned an invalid response (${response.statusCode}).',
+      };
     }
   }
 
@@ -587,11 +625,16 @@ class MembershipFormController extends GetxController {
   }
 
   Future<void> proceedToPayment() async {
+    if (!isSaved.value) {
+      Get.snackbar('Save Required', 'Please save your details before payment.');
+      return;
+    }
     if (referralCodeController.text.trim().isNotEmpty &&
         !isReferralCodeValid.value) {
       await validateReferralCode();
       if (!isReferralCodeValid.value) return;
     }
+
     if (idProofBase64.value.isEmpty) {
       Get.snackbar(
         'Validation Error',
@@ -656,6 +699,53 @@ class MembershipFormController extends GetxController {
       }
     } catch (e) {
       Get.snackbar('Error', 'Payment initialization failed');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> saveMembershipDetails() async {
+    if (idProofBase64.value.isEmpty) {
+      Get.snackbar(
+        'Validation Error',
+        'Please upload your Aadhaar Card',
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
+      return;
+    }
+    if (!isConsentChecked.value) {
+      Get.snackbar(
+        'Validation Error',
+        'Please agree to the Terms & Conditions',
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      final response = await membershipRepo.saveMembership(
+        selectedTier.id,
+        _buildMemberDetails(),
+        referralCode: referralCodeController.text,
+      );
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        isSaved.value = true;
+        Get.snackbar(
+          'Details Saved',
+          'Your details were saved. You can pay now or later.',
+          backgroundColor: AppColors.primaryYellow,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar('Save Failed', data['message'] ?? 'Unable to save details.');
+      }
+    } catch (e) {
+      Get.snackbar('Save Failed', 'Unable to save details. Please try again.');
     } finally {
       isLoading.value = false;
     }

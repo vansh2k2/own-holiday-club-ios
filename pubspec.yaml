@@ -16,8 +16,8 @@ description: "A new Flutter project."
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-# version: 2.0.8+29
-version: 2.0.9+29
+version: 2.0.10+30
+
 environment:
   # Ye define karta hai ki app kis Dart SDK version par chalegi. Yahan SDK version 3.11.4 ya usse upar required hai.
   sdk: ^3.11.4
@@ -51,6 +51,7 @@ dependencies:
   url_launcher: ^6.3.2
   file_picker: ^11.0.2
   flutter_staggered_grid_view: ^0.7.0
+  facebook_app_events: ^0.30.5
 
 dev_dependencies:
   flutter_test:

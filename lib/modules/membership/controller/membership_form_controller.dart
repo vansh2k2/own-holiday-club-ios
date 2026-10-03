@@ -8,6 +8,7 @@ import 'package:own_holiday_app/modules/account/controller/account_controller.da
 import 'package:own_holiday_app/utils/app_colors.dart';
 import 'package:own_holiday_app/modules/membership/model/membership_tier.dart';
 import 'package:own_holiday_app/routes/app_pages.dart';
+import 'package:facebook_app_events/facebook_app_events.dart';
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io' as io;
@@ -15,8 +16,6 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
-import 'package:own_holiday_app/utils/razorpay_web_platform.dart';
 
 class MembershipFormController extends GetxController {
   final MembershipRepo membershipRepo = Get.find();
@@ -25,7 +24,6 @@ class MembershipFormController extends GetxController {
 
   var currentStep = 1.obs;
   var isLoading = false.obs;
-  var isSaved = false.obs;
   Map<String, dynamic>? savedRazorpayOptions;
 
   late MembershipTier selectedTier;
@@ -39,9 +37,6 @@ class MembershipFormController extends GetxController {
   final emailController = TextEditingController();
   final emailOtpController = TextEditingController();
   final anniversaryController = TextEditingController();
-  final referralCodeController = TextEditingController();
-  var isReferralCodeValid = false.obs;
-  var isReferralCodeChecking = false.obs;
 
   // Permanent (Residence) Address Controllers
   final houseNoController = TextEditingController();
@@ -69,12 +64,13 @@ class MembershipFormController extends GetxController {
     selectedCountryCorrAddress.value = selectedCountryRes.value;
   }
 
+
   // Family Details
   final spouseNameController = TextEditingController();
   final spouseDobController = TextEditingController();
   final spouseMobileController = TextEditingController();
   final spouseEmailController = TextEditingController();
-
+  
   var numberOfChildren = 0.obs;
   var childrenNameControllers = <TextEditingController>[].obs;
   var childrenGenderOptions = <RxnString>[].obs;
@@ -82,7 +78,7 @@ class MembershipFormController extends GetxController {
 
   void updateChildrenCount(int count) {
     numberOfChildren.value = count;
-
+    
     // Adjust lengths
     while (childrenNameControllers.length < count) {
       childrenNameControllers.add(TextEditingController());
@@ -162,7 +158,6 @@ class MembershipFormController extends GetxController {
     emailController.dispose();
     emailOtpController.dispose();
     anniversaryController.dispose();
-    referralCodeController.dispose();
     houseNoController.dispose();
     residenceAddressController.dispose();
     residenceCityController.dispose();
@@ -179,24 +174,20 @@ class MembershipFormController extends GetxController {
     spouseDobController.dispose();
     spouseMobileController.dispose();
     spouseEmailController.dispose();
-    for (var c in childrenNameControllers) {
-      c.dispose();
-    }
-    for (var c in childrenDobControllers) {
-      c.dispose();
-    }
+    for (var c in childrenNameControllers) { c.dispose(); }
+    for (var c in childrenDobControllers) { c.dispose(); }
     super.onClose();
   }
 
   Future<void> nextStep() async {
     if (currentStep.value == 1) {
+      // Mobile OTP verification is optional for mobile app
       if (!isMobileVerified.value) {
-        Get.snackbar('Verification Required', 'Please verify your mobile number first.');
-        return;
+        debugPrint("Mobile number not verified, proceeding anyway.");
       }
+      // Email OTP verification is optional for mobile app
       if (!isEmailVerified.value) {
-        Get.snackbar('Verification Required', 'Please verify your email address first.');
-        return;
+        debugPrint("Email address not verified, proceeding anyway.");
       }
 
       try {
@@ -210,17 +201,6 @@ class MembershipFormController extends GetxController {
         );
         print("===========================================");
 
-        final saveResponse = await membershipRepo.saveMembership(
-          selectedTier.id,
-          memberDetails,
-          referralCode: referralCodeController.text,
-        );
-        final saveData = _decodeApiResponse(saveResponse);
-        if (saveResponse.statusCode != 200 && saveResponse.statusCode != 201) {
-          throw Exception(saveData['message'] ?? 'Unable to save your details.');
-        }
-        isSaved.value = true;
-
         // Save to GetStorage (Local Storage)
         final box = GetStorage();
         await box.write(
@@ -230,8 +210,8 @@ class MembershipFormController extends GetxController {
         print("Saved Step 1 details to local storage successfully!");
 
         Get.snackbar(
-          'Step 1 Saved',
-          'Your details are saved. Please continue with the documents.',
+          'Success',
+          'Details saved successfully!',
           backgroundColor: AppColors.primaryYellow,
           colorText: Colors.white,
         );
@@ -247,32 +227,6 @@ class MembershipFormController extends GetxController {
       } finally {
         isLoading.value = false;
       }
-    }
-
-  }
-
-  Map<String, dynamic> _decodeApiResponse(http.Response response) {
-    final body = response.body.trim();
-    if (body.isEmpty) {
-      return {
-        'message': 'The server returned an empty response (${response.statusCode}).',
-      };
-    }
-
-    try {
-      final decoded = jsonDecode(body);
-      if (decoded is Map<String, dynamic>) {
-        return decoded;
-      }
-      return {
-        'message': 'The server returned an invalid response (${response.statusCode}).',
-      };
-    } on FormatException {
-      return {
-        'message': response.statusCode == 404
-            ? 'Membership save service is not available on the server yet. Please try again after the backend is deployed.'
-            : 'The server returned an invalid response (${response.statusCode}).',
-      };
     }
   }
 
@@ -402,47 +356,6 @@ class MembershipFormController extends GetxController {
   }
 
   // --- Payment Flow ---
-
-  Future<void> validateReferralCode() async {
-    final code = referralCodeController.text.trim().toUpperCase();
-    referralCodeController.text = code;
-
-    if (code.isEmpty) {
-      isReferralCodeValid.value = false;
-      Get.snackbar('Referral Code', 'Please enter a referral code.');
-      return;
-    }
-
-    try {
-      isReferralCodeChecking.value = true;
-      final response = await membershipRepo.validateReferralCode(code);
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && data['valid'] == true) {
-        isReferralCodeValid.value = true;
-        Get.snackbar(
-          'Referral Code',
-          'Referral code applied successfully.',
-          backgroundColor: AppColors.primaryYellow,
-          colorText: Colors.white,
-        );
-      } else {
-        isReferralCodeValid.value = false;
-        Get.snackbar(
-          'Invalid Referral Code',
-          data['message'] ?? 'Please check the code and try again.',
-        );
-      }
-    } catch (e) {
-      isReferralCodeValid.value = false;
-      Get.snackbar(
-        'Referral Code Error',
-        'Could not validate the referral code. Please try again.',
-      );
-    } finally {
-      isReferralCodeChecking.value = false;
-    }
-  }
 
   Future<void> pickFile(String docType) async {
     if (docType == 'addressProof') {
@@ -578,19 +491,16 @@ class MembershipFormController extends GetxController {
       },
       'familyDetails': {
         'spouse': {
-          'name': spouseNameController.text,
+          'name': spouseNameController.text, 
           'dob': spouseDobController.text,
           'mobile': spouseMobileController.text,
           'email': spouseEmailController.text,
         },
-        'children': List.generate(
-          numberOfChildren.value,
-          (index) => {
-            'name': childrenNameControllers[index].text,
-            'gender': childrenGenderOptions[index].value ?? '',
-            'dob': childrenDobControllers[index].text,
-          },
-        ),
+        'children': List.generate(numberOfChildren.value, (index) => {
+          'name': childrenNameControllers[index].text,
+          'gender': childrenGenderOptions[index].value ?? '',
+          'dob': childrenDobControllers[index].text,
+        }),
       },
       'documents': {
         'profileImage': {
@@ -625,16 +535,6 @@ class MembershipFormController extends GetxController {
   }
 
   Future<void> proceedToPayment() async {
-    if (!isSaved.value) {
-      Get.snackbar('Save Required', 'Please save your details before payment.');
-      return;
-    }
-    if (referralCodeController.text.trim().isNotEmpty &&
-        !isReferralCodeValid.value) {
-      await validateReferralCode();
-      if (!isReferralCodeValid.value) return;
-    }
-
     if (idProofBase64.value.isEmpty) {
       Get.snackbar(
         'Validation Error',
@@ -684,15 +584,20 @@ class MembershipFormController extends GetxController {
           },
           'notes': data['order']['notes'],
         };
-        if (kIsWeb) {
-          openRazorpayWeb(
-            options,
-            _handleWebPaymentSuccess,
-            _handleWebPaymentError,
-          );
-        } else {
-          _razorpay.open(options);
-        }
+
+        // Facebook Event - Initiate Checkout
+        final facebookAppEvents = FacebookAppEvents();
+        await facebookAppEvents.logEvent(
+          name: 'fb_mobile_initiated_checkout',
+          parameters: {
+            'fb_content_type': 'membership',
+            'fb_content_id': data['tier']['name'],
+            'fb_currency': 'INR',
+            'fb_total_price': ((data['order']['amount'] as int) / 100).toString(),
+          },
+        );
+
+        _razorpay.open(options);
       } else {
         final data = jsonDecode(response.body);
         Get.snackbar('Error', data['message'] ?? 'Failed to create order');
@@ -704,85 +609,15 @@ class MembershipFormController extends GetxController {
     }
   }
 
-  Future<void> saveMembershipDetails() async {
-    if (idProofBase64.value.isEmpty) {
-      Get.snackbar(
-        'Validation Error',
-        'Please upload your Aadhaar Card',
-        backgroundColor: AppColors.brownAccent,
-        colorText: Colors.white,
-      );
-      return;
-    }
-    if (!isConsentChecked.value) {
-      Get.snackbar(
-        'Validation Error',
-        'Please agree to the Terms & Conditions',
-        backgroundColor: AppColors.brownAccent,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
-    try {
-      isLoading.value = true;
-      final response = await membershipRepo.saveMembership(
-        selectedTier.id,
-        _buildMemberDetails(),
-        referralCode: referralCodeController.text,
-      );
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        isSaved.value = true;
-        Get.snackbar(
-          'Details Saved',
-          'Your details were saved. You can pay now or later.',
-          backgroundColor: AppColors.primaryYellow,
-          colorText: Colors.white,
-        );
-      } else {
-        Get.snackbar('Save Failed', data['message'] ?? 'Unable to save details.');
-      }
-    } catch (e) {
-      Get.snackbar('Save Failed', 'Unable to save details. Please try again.');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
   void _handlePaymentSuccess(PaymentSuccessResponse response) async {
-    await _verifyPayment({
-      'razorpay_payment_id': response.paymentId,
-      'razorpay_order_id': response.orderId,
-      'razorpay_signature': response.signature,
-    });
-  }
-
-  Future<void> _handleWebPaymentSuccess(
-    Map<String, dynamic> response,
-  ) async {
-    await _verifyPayment(response);
-  }
-
-  void _handleWebPaymentError(String message) {
-    Get.snackbar(
-      'Payment Failed',
-      message,
-      backgroundColor: AppColors.brownAccent,
-      colorText: Colors.white,
-    );
-  }
-
-  Future<void> _verifyPayment(Map<String, dynamic> paymentResponse) async {
     try {
       isLoading.value = true;
       final data = {
         'tierId': selectedTier.id,
         'memberDetails': _buildMemberDetails(),
-        if (referralCodeController.text.trim().isNotEmpty)
-          'referralCode': referralCodeController.text.trim().toUpperCase(),
-        ...paymentResponse,
+        'razorpay_payment_id': response.paymentId,
+        'razorpay_order_id': response.orderId,
+        'razorpay_signature': response.signature,
       };
       print("========== VERIFY PAYMENT REQUEST PAYLOAD ==========");
       print(const JsonEncoder.withIndent('  ').convert(data));
@@ -801,6 +636,22 @@ class MembershipFormController extends GetxController {
         // Save to AccountController
         Get.find<AccountController>().userData.value = userModel;
         Get.find<AccountController>().isLoggedIn.value = true;
+
+        // Facebook Event - Purchase & Complete Registration
+        final facebookAppEvents = FacebookAppEvents();
+        await facebookAppEvents.logPurchase(
+          amount: double.tryParse(selectedTier.price.toString()) ?? 0.0,
+          currency: 'INR',
+          parameters: {
+            'fb_content_type': 'membership',
+            'fb_content_id': selectedTier.id.toString(),
+            'fb_description': selectedTier.name,
+          },
+        );
+        await facebookAppEvents.logEvent(
+          name: 'fb_mobile_complete_registration',
+          parameters: {'fb_registration_method': 'mobile'},
+        );
 
         Get.offAllNamed(Routes.MEMBER_DETAILS);
         Get.snackbar('Success', 'Welcome to Own Holiday Club!');

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:facebook_app_events/facebook_app_events.dart';
 import 'routes/app_pages.dart';
 import 'utils/app_theme.dart';
 import 'utils/init_dependencies.dart' as di;
@@ -19,6 +20,11 @@ void main() async {
   ));
   await GetStorage.init();
   await di.init();
+
+  // Facebook App Events - App Open
+  final facebookAppEvents = FacebookAppEvents();
+  await facebookAppEvents.logEvent(name: 'fb_mobile_activate_app');
+
   runApp(const MyApp());
 }
 

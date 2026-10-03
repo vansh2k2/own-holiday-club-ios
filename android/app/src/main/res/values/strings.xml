@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="facebook_app_id">1093752483053294</string>
+
+    <string name="facebook_client_token">a925c8e2b65e389acdc6e655df3d08a6</string>
+
+    <string name="fb_login_protocol_scheme">fb1093752483053294</string>
+
+    <string name="app_name">Own Holiday Club</string>
+
+</resources>

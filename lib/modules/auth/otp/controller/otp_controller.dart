@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:own_holiday_app/routes/app_pages.dart';
 import 'package:own_holiday_app/utils/app_colors.dart';
 import 'package:own_holiday_app/data/repository/auth_repo.dart';
+import 'package:facebook_app_events/facebook_app_events.dart';
 import 'dart:convert';
 
 class OtpController extends GetxController {
@@ -90,6 +91,10 @@ class OtpController extends GetxController {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 && data['verified'] == true) {
+        // Facebook Event - Login
+        final facebookAppEvents = FacebookAppEvents();
+        await facebookAppEvents.logEvent(name: 'fb_mobile_login');
+
         Get.offAllNamed(Routes.DASHBOARD);
       } else {
         Get.snackbar(

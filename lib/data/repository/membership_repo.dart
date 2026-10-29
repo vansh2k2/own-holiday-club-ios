@@ -15,7 +15,10 @@ class MembershipRepo {
     return await apiClient.postData(ApiConstants.membershipPurchase, data);
   }
 
-  Future<http.Response> createRazorpayOrder(String tierId, dynamic memberDetails) async {
+  Future<http.Response> createRazorpayOrder(
+    String tierId,
+    dynamic memberDetails,
+  ) async {
     return await apiClient.postData(ApiConstants.createOrder, {
       "tierId": tierId,
       "memberDetails": memberDetails,
@@ -37,6 +40,16 @@ class MembershipRepo {
 
   Future<http.Response> verifyPayment(dynamic data) async {
     return await apiClient.postData(ApiConstants.verifyPayment, data);
+  }
+
+  Future<http.Response> savePostPaymentDetails(
+    String userId,
+    dynamic memberDetails,
+  ) async {
+    return await apiClient.putData(
+      "${ApiConstants.profile}/$userId",
+      memberDetails,
+    );
   }
 
   Future<http.Response> validateReferralCode(String code) async {

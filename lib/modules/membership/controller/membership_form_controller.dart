@@ -13,7 +13,6 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io' as io;
 import 'dart:ui' as ui;
 import 'dart:typed_data';
-import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:own_holiday_app/utils/razorpay_web_platform.dart';
@@ -190,60 +189,30 @@ class MembershipFormController extends GetxController {
     super.onClose();
   }
 
-  Future<void> nextStep() async {
-    if (currentStep.value == 1) {
-      // Mobile OTP verification is optional for mobile app
-      if (!isMobileVerified.value) {
-        debugPrint("Mobile number not verified, proceeding anyway.");
-      }
-      // Email OTP verification is optional for mobile app
-      if (!isEmailVerified.value) {
-        debugPrint("Email address not verified, proceeding anyway.");
-      }
-
-      try {
-        isLoading.value = true;
-        final memberDetails = _buildMemberDetails();
-        print("========== STEP 1 MEMBER DETAILS ==========");
-        print(
-          const JsonEncoder.withIndent(
-            '  ',
-          ).convert(memberDetails['personalDetails']),
-        );
-        print("===========================================");
-
-        // Save to GetStorage (Local Storage)
-        final box = GetStorage();
-        await box.write(
-          'membership_step1_data',
-          memberDetails['personalDetails'],
-        );
-        print("Saved Step 1 details to local storage successfully!");
-
-        Get.snackbar(
-          'Success',
-          'Details saved successfully!',
-          backgroundColor: AppColors.primaryYellow,
-          colorText: Colors.white,
-        );
-        currentStep.value = 2;
-      } catch (e) {
-        print("Error saving step 1 locally: $e");
-        Get.snackbar(
-          'Error',
-          'Failed to save details locally: $e',
-          backgroundColor: AppColors.brownAccent,
-          colorText: Colors.white,
-        );
-      } finally {
-        isLoading.value = false;
-      }
+  Map<String, dynamic> _decodeApiResponse(http.Response response) {
+    final body = response.body.trim();
+    if (body.isEmpty) {
+      return {
+        'message':
+            'The server returned an empty response (${response.statusCode}).',
+      };
     }
-  }
 
-  void previousStep() {
-    if (currentStep.value == 2) {
-      currentStep.value = 1;
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      return {
+        'message':
+            'The server returned an invalid response (${response.statusCode}).',
+      };
+    } on FormatException {
+      return {
+        'message': response.statusCode == 404
+            ? 'Membership save service is not available on the server yet. Please try again after the backend is deployed.'
+            : 'The server returned an invalid response (${response.statusCode}).',
+      };
     }
   }
 
@@ -589,16 +558,7 @@ class MembershipFormController extends GetxController {
     };
   }
 
-  Future<void> saveMembershipDetails() async {
-    if (idProofBase64.value.isEmpty) {
-      Get.snackbar(
-        'Validation Error',
-        'Please upload your Aadhaar Card',
-        backgroundColor: AppColors.brownAccent,
-        colorText: Colors.white,
-      );
-      return;
-    }
+  Future<void> proceedToPayment() async {
     if (!isConsentChecked.value) {
       Get.snackbar(
         'Validation Error',
@@ -608,46 +568,24 @@ class MembershipFormController extends GetxController {
       );
       return;
     }
-    isSaved.value = true;
-    Get.snackbar(
-      'Saved',
-      'Details saved! You can now proceed to payment.',
-      backgroundColor: AppColors.primaryYellow,
-      colorText: Colors.white,
-    );
-  }
-
-  Future<void> proceedToPayment() async {
-    if (referralCodeController.text.trim().isNotEmpty &&
-        !isReferralCodeValid.value) {
+    if (referralCodeController.text.trim().isNotEmpty) {
       await validateReferralCode();
       if (!isReferralCodeValid.value) return;
-    }
-    if (idProofBase64.value.isEmpty) {
-      Get.snackbar(
-        'Validation Error',
-        'Please upload your Aadhaar Card',
-        backgroundColor: AppColors.brownAccent,
-        colorText: Colors.white,
-      );
-      return;
-    }
-    if (!isConsentChecked.value) {
-      Get.snackbar(
-        'Validation Error',
-        'Please agree to the Terms & Conditions',
-        backgroundColor: AppColors.brownAccent,
-        colorText: Colors.white,
-      );
-      return;
     }
 
     try {
       isLoading.value = true;
       final memberDetails = _buildMemberDetails();
-      print("========== MEMBER DETAILS PAYLOAD ==========");
-      print(const JsonEncoder.withIndent('  ').convert(memberDetails));
-      print("============================================");
+      final saveResponse = await membershipRepo.saveMembership(
+        selectedTier.id,
+        memberDetails,
+        referralCode: referralCodeController.text,
+      );
+      final saveData = _decodeApiResponse(saveResponse);
+      if (saveResponse.statusCode != 200 && saveResponse.statusCode != 201) {
+        throw Exception(saveData['message'] ?? 'Unable to save your details.');
+      }
+      isSaved.value = true;
 
       final response = await membershipRepo.createRazorpayOrder(
         selectedTier.id,
@@ -686,7 +624,114 @@ class MembershipFormController extends GetxController {
         Get.snackbar('Error', data['message'] ?? 'Failed to create order');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Payment initialization failed');
+      Get.snackbar(
+        'Payment initialization failed',
+        e.toString().replaceFirst('Exception: ', ''),
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> saveMembershipDetails() async {
+    if (idProofBase64.value.isEmpty) {
+      Get.snackbar(
+        'Validation Error',
+        'Please upload your Aadhaar Card',
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
+      return;
+    }
+    if (selectedAddressProof.value == null ||
+        selectedAddressProof.value!.isEmpty ||
+        addressProofBase64.value.isEmpty) {
+      Get.snackbar(
+        'Validation Error',
+        'Please select and upload your address proof.',
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
+      return;
+    }
+    if (selectedMarried.value == 'Married') {
+      if (spouseNameController.text.trim().isEmpty ||
+          spouseDobController.text.trim().isEmpty ||
+          spouseMobileController.text.replaceAll(RegExp(r'\D'), '').length !=
+              10 ||
+          !GetUtils.isEmail(spouseEmailController.text.trim())) {
+        Get.snackbar(
+          'Validation Error',
+          'Please complete all required spouse details.',
+          backgroundColor: AppColors.brownAccent,
+          colorText: Colors.white,
+        );
+        return;
+      }
+    }
+
+    final userId = Get.find<AccountController>().userData.value?.id ?? '';
+    if (userId.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Your paid membership could not be found. Please contact support.',
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      final details = _buildMemberDetails();
+      final personal = details['personalDetails'] as Map<String, dynamic>;
+      final family = details['familyDetails'] as Map<String, dynamic>;
+      final response = await membershipRepo.savePostPaymentDetails(userId, {
+        'name': personal['fullName'],
+        'email': personal['email'],
+        'dob': personal['dob'],
+        'gender': personal['gender'],
+        'maritalStatus': personal['maritalStatus'],
+        'anniversary': personal['anniversary'],
+        'occupation': personal['occupation'],
+        'residenceAddress': personal['residenceAddress'],
+        'correspondenceAddress': personal['correspondenceAddress'],
+        'officeAddress': personal['officeAddress'],
+        'spouse': family['spouse'],
+        'familyMembers': family['children'],
+        'documents': details['documents'],
+      });
+      final responseData = _decodeApiResponse(response);
+
+      if (response.statusCode != 200) {
+        throw Exception(
+          responseData['message'] ?? 'Unable to save your details.',
+        );
+      }
+
+      final updatedUser = responseData['user'];
+      if (updatedUser is Map<String, dynamic>) {
+        Get.find<AccountController>().userData.value = UserModel.fromJson(
+          updatedUser,
+        );
+      }
+
+      Get.offAllNamed(Routes.MEMBER_DETAILS);
+      Get.snackbar(
+        'Success',
+        'Your family details and documents have been saved.',
+        backgroundColor: AppColors.primaryYellow,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Save Failed',
+        e.toString().replaceFirst('Exception: ', ''),
+        backgroundColor: AppColors.brownAccent,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -700,9 +745,7 @@ class MembershipFormController extends GetxController {
     });
   }
 
-  Future<void> _handleWebPaymentSuccess(
-    Map<String, dynamic> response,
-  ) async {
+  Future<void> _handleWebPaymentSuccess(Map<String, dynamic> response) async {
     await _verifyPayment(response);
   }
 
@@ -743,8 +786,14 @@ class MembershipFormController extends GetxController {
         Get.find<AccountController>().userData.value = userModel;
         Get.find<AccountController>().isLoggedIn.value = true;
 
-        Get.offAllNamed(Routes.MEMBER_DETAILS);
-        Get.snackbar('Success', 'Welcome to Own Holiday Club!');
+        isSaved.value = true;
+        currentStep.value = 2;
+        Get.snackbar(
+          'Payment Successful',
+          'Please complete your family details and documents.',
+          backgroundColor: AppColors.primaryYellow,
+          colorText: Colors.white,
+        );
       } else {
         Get.snackbar(
           'Error',

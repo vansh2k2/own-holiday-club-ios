@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:own_holiday_app/utils/app_colors.dart';
 import 'package:own_holiday_app/routes/app_pages.dart';
 import '../controller/membership_form_controller.dart';
@@ -15,7 +14,10 @@ class MembershipFormView extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 24.0,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4.0),
           ),
@@ -54,7 +56,10 @@ class MembershipFormView extends StatelessWidget {
                           child: Text(
                             'PURCHASER (S) DECLARATION\nTERM & CONTIDIONS',
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.poppins(fontSize: 11.0, fontWeight: FontWeight.bold),
+                            style: GoogleFonts.poppins(
+                              fontSize: 11.0,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -63,28 +68,109 @@ class MembershipFormView extends StatelessWidget {
                           style: GoogleFonts.poppins(fontSize: 11.0),
                         ),
                         const SizedBox(height: 12),
-                        _buildTermPoint('1. ', 'In this application and subsequent Agreement the following words shall have the meaning given in the Rules of Occupation of the Resort (a copy of which has been made available to the Applicant) in respect thereof save where the context otherwise requires.'),
-                        _buildTermPoint('2. ', 'The Applicant(s) acknowledge to have read and understood the rules of occupation of the resort, and hereby agrees to be bound by the rules and regulations contained therein. The Membership shall continue until the termination date of the scheme or cancellation of Membership in accordance with the relevant provisions of the rules of occupation.'),
-                        _buildTermPoint('3. THE COMPANY: ', 'The Company is Rigel Hospitality Services Pvt. Ltd. Who are Developers of the Own Holiday Club situated at South Delhi, New Delhi -110044', boldPrefix: true),
-                        _buildTermPoint('4. MEMBERSHIP CARD : ', 'Upon the Applicant(s) completing all payments due under this agreement, Developer shall cause (within 30 days) to be issued to the Applicant(s), a Membership card specifying the Applicant(s) timeshare occupancy rights and upon such card being issued the applicant shall thereby be admitted to membership of the Resort relating to the Apartment or type thereof.', boldPrefix: true),
-                        _buildTermPoint('5. RIGHT OF OCCUPATION: ', 'The Applicant(s) is/are entitled to a right of occupation in the apartment as stipulated in the Particulars of Holiday Membership Such right shall exist on a right to use basis and shall exist for the period as stipulated therein.', boldPrefix: true),
-                        _buildTermPoint('6. RIGHT OF TRANSFER: ', 'The Applicant(s) besides having the right to use his/her/their week(s), he/she/they may also sell, gift, or bequeath the week(s) to third party, with prior written intimation to “The Company”. Neither the Developer nor the Marketer operates a guaranteed rental or resale service or memberships.', boldPrefix: true),
-                        _buildTermPoint('7. OBLIGATION OF COMPANY: ', 'Subject to the prompt payment by the Applicant of the maintenance payments, the Company hereby undertakes with the Applicant to observe and perform the obligations imposed upon it. In case Annual Service Fees is not paid for 5 years then this membership stands cancelled without any prior information to member. You can split your holiday.', boldPrefix: true),
-                        _buildTermPoint('8. OBLIGATION OF COMPANY TOWARDS PURCHASER: ', 'The Obligations of Company shall arise/take place in respect of agreement between Marketer and Purchaser only on receipt of full amount of consideration and not otherwise.', boldPrefix: true),
-                        _buildTermPoint('9. TERMINATION OF MEMBER’S RIGHT: ', 'In the event of the Application(s) / Member (s) failing to make any payment, due pursuant to this Agreement, the provisions of the rules and regulations of resort relating to terminating the members right to use the resort shall apply.', boldPrefix: true),
-                        _buildTermPoint('10. UTILITY FEES: ', 'The Utility Fees stipulated in this agreement shall be payable, to the Company, for the following year in which the Applicant(s) shall be entitled to occupy the apartment as a Resort purchaser. At the time of Holiday booking, the purchaser required to pay the Utility Fees (Approx INR 1500 to INR 2500 Per Night depend upon the properties & location) .', boldPrefix: true),
-                        _buildTermPoint('11. INTERPRETATION: ', 'This Purchase Agreement, its terms and conditions, Purchaser(s) acknowledgement, shall constitute the full agreement between the parties herein and the Purchaser(s) acknowledges that no other document shall form a constituted part of this agreement for the purpose of enforcement and interpretation of this agreement.', boldPrefix: true),
-                        _buildTermPoint('12. TAXES & LEVIES: ', 'Any present or future levy/tax/duty/charge/fee imposed by State/ Union Government or Local/ public body or authority, (expect any levy on its turnover/income/assets payable by Company), on the members actual use of deemed/concomitant activities thereto, must be borne by the member or if paid by the company on his behalf, be reimbursed on demand.', boldPrefix: true),
-                        _buildTermPoint('13. EXIT OPTION: ', 'It is understood that this Agreement upon receipt of written notice (without any personal and financial reason) is cancellable at the option of either of the parties to this agreement within a period of 7 days from date of this Agreement. Upon the non-receipt of any such notice within the stipulated period, the parties agree to be bound by the terms and conditions of this agreement thereafter and the Developer shall not be entitled to refund any money that held by it. . But this clause is not applicable for 5 year’s membership term.', boldPrefix: true),
-                        _buildTermPoint('14. REFUND : ', 'It is understood that if the Agreement is cancelled as per clause 14 above by the Applicant (s) the Company shall refund to the Applicant(s), the payments then held by the Company after deducting the administration fee & expenses of Rs. 25000/- paid by the purchaser, but without any interest within 180 days from the date of cancellation request .', boldPrefix: true),
-                        _buildTermPoint('15. MODIFICATION: ', 'No modification of this Agreement shall be valid unless made in writing and signed by the Applicant/Member and the Director of Own Holiday Club (Rigel Hospitality Services Pvt. Ltd.) No over writing is allowed on Agreement paper and it is not valid.', boldPrefix: true),
-                        _buildTermPoint('16. ARBITRATION AND JURISDICTION: ', 'It is agrees between the parties herein that in the event of any dispute, claims or differences arising under this agreement, the second party shall contact the central customer care team of Own Holiday Club (Rigel Hospitality Services Pvt. Ltd.) at Delhi. In the event the second party reaches no resolution then the second party shall discuss the issue with the resolution cell of the first party. Thereafter if the parties fail to reach any resolution even after discussion with the officers from the resolution cell, the second party may adjudicate the dispute by way of sole arbitrator as per the provisions contained under law. The sole arbitrator shall be nominated by the first party and/or the authorized person of the first party alone. The place of arbitration shall be DELHI only.', boldPrefix: true),
-                        _buildTermPoint('17. ', 'All disputes arising out of the relation to the present agreement including for arbitration proceedings shall be subject to exclusive and sole jurisdiction of the court. The definition of the courts includes districts/state consumer forums also situated at Delhi alone and now where else since the agreement is entered between the parties at Delhi for all material purpose and by the virtue of present agreement the jurisdiction of the courts is excluded by the parties except for court situated in Delhi alone. The second party is hereby unconditionally and irrevocably agreed the place of jurisdiction for adopting any kind of legal recourse will be at Delhi.'),
-                        _buildTermPoint('18. ', 'The dates from 15th December to 15th January every year comes under blackout dates and we are not providing any bookings in this period.'),
-                        _buildTermPoint('19. ', 'Food/Pickup/Drop/Sightseeing facility can be done only on chargeable basis.'),
-                        _buildTermPoint('20. ', 'SECOND PARTY hereby declares that particulars given above are true, correct and completely in order. If any transaction is delayed or not affected at all for the reason of incomplete or incorrect information, SECOND PARTY shall not hold Rigel Hospitality Services Pvt. Ltd. responsible for any loss/damages/ inconvenience caused due to the same.'),
-                        _buildTermPoint('21. ', 'SECOND PARTY confirms the understanding that all bookings are subject to availability and booking of more than one room simultaneously is purely as per availability.'),
-                        _buildTermPoint('22. ', 'Member confirms that this agreement is accepted without any force and confirms that this agreement does not create any undue financial burden on him or on his family.', isSecondPartBold: true),
+                        _buildTermPoint(
+                          '1. ',
+                          'In this application and subsequent Agreement the following words shall have the meaning given in the Rules of Occupation of the Resort (a copy of which has been made available to the Applicant) in respect thereof save where the context otherwise requires.',
+                        ),
+                        _buildTermPoint(
+                          '2. ',
+                          'The Applicant(s) acknowledge to have read and understood the rules of occupation of the resort, and hereby agrees to be bound by the rules and regulations contained therein. The Membership shall continue until the termination date of the scheme or cancellation of Membership in accordance with the relevant provisions of the rules of occupation.',
+                        ),
+                        _buildTermPoint(
+                          '3. THE COMPANY: ',
+                          'The Company is Rigel Hospitality Services Pvt. Ltd. Who are Developers of the Own Holiday Club situated at South Delhi, New Delhi -110044',
+                          boldPrefix: true,
+                        ),
+                        _buildTermPoint(
+                          '4. MEMBERSHIP CARD : ',
+                          'Upon the Applicant(s) completing all payments due under this agreement, Developer shall cause (within 30 days) to be issued to the Applicant(s), a Membership card specifying the Applicant(s) timeshare occupancy rights and upon such card being issued the applicant shall thereby be admitted to membership of the Resort relating to the Apartment or type thereof.',
+                          boldPrefix: true,
+                        ),
+                        _buildTermPoint(
+                          '5. RIGHT OF OCCUPATION: ',
+                          'The Applicant(s) is/are entitled to a right of occupation in the apartment as stipulated in the Particulars of Holiday Membership Such right shall exist on a right to use basis and shall exist for the period as stipulated therein.',
+                          boldPrefix: true,
+                        ),
+                        _buildTermPoint(
+                          '6. RIGHT OF TRANSFER: ',
+                          'The Applicant(s) besides having the right to use his/her/their week(s), he/she/they may also sell, gift, or bequeath the week(s) to third party, with prior written intimation to “The Company”. Neither the Developer nor the Marketer operates a guaranteed rental or resale service or memberships.',
+                          boldPrefix: true,
+                        ),
+                        _buildTermPoint(
+                          '7. OBLIGATION OF COMPANY: ',
+                          'Subject to the prompt payment by the Applicant of the maintenance payments, the Company hereby undertakes with the Applicant to observe and perform the obligations imposed upon it. In case Annual Service Fees is not paid for 5 years then this membership stands cancelled without any prior information to member. You can split your holiday.',
+                          boldPrefix: true,
+                        ),
+                        _buildTermPoint(
+                          '8. OBLIGATION OF COMPANY TOWARDS PURCHASER: ',
+                          'The Obligations of Company shall arise/take place in respect of agreement between Marketer and Purchaser only on receipt of full amount of consideration and not otherwise.',
+                          boldPrefix: true,
+                        ),
+                        _buildTermPoint(
+                          '9. TERMINATION OF MEMBER’S RIGHT: ',
+                          'In the event of the Application(s) / Member (s) failing to make any payment, due pursuant to this Agreement, the provisions of the rules and regulations of resort relating to terminating the members right to use the resort shall apply.',
+                          boldPrefix: true,
+                        ),
+                        _buildTermPoint(
+                          '10. UTILITY FEES: ',
+                          'The Utility Fees stipulated in this agreement shall be payable, to the Company, for the following year in which the Applicant(s) shall be entitled to occupy the apartment as a Resort purchaser. At the time of Holiday booking, the purchaser required to pay the Utility Fees (Approx INR 1500 to INR 2500 Per Night depend upon the properties & location) .',
+                          boldPrefix: true,
+                        ),
+                        _buildTermPoint(
+                          '11. INTERPRETATION: ',
+                          'This Purchase Agreement, its terms and conditions, Purchaser(s) acknowledgement, shall constitute the full agreement between the parties herein and the Purchaser(s) acknowledges that no other document shall form a constituted part of this agreement for the purpose of enforcement and interpretation of this agreement.',
+                          boldPrefix: true,
+                        ),
+                        _buildTermPoint(
+                          '12. TAXES & LEVIES: ',
+                          'Any present or future levy/tax/duty/charge/fee imposed by State/ Union Government or Local/ public body or authority, (expect any levy on its turnover/income/assets payable by Company), on the members actual use of deemed/concomitant activities thereto, must be borne by the member or if paid by the company on his behalf, be reimbursed on demand.',
+                          boldPrefix: true,
+                        ),
+                        _buildTermPoint(
+                          '13. EXIT OPTION: ',
+                          'It is understood that this Agreement upon receipt of written notice (without any personal and financial reason) is cancellable at the option of either of the parties to this agreement within a period of 7 days from date of this Agreement. Upon the non-receipt of any such notice within the stipulated period, the parties agree to be bound by the terms and conditions of this agreement thereafter and the Developer shall not be entitled to refund any money that held by it. . But this clause is not applicable for 5 year’s membership term.',
+                          boldPrefix: true,
+                        ),
+                        _buildTermPoint(
+                          '14. REFUND : ',
+                          'It is understood that if the Agreement is cancelled as per clause 14 above by the Applicant (s) the Company shall refund to the Applicant(s), the payments then held by the Company after deducting the administration fee & expenses of Rs. 25000/- paid by the purchaser, but without any interest within 180 days from the date of cancellation request .',
+                          boldPrefix: true,
+                        ),
+                        _buildTermPoint(
+                          '15. MODIFICATION: ',
+                          'No modification of this Agreement shall be valid unless made in writing and signed by the Applicant/Member and the Director of Own Holiday Club (Rigel Hospitality Services Pvt. Ltd.) No over writing is allowed on Agreement paper and it is not valid.',
+                          boldPrefix: true,
+                        ),
+                        _buildTermPoint(
+                          '16. ARBITRATION AND JURISDICTION: ',
+                          'It is agrees between the parties herein that in the event of any dispute, claims or differences arising under this agreement, the second party shall contact the central customer care team of Own Holiday Club (Rigel Hospitality Services Pvt. Ltd.) at Delhi. In the event the second party reaches no resolution then the second party shall discuss the issue with the resolution cell of the first party. Thereafter if the parties fail to reach any resolution even after discussion with the officers from the resolution cell, the second party may adjudicate the dispute by way of sole arbitrator as per the provisions contained under law. The sole arbitrator shall be nominated by the first party and/or the authorized person of the first party alone. The place of arbitration shall be DELHI only.',
+                          boldPrefix: true,
+                        ),
+                        _buildTermPoint(
+                          '17. ',
+                          'All disputes arising out of the relation to the present agreement including for arbitration proceedings shall be subject to exclusive and sole jurisdiction of the court. The definition of the courts includes districts/state consumer forums also situated at Delhi alone and now where else since the agreement is entered between the parties at Delhi for all material purpose and by the virtue of present agreement the jurisdiction of the courts is excluded by the parties except for court situated in Delhi alone. The second party is hereby unconditionally and irrevocably agreed the place of jurisdiction for adopting any kind of legal recourse will be at Delhi.',
+                        ),
+                        _buildTermPoint(
+                          '18. ',
+                          'The dates from 15th December to 15th January every year comes under blackout dates and we are not providing any bookings in this period.',
+                        ),
+                        _buildTermPoint(
+                          '19. ',
+                          'Food/Pickup/Drop/Sightseeing facility can be done only on chargeable basis.',
+                        ),
+                        _buildTermPoint(
+                          '20. ',
+                          'SECOND PARTY hereby declares that particulars given above are true, correct and completely in order. If any transaction is delayed or not affected at all for the reason of incomplete or incorrect information, SECOND PARTY shall not hold Rigel Hospitality Services Pvt. Ltd. responsible for any loss/damages/ inconvenience caused due to the same.',
+                        ),
+                        _buildTermPoint(
+                          '21. ',
+                          'SECOND PARTY confirms the understanding that all bookings are subject to availability and booking of more than one room simultaneously is purely as per availability.',
+                        ),
+                        _buildTermPoint(
+                          '22. ',
+                          'Member confirms that this agreement is accepted without any force and confirms that this agreement does not create any undue financial burden on him or on his family.',
+                          isSecondPartBold: true,
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           'I confirm and understand that no verbal promised are valid and developer does not take any responsibility for the same.',
@@ -93,22 +179,34 @@ class MembershipFormView extends StatelessWidget {
                         const SizedBox(height: 16),
                         Text(
                           'I have read all terms and conditions and accept all of them.',
-                          style: GoogleFonts.poppins(fontSize: 11.0, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.poppins(
+                            fontSize: 11.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           "Purchaser's Signatures: 1 __________________________2. ________________________________",
-                          style: GoogleFonts.poppins(fontSize: 11.0, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.poppins(
+                            fontSize: 11.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Signed for and on behalf of the developer (Rigel Hospitality Services Pvt. Ltd.)',
-                          style: GoogleFonts.poppins(fontSize: 11.0, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.poppins(
+                            fontSize: 11.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Authorized Signatory: _____________________________________',
-                          style: GoogleFonts.poppins(fontSize: 11.0, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.poppins(
+                            fontSize: 11.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 24),
                         Center(
@@ -131,7 +229,12 @@ class MembershipFormView extends StatelessWidget {
     );
   }
 
-  Widget _buildTermPoint(String prefix, String suffix, {bool boldPrefix = false, bool isSecondPartBold = false}) {
+  Widget _buildTermPoint(
+    String prefix,
+    String suffix, {
+    bool boldPrefix = false,
+    bool isSecondPartBold = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
@@ -148,11 +251,19 @@ class MembershipFormView extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: prefix,
-                    style: TextStyle(fontWeight: boldPrefix ? FontWeight.bold : FontWeight.normal),
+                    style: TextStyle(
+                      fontWeight: boldPrefix
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
                   ),
                   TextSpan(
                     text: suffix,
-                    style: TextStyle(fontWeight: isSecondPartBold ? FontWeight.bold : FontWeight.normal),
+                    style: TextStyle(
+                      fontWeight: isSecondPartBold
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
                   ),
                 ],
               ),
@@ -247,8 +358,8 @@ class MembershipFormView extends StatelessWidget {
                   Obx(
                     () => _buildPurchaseOverviewCard(
                       label: "Step 2",
-                      value: "Finalize & Pay",
-                      hint: "Documents and payment",
+                      value: "Family & Documents",
+                      hint: "Complete your profile after payment",
                       tone: controller.currentStep.value == 2
                           ? "accent"
                           : "default",
@@ -499,63 +610,23 @@ class MembershipFormView extends StatelessWidget {
           'Other',
         ], prefixIcon: Icons.wc_outlined),
         const SizedBox(height: 14),
-        _buildDropdown(
-          'Marital Status *',
-          controller.selectedMarried,
-          ['Married', 'Single', 'Separated'],
-          prefixIcon: Icons.favorite_outline,
-        ),
+        _buildDropdown('Marital Status *', controller.selectedMarried, [
+          'Married',
+          'Single',
+          'Separated',
+        ], prefixIcon: Icons.favorite_outline),
         const SizedBox(height: 14),
-        Obx(() {
-          final isMarried = controller.selectedMarried.value == 'Married';
-          if (!isMarried) return const SizedBox.shrink();
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTextField(
-                'Anniversary',
-                controller.anniversaryController,
-                readOnly: true,
-                prefixIcon: Icons.calendar_month_outlined,
-                suffixIcon: const Icon(
-                  Icons.calendar_today_rounded,
-                  size: 16,
-                  color: Colors.grey,
-                ),
-                onTap: () async {
-                  DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(1900),
-                    lastDate: DateTime(2050),
-                  );
-                  if (picked != null) {
-                    controller.anniversaryController.text = DateFormat(
-                      'dd-MM-yyyy',
-                    ).format(picked);
-                  }
-                },
-              ),
-              const SizedBox(height: 14),
-            ],
-          );
-        }),
-        _buildDropdown(
-          'Occupation *',
-          controller.selectedOccupation,
-          [
-            'Business',
-            'Private Job',
-            'Government Job',
-            'Professional',
-            'Self Employed',
-            'Homemaker',
-            'Retired',
-            'Student',
-            'Other',
-          ],
-          prefixIcon: Icons.work_outline,
-        ),
+        _buildDropdown('Occupation *', controller.selectedOccupation, [
+          'Business',
+          'Private Job',
+          'Government Job',
+          'Professional',
+          'Self Employed',
+          'Homemaker',
+          'Retired',
+          'Student',
+          'Other',
+        ], prefixIcon: Icons.work_outline),
         const SizedBox(height: 24),
         // ─── ADDRESS INFORMATION HEADER ───────────────────────────────────
         Column(
@@ -610,15 +681,42 @@ class MembershipFormView extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         _buildDropdown('State *', controller.selectedStateRes, [
-          'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar',
-          'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh',
-          'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra',
-          'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
-          'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
-          'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
-          'Andaman & Nicobar Islands', 'Chandigarh',
-          'Dadra & Nagar Haveli and Daman & Diu', 'Delhi',
-          'Jammu & Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
+          'Andhra Pradesh',
+          'Arunachal Pradesh',
+          'Assam',
+          'Bihar',
+          'Chhattisgarh',
+          'Goa',
+          'Gujarat',
+          'Haryana',
+          'Himachal Pradesh',
+          'Jharkhand',
+          'Karnataka',
+          'Kerala',
+          'Madhya Pradesh',
+          'Maharashtra',
+          'Manipur',
+          'Meghalaya',
+          'Mizoram',
+          'Nagaland',
+          'Odisha',
+          'Punjab',
+          'Rajasthan',
+          'Sikkim',
+          'Tamil Nadu',
+          'Telangana',
+          'Tripura',
+          'Uttar Pradesh',
+          'Uttarakhand',
+          'West Bengal',
+          'Andaman & Nicobar Islands',
+          'Chandigarh',
+          'Dadra & Nagar Haveli and Daman & Diu',
+          'Delhi',
+          'Jammu & Kashmir',
+          'Ladakh',
+          'Lakshadweep',
+          'Puducherry',
         ], prefixIcon: Icons.map_outlined),
         const SizedBox(height: 14),
         _buildCountryDropdown(
@@ -659,52 +757,54 @@ class MembershipFormView extends StatelessWidget {
         const SizedBox(height: 10),
 
         // "Same as Permanent" checkbox
-        Obx(() => GestureDetector(
-          onTap: () {
-            final newVal = !controller.sameAsPermanent.value;
-            controller.sameAsPermanent.value = newVal;
-            if (newVal) controller.syncCorrespondenceFromPermanent();
-          },
-          child: Row(
-            children: [
-              Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  color: controller.sameAsPermanent.value
-                      ? AppColors.primaryYellow
-                      : Colors.white,
-                  border: Border.all(
+        Obx(
+          () => GestureDetector(
+            onTap: () {
+              final newVal = !controller.sameAsPermanent.value;
+              controller.sameAsPermanent.value = newVal;
+              if (newVal) controller.syncCorrespondenceFromPermanent();
+            },
+            child: Row(
+              children: [
+                Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
                     color: controller.sameAsPermanent.value
                         ? AppColors.primaryYellow
-                        : Colors.grey[400]!,
-                    width: 2,
+                        : Colors.white,
+                    border: Border.all(
+                      color: controller.sameAsPermanent.value
+                          ? AppColors.primaryYellow
+                          : Colors.grey[400]!,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                  borderRadius: BorderRadius.circular(4),
+                  child: controller.sameAsPermanent.value
+                      ? const Icon(Icons.check, size: 14, color: Colors.black)
+                      : null,
                 ),
-                child: controller.sameAsPermanent.value
-                    ? const Icon(Icons.check, size: 14, color: Colors.black)
-                    : null,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                'Same as Permanent Address',
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1565C0),
+                const SizedBox(width: 10),
+                Text(
+                  'Same as Permanent Address',
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF1565C0),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        )),
+        ),
         const SizedBox(height: 14),
 
         // Correspondence fields (editable or synced)
         Obx(() {
           final isSame = controller.sameAsPermanent.value;
           if (isSame) return const SizedBox.shrink();
-          
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -726,22 +826,44 @@ class MembershipFormView extends StatelessWidget {
                 prefixIcon: Icons.location_city_outlined,
               ),
               const SizedBox(height: 14),
-              _buildDropdown(
-                'State',
-                controller.selectedStateCorrAddress,
-                [
-                  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar',
-                  'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh',
-                  'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra',
-                  'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
-                  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
-                  'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
-                  'Andaman & Nicobar Islands', 'Chandigarh',
-                  'Dadra & Nagar Haveli and Daman & Diu', 'Delhi',
-                  'Jammu & Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
-                ],
-                prefixIcon: Icons.map_outlined,
-              ),
+              _buildDropdown('State', controller.selectedStateCorrAddress, [
+                'Andhra Pradesh',
+                'Arunachal Pradesh',
+                'Assam',
+                'Bihar',
+                'Chhattisgarh',
+                'Goa',
+                'Gujarat',
+                'Haryana',
+                'Himachal Pradesh',
+                'Jharkhand',
+                'Karnataka',
+                'Kerala',
+                'Madhya Pradesh',
+                'Maharashtra',
+                'Manipur',
+                'Meghalaya',
+                'Mizoram',
+                'Nagaland',
+                'Odisha',
+                'Punjab',
+                'Rajasthan',
+                'Sikkim',
+                'Tamil Nadu',
+                'Telangana',
+                'Tripura',
+                'Uttar Pradesh',
+                'Uttarakhand',
+                'West Bengal',
+                'Andaman & Nicobar Islands',
+                'Chandigarh',
+                'Dadra & Nagar Haveli and Daman & Diu',
+                'Delhi',
+                'Jammu & Kashmir',
+                'Ladakh',
+                'Lakshadweep',
+                'Puducherry',
+              ], prefixIcon: Icons.map_outlined),
               const SizedBox(height: 14),
               _buildCountryDropdown(
                 'Country',
@@ -891,201 +1013,8 @@ class MembershipFormView extends StatelessWidget {
           );
         }),
 
-        Obx(() {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'FAMILY DETAILS ',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFFC8102E),
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                    TextSpan(
-                      text: '(Compulsory for Married)',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF9CA3AF),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 14),
-              _buildTextField(
-                'Spouse Name *',
-                controller.spouseNameController,
-                prefixIcon: Icons.person_outline,
-              ),
-              const SizedBox(height: 14),
-              _buildTextField(
-                'Spouse DOB *',
-                controller.spouseDobController,
-                readOnly: true,
-                prefixIcon: Icons.calendar_today_outlined,
-                onTap: () async {
-                  DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(1900),
-                    lastDate: DateTime.now(),
-                  );
-                  if (picked != null) {
-                    controller.spouseDobController.text = DateFormat(
-                      'yyyy-MM-dd',
-                    ).format(picked);
-                  }
-                },
-              ),
-              const SizedBox(height: 14),
-              _buildTextField(
-                'Spouse Mobile *',
-                controller.spouseMobileController,
-                prefixIcon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 14),
-              _buildTextField(
-                'Spouse Email *',
-                controller.spouseEmailController,
-                prefixIcon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 24),
-
-              // Children details
-              Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'CHILDREN DETAILS',
-                          style: GoogleFonts.poppins(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF4B5563),
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              'NO. OF CHILDREN: ',
-                              style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF6B7280),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              height: 28,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                border: Border.all(
-                                  color: const Color(0xFFD1D5DB),
-                                ),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<int>(
-                                  value: controller.numberOfChildren.value,
-                                  icon: const Icon(
-                                    Icons.keyboard_arrow_down,
-                                    size: 16,
-                                  ),
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  items: List.generate(5, (index) {
-                                    return DropdownMenuItem(
-                                      value: index,
-                                      child: Text(index.toString()),
-                                    );
-                                  }),
-                                  onChanged: (val) {
-                                    if (val != null) {
-                                      controller.updateChildrenCount(val);
-                                    }
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    if (controller.numberOfChildren.value > 0) ...[
-                      const SizedBox(height: 16),
-                      ...List.generate(controller.numberOfChildren.value, (
-                        index,
-                      ) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildTextField(
-                              'CHILD NAME',
-                              controller.childrenNameControllers[index],
-                              prefixIcon: Icons.person_outline,
-                            ),
-                            const SizedBox(height: 14),
-                            _buildDropdown(
-                              'Gender',
-                              controller.childrenGenderOptions[index],
-                              ['Male', 'Female', 'Other'],
-                              prefixIcon: Icons.people_outline,
-                            ),
-                            const SizedBox(height: 14),
-                            _buildTextField(
-                              'DOB',
-                              controller.childrenDobControllers[index],
-                              readOnly: true,
-                              prefixIcon: Icons.calendar_today_outlined,
-                              onTap: () async {
-                                DateTime? picked = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(1900),
-                                  lastDate: DateTime.now(),
-                                );
-                                if (picked != null) {
-                                  controller
-                                      .childrenDobControllers[index]
-                                      .text = DateFormat(
-                                    'yyyy-MM-dd',
-                                  ).format(picked);
-                                }
-                              },
-                            ),
-                            if (index < controller.numberOfChildren.value - 1)
-                              const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                child: Divider(color: Color(0xFFE5E7EB)),
-                              ),
-                          ],
-                        );
-                      }),
-                    ],
-                  ],
-                ),
-            ],
-          );
-        }),
+        const SizedBox(height: 24),
+        _buildReferralCodeField(controller),
         const SizedBox(height: 24),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1141,7 +1070,7 @@ class MembershipFormView extends StatelessWidget {
               ),
               onPressed: controller.isLoading.value
                   ? null
-                  : controller.nextStep,
+                  : controller.proceedToPayment,
               child: controller.isLoading.value
                   ? const SizedBox(
                       width: 20,
@@ -1152,7 +1081,7 @@ class MembershipFormView extends StatelessWidget {
                       ),
                     )
                   : Text(
-                      'Next Step ➔',
+                      'Pay Now',
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.bold,
                         fontSize: 14.0,
@@ -1173,6 +1102,8 @@ class MembershipFormView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildFamilyDetails(context, controller),
+        const SizedBox(height: 24),
         Text(
           'DOCUMENTS',
           style: GoogleFonts.poppins(
@@ -1218,220 +1149,291 @@ class MembershipFormView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 14),
-          decoration: BoxDecoration(
-            color: AppColors.primaryYellow.withOpacity(0.04),
-            border: Border.all(
-              color: AppColors.primaryYellow.withOpacity(0.25),
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'REFERRAL CODE (OPTIONAL)',
-                style: GoogleFonts.poppins(
-                  color: const Color(0xFF8B6A1F),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 11.0,
-                  letterSpacing: 1.0,
+        Obx(
+          () => SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryYellow,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: controller.referralCodeController,
-                textCapitalization: TextCapitalization.characters,
-                onChanged: (_) {
-                  if (controller.isReferralCodeValid.value) {
-                    controller.isReferralCodeValid.value = false;
-                  }
-                },
-                style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  color: const Color(0xFF0D1321),
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Enter referral code',
-                  hintStyle: GoogleFonts.poppins(
-                    color: Colors.grey[400],
-                    fontSize: 12,
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 14,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    borderSide: const BorderSide(
-                      color: AppColors.primaryYellow,
-                      width: 1.5,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    borderSide: const BorderSide(
-                      color: AppColors.primaryYellow,
-                      width: 2,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'CONSENT',
-          style: GoogleFonts.poppins(
-            color: AppColors.primaryYellow,
-            fontWeight: FontWeight.bold,
-            fontSize: 13.0,
-            letterSpacing: 0.5,
-          ),
-        ),
-        const SizedBox(height: 14),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.primaryYellow.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Obx(
-                () => SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: Checkbox(
-                    value: controller.isConsentChecked.value,
-                    activeColor: AppColors.primaryYellow,
-                    checkColor: Colors.black,
-                    onChanged: (val) =>
-                        controller.isConsentChecked.value = val ?? false,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      children: [
-                        Text(
-                          'I agree to the ',
-                          style: GoogleFonts.poppins(
-                            color: Colors.black,
-                            fontSize: 12.0,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          'Terms & Conditions',
-                          style: GoogleFonts.poppins(
-                            color: AppColors.primaryYellow,
-                            fontSize: 12.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    GestureDetector(
-                      onTap: () => _showTermsPopup(context),
-                      child: Text(
-                        'Read full terms and conditions',
-                        style: GoogleFonts.poppins(
-                          color: AppColors.greyText,
-                          fontSize: 12.0,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 32),
-        Row(
-          children: [
-            Expanded(
-              child: SizedBox(
-                height: 48,
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    side: const BorderSide(color: Color(0xFFCED4DA)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: controller.previousStep,
-                  icon: const Icon(Icons.arrow_back, size: 14),
-                  label: Text(
-                    'Back',
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.0,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryYellow,
-                    foregroundColor: Colors.black,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: controller.isSaved.value
-                      ? controller.proceedToPayment
-                      : controller.saveMembershipDetails,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(
-                        controller.isSaved.value
-                            ? Icons.payment
-                            : Icons.save_outlined,
-                        size: 16,
+              onPressed: controller.isLoading.value
+                  ? null
+                  : controller.saveMembershipDetails,
+              icon: controller.isLoading.value
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
                         color: Colors.white,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        controller.isSaved.value ? 'Pay Now' : 'Save & Continue',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14.0,
-                          color: Colors.white,
-                          height: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
+                    )
+                  : const Icon(Icons.verified_outlined, size: 18),
+              label: Text(
+                controller.isLoading.value
+                    ? 'Saving details...'
+                    : 'Save Details & Continue',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.0,
+                  color: Colors.white,
                 ),
               ),
             ),
-          ],
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildFamilyDetails(
+    BuildContext context,
+    MembershipFormController controller,
+  ) {
+    return Obx(() {
+      final maritalStatus = controller.selectedMarried.value;
+      if (maritalStatus != 'Married' && maritalStatus != 'Separated') {
+        return const SizedBox.shrink();
+      }
+
+      final isMarried = maritalStatus == 'Married';
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'FAMILY DETAILS',
+            style: GoogleFonts.poppins(
+              color: const Color(0xFFC8102E),
+              fontWeight: FontWeight.bold,
+              fontSize: 12.5,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 14),
+          if (isMarried) ...[
+            _buildTextField(
+              'Anniversary',
+              controller.anniversaryController,
+              readOnly: true,
+              prefixIcon: Icons.calendar_month_outlined,
+              suffixIcon: const Icon(
+                Icons.calendar_today_rounded,
+                size: 16,
+                color: Colors.grey,
+              ),
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime(2050),
+                );
+                if (picked != null) {
+                  controller.anniversaryController.text = DateFormat(
+                    'dd-MM-yyyy',
+                  ).format(picked);
+                }
+              },
+            ),
+            const SizedBox(height: 14),
+          ],
+          _buildTextField(
+            isMarried ? 'Spouse Name *' : 'Spouse Name (Optional)',
+            controller.spouseNameController,
+            prefixIcon: Icons.person_outline,
+          ),
+          const SizedBox(height: 14),
+          _buildTextField(
+            isMarried ? 'Spouse DOB *' : 'Spouse DOB (Optional)',
+            controller.spouseDobController,
+            readOnly: true,
+            prefixIcon: Icons.calendar_today_outlined,
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(1900),
+                lastDate: DateTime.now(),
+              );
+              if (picked != null) {
+                controller.spouseDobController.text = DateFormat(
+                  'yyyy-MM-dd',
+                ).format(picked);
+              }
+            },
+          ),
+          const SizedBox(height: 14),
+          _buildTextField(
+            isMarried ? 'Spouse Mobile *' : 'Spouse Mobile (Optional)',
+            controller.spouseMobileController,
+            prefixIcon: Icons.phone_outlined,
+            keyboardType: TextInputType.phone,
+          ),
+          const SizedBox(height: 14),
+          _buildTextField(
+            isMarried ? 'Spouse Email *' : 'Spouse Email (Optional)',
+            controller.spouseEmailController,
+            prefixIcon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'CHILDREN DETAILS',
+                style: GoogleFonts.poppins(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF4B5563),
+                  letterSpacing: 0.5,
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    'NO. OF CHILDREN: ',
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF6B7280),
+                    ),
+                  ),
+                  DropdownButtonHideUnderline(
+                    child: DropdownButton<int>(
+                      value: controller.numberOfChildren.value,
+                      items: List.generate(
+                        5,
+                        (index) => DropdownMenuItem(
+                          value: index,
+                          child: Text(index.toString()),
+                        ),
+                      ),
+                      onChanged: (value) {
+                        if (value != null) {
+                          controller.updateChildrenCount(value);
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ...List.generate(controller.numberOfChildren.value, (index) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 14),
+                _buildTextField(
+                  'Child ${index + 1} Name',
+                  controller.childrenNameControllers[index],
+                  prefixIcon: Icons.person_outline,
+                ),
+                const SizedBox(height: 14),
+                _buildDropdown(
+                  'Gender',
+                  controller.childrenGenderOptions[index],
+                  ['Male', 'Female', 'Other'],
+                  prefixIcon: Icons.people_outline,
+                ),
+                const SizedBox(height: 14),
+                _buildTextField(
+                  'DOB',
+                  controller.childrenDobControllers[index],
+                  readOnly: true,
+                  prefixIcon: Icons.calendar_today_outlined,
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) {
+                      controller.childrenDobControllers[index].text =
+                          DateFormat('yyyy-MM-dd').format(picked);
+                    }
+                  },
+                ),
+              ],
+            );
+          }),
+        ],
+      );
+    });
+  }
+
+  Widget _buildReferralCodeField(MembershipFormController controller) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 14),
+      decoration: BoxDecoration(
+        color: AppColors.primaryYellow.withValues(alpha: 0.04),
+        border: Border.all(
+          color: AppColors.primaryYellow.withValues(alpha: 0.25),
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'REFERRAL CODE (OPTIONAL)',
+            style: GoogleFonts.poppins(
+              color: const Color(0xFF8B6A1F),
+              fontWeight: FontWeight.bold,
+              fontSize: 11.0,
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: controller.referralCodeController,
+            textCapitalization: TextCapitalization.characters,
+            onChanged: (_) {
+              controller.isReferralCodeValid.value = false;
+            },
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              color: const Color(0xFF0D1321),
+            ),
+            decoration: InputDecoration(
+              hintText: 'Enter referral code',
+              hintStyle: GoogleFonts.poppins(
+                color: Colors.grey[400],
+                fontSize: 12,
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 14,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: const BorderSide(
+                  color: AppColors.primaryYellow,
+                  width: 1.5,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: const BorderSide(
+                  color: AppColors.primaryYellow,
+                  width: 2,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1734,107 +1736,6 @@ class MembershipFormView extends StatelessWidget {
     );
   }
 
-  void _showTermsPopup(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.primaryWhite,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Terms & Conditions',
-              style: GoogleFonts.poppins(
-                fontSize: 15.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: const Icon(
-                Icons.close,
-                color: AppColors.greyText,
-                size: 20,
-              ),
-            ),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '1. Membership Agreement',
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13.0,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'By purchasing a membership, you agree to abide by the rules and regulations of Own Holiday Club.',
-                style: GoogleFonts.poppins(
-                  fontSize: 12.0,
-                  color: AppColors.greyText,
-                ),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                '2. Payment & Refunds',
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13.0,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'All membership payments are final. Refunds are subject to the cancellation policy.',
-                style: GoogleFonts.poppins(
-                  fontSize: 12.0,
-                  color: AppColors.greyText,
-                ),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                '3. Document Verification',
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13.0,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'Your membership is subject to successful verification of your submitted KYC documents.',
-                style: GoogleFonts.poppins(
-                  fontSize: 12.0,
-                  color: AppColors.greyText,
-                ),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                '4. Usage of Benefits',
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13.0,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'Membership benefits, including holiday packages and discounts, are non-transferable unless explicitly stated.',
-                style: GoogleFonts.poppins(
-                  fontSize: 12.0,
-                  color: AppColors.greyText,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildDropdown(
     String hint,
     RxnString rxValue,
@@ -1920,7 +1821,6 @@ class MembershipFormView extends StatelessWidget {
       ],
     );
   }
-
 
   Widget _buildFileRow(
     String label,

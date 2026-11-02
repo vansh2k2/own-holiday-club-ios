@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -15,15 +16,16 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
   // Optimize system UI rendering
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-  ));
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+  );
   await GetStorage.init();
   await di.init();
 
-  // Facebook App Events - App Open
-  final facebookAppEvents = FacebookAppEvents();
-  await facebookAppEvents.logEvent(name: 'fb_mobile_activate_app');
+  if (!kIsWeb) {
+    final facebookAppEvents = FacebookAppEvents();
+    await facebookAppEvents.logEvent(name: 'fb_mobile_activate_app');
+  }
 
   runApp(const MyApp());
 }

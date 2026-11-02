@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:own_holiday_app/routes/app_pages.dart';
@@ -87,13 +88,17 @@ class OtpController extends GetxController {
 
     isLoading.value = true;
     try {
-      final response = await authRepo.verifyMobileOtp(phoneNumber, otpController.text);
+      final response = await authRepo.verifyMobileOtp(
+        phoneNumber,
+        otpController.text,
+      );
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 && data['verified'] == true) {
-        // Facebook Event - Login
-        final facebookAppEvents = FacebookAppEvents();
-        await facebookAppEvents.logEvent(name: 'fb_mobile_login');
+        if (!kIsWeb) {
+          final facebookAppEvents = FacebookAppEvents();
+          await facebookAppEvents.logEvent(name: 'fb_mobile_login');
+        }
 
         Get.offAllNamed(Routes.DASHBOARD);
       } else {
@@ -123,5 +128,3 @@ class OtpController extends GetxController {
     super.onClose();
   }
 }
-
-

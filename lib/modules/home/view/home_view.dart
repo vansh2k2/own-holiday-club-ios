@@ -1,5 +1,6 @@
 
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:animate_do/animate_do.dart';
@@ -854,22 +855,53 @@ class _ExperienceCardState extends State<_ExperienceCard> {
 }
 
 Widget _buildDynamicImage(String path, {double? height, double? width}) {
-  if (path.isEmpty) return const Skeleton();
-  if (path.startsWith('http')) {
+  final imagePath = path.trim();
+  if (imagePath.isEmpty) return const Skeleton();
+  if (imagePath.startsWith('http')) {
+    if (kIsWeb) {
+      return Image.network(
+        imagePath,
+        height: height,
+        width: width,
+        fit: BoxFit.cover,
+        webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+        errorBuilder: (context, error, stackTrace) =>
+            _buildImageErrorFallback(height: height, width: width),
+      );
+    }
+
     return CachedNetworkImage(
-      imageUrl: path,
+      imageUrl: imagePath,
       height: height,
       width: width,
       fit: BoxFit.cover,
       placeholder: (context, url) => const Skeleton(),
-      errorWidget: (context, url, error) => const Icon(Icons.error),
+      errorWidget: (context, url, error) =>
+          _buildImageErrorFallback(height: height, width: width),
     );
   }
   return Image.asset(
-    path,
+    imagePath,
     height: height,
     width: width,
     fit: BoxFit.cover,
+  );
+}
+
+Widget _buildImageErrorFallback({double? height, double? width}) {
+  return Container(
+    height: height,
+    width: width,
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFFE5E7EB), Color(0xFF9CA3AF)],
+      ),
+    ),
+    child: const Center(
+      child: Icon(Icons.image_not_supported_outlined, color: Colors.white70),
+    ),
   );
 }
 
